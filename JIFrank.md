@@ -2,23 +2,9 @@
 <thead>
 <tr class="header">
 <th><strong>Rank</strong></th>
-<th><p><img src="media/image1.png" width="15" height="15" /></p>
-<table>
-<tbody>
-<tr class="odd">
-<td><em><strong>Abbreviated Journal Title</strong></em></td>
-</tr>
-</tbody>
-</table></th>
+<th><em><strong>Abbreviated Journal Title</strong></em></th>
 <th><strong>Impact Factor</strong></th>
-<th><p><img src="media/image1.png" width="15" height="15" /></p>
-<table>
-<tbody>
-<tr class="odd">
-<td><strong>Articles on DBS</strong></td>
-</tr>
-</tbody>
-</table></th>
+<th><strong>Articles on DBS</strong></th>
 <th><strong>EEG only if Mol/Cell ?</strong></th>
 <th><strong>Invitation only</strong></th>
 <th><strong>Reviews /Trials only</strong></th>
