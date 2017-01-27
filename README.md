@@ -1,9 +1,9 @@
 <img src = "./media/lablogo.png" alt = "lab_logo" title="lab logo" width="100">
 
-[Click here: Homepage for the Public](stimulating-plasticity.org/)
+[Click here: Homepage for the Public](www.stimulating-plasticity.org/)
 <hr />
 
-#### This is the homepage for the Working
+#### This is the [homepage for the Working](translationalneurosurgery.github.io)
 
 
 
