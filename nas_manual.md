@@ -102,8 +102,7 @@ The purpose of the backup-server is maintaining a backup copy of the data. Pleas
 
 
 1. Open your browser.
-
-2. Enter the IP address of the processing server: 134.2.117.145.
+2. Enter the IP address of the processing server
 
 3. Click on the figure with the folder to get to the web file manager.
 
