@@ -1,9 +1,6 @@
 
 <h1>A link collection for Git <br></h1>
 
-</center>
-
-
 <table class="m_-7627066792137526750gmail-button"><tbody><tr><td>
 <a href="http://chris.beams.io/posts/git-commit/" target="_blank" data-saferedirecturl="https://www.google.com/url?hl=de&amp;q=http://chris.beams.io/posts/git-commit/&amp;source=gmail&amp;ust=1486112951268000&amp;usg=AFQjCNFjwsywEDGUFR_aJJ_iXx_qJphtUw">How to Write a Commit Message</a>
 </td></tr></tbody></table>

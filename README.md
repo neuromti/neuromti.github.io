@@ -15,5 +15,6 @@ And here is a direct link to our [GitHub Account](https://github.com/translation
 
 ## might be nice to know
 
+[Fundamental Neuroscience Literature](./basiclit)
 
 [Journals with IF >10](./JIFrank.md)
