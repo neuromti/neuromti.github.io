@@ -12,3 +12,5 @@
 [How to Backup your Data](./nas_manual.md)
 
 [Journals with IF >10](./JIFrank.md)
+
+[How to Git](./howtogit.md)
