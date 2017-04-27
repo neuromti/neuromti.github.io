@@ -28,3 +28,8 @@
 <table class="m_-7627066792137526750gmail-button"><tbody><tr><td>
 <a href="https://www.codecademy.com/learn/learn-git" target="_blank" data-saferedirecturl="https://www.google.com/url?hl=de&amp;q=https://www.codecademy.com/learn/learn-git&amp;source=gmail&amp;ust=1486112951268000&amp;usg=AFQjCNFsEl188ZT2Ugn3IJykKocUYWAy6A">Git in the Codeacademy Sandbox</a>
 </td></tr></tbody></table>
+
+<table class="m_-7627066792137526750gmail-button"><tbody><tr><td>
+<a href="https://eglerean.wordpress.com/2016/04/19/git-in-10-minutes/" target="_blank">Git in 10 Minutes</a>
+</td></tr></tbody></table>
+
