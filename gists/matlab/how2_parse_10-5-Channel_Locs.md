@@ -1,11 +1,8 @@
-
 This example demonstrates how to load channel positions from _10-5-Channel_Locs.csd_ into Matlab
 
-see also [SCCN-ChanLocFiles-Repository]https://sccn.ucsd.edu/wiki/Channel_Location_Files)
-.csd file (storing the positions in azimuthal angle, polar angle, radial distance, radius, x, y,  z, 
-importfile (parses) 
-mk_sensors_plane (shifts locations to achieve equidistance on 2D-plane) 
-can be found in '.\gists\matlab'
+see also [SCCN-ChanLocFiles-Repository](https://sccn.ucsd.edu/wiki/Channel_Location_Files)
+
+10-5-Channel_Locs.csd.csd file (storing the positions in (theta, phi, radius, x, y, z) can be found in '.\gists\' while _importfile_ (parses)  and _mk_sensors_plane_ (shifts locations to achieve equidistance on 2D-plane) can be found in '.\gists\matlab'.
 
 
 ```{matlab}
