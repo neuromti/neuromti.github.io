@@ -1,0 +1,63 @@
+\documentclass[10pt,a4paper]{beamer}
+\usepackage[latin1]{inputenc}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{graphicx}
+
+
+\usetheme{Frankfurt}
+
+\begin{document}
+	\begin{frame}
+		\begin{center}
+			\begin{LARGE}
+				\textbf{Agile Software Development}
+			\end{LARGE}
+		\end{center}
+	\end{frame}
+	
+	\begin{frame}{Basic Ideas}
+		\begin{center}
+			Individuals and interactions over processes and tools \\
+			Working software over comprehensive documentation \\
+			Customer collaboration over contract negotiation \\
+			Responding to change over following a plan
+		\end{center}
+	\end{frame}
+
+	\begin{frame}{Steps in Agile Software Development}
+		\begin{enumerate}
+			\item Define your features
+			\item Order the features
+			\item Select a feature
+			\item Define a test case for the feature
+			\item Work on the feature until it either passes the test or another feature becomes more important
+		\end{enumerate}
+	\end{frame}
+
+	\begin{frame}{Pros. vs. Cons.}
+		\begin{center}
+			\begin{tabular}{l|l}
+				Advantages	&	Disadvantages \\ \hline
+				Progress very transparent	&	Overall Slow \\
+				Very high level approach	&	Creates a lot of 'dead code' \\
+				Easy to debug	\\
+				Less prone to errors	\\
+				Requires little abstract modeling
+			\end{tabular}
+		\end{center}
+	\end{frame}
+
+	\begin{frame}{How to handle the disadvantages}
+		Overall slow $\rightarrow$ Compensation would require perfect planning, any diversion in statical programming is very time expensive \\ \vspace*{.5cm}
+		Creates a lot of 'dead code' $\rightarrow$ Refactoring is necessary
+	\end{frame}
+
+	\begin{frame}{What is refactoring}
+		Goal: Remove unnecessary code and avoid writing unnecessary code \\
+		\vspace*{.5cm}
+		How to do it: Continuously reevaluate already programmed code
+	\end{frame}
+
+\end{document}

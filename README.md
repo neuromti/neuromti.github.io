@@ -20,3 +20,19 @@ And here is a direct link to our [GitHub Account](https://github.com/translation
 [Fundamental Neuroscience Literature](./basiclit)
 
 [Journals with IF >10](./JIFrank.md)
+
+
+# Markdown & Notebooks
+[Try Jupyter](https://try.jupyter.org/)
+
+[Markdown Syntax](https://daringfireball.net/projects/markdown/syntax)
+
+[RStudio](https://www.rstudio.com/products/RStudio/#Desktop)
+
+# Sphinx and ReSt
+[Sphinx Intro](https://thomas-cokelaer.info/tutorials/sphinx/introduction.html)
+
+# Python Packaging
+[Alice in Python projectland](http://veekaybee.github.io/2017/09/26/python-packaging/)
+
+[Hitchhikers Guide](https://the-hitchhikers-guide-to-packaging.readthedocs.io/en/latest/creation.html#directory-layout)

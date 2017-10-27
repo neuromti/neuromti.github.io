@@ -1,0 +1,25 @@
+This is a textfile which aims to provide a basic introduction to pip.
+The acronym pip means "Pip Installs Packages" or "Pip Installs Python"
+
+How to install a package with pip:
+
+python.exe -m pip install -U packageName	//Python binary can have a different name, e.g. "python3.5m"
+											//Pip is a Python module which installs other Python modules/packages.
+											//Explanation of command line options:
+											//		"-m" option tells python to execute a module as a script
+											//		"pip" indicates which module to run
+											//		"install" which part of the module to run
+											//		"-U" Upgrade defined package and its dependencies
+											//Full guide at: https://docs.python.org/3/using/cmdline.html
+											
+Usually, when installing a module/package via pip, its dependencies are also automatically installed.
+Be aware: This is not always the case! Sometimes, e.g. when different alternatives for dependencies are available
+the dependencies are not automatically installed.
+Example: Let's say module/package A requires either module/package B or C. If A is installed without prior installation of B or C,
+the installation of A will most likely fail. The website which hosts A should tell you that either B or C is required.
+After installing B or C or both via pip or manually, package A can be installed. 
+
+
+Basically Pip is a package management system. This means that it keeps track of what is installed, what the version of each 
+module/package. Therefore when installing a new module/package it compares the dependencies to the already installed modules/packages
+and installs only the missing ones.

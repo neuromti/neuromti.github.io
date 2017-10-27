@@ -1,0 +1,13 @@
+#Eclipse
+.project
+.pydevproject
+
+#Latex
+*.aux
+*.log
+*.nav
+*.out
+*.pdf
+*.snm
+*.synctex.gz
+*.toc

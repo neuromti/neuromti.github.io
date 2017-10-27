@@ -1,0 +1,60 @@
+GIT is a version control system. It is primarily used for two purposes.
+	1) Keeping track of code development
+	2) Simplify collaboration in programming
+	
+GIT can be thought of as a "bookkeeper". Initially the repository, where GIT works is empty, therefore there is nothing
+to keep track of. When code is written, it is occasionally given to GIT to take a look at at. As GIT is a very detail-loving
+bookkeeper, it writes down all differences between this time and the previous time it was shown some code.
+
+This has some advantages:
+	1) When modifying code and destroying some functionality, one can ask GIT how the code looked at timestamp X. Subsequently
+	the older code can be compare to the new code and GIT highlights the differences.
+	2) When submitting changes the code to GIT, one always has to provide a description to GIT what the purpose of the change is.
+	Therefore not only the changes in code are shown over time, but the programmer may also remember after his/her vacation what the purpose of the
+	last change was.
+	3) And many more
+	
+	
+A git repository is initilized with:
+git.exe init		//Depending on the name of the binary, may also be "git"
+
+Or a foreign repository can be cloned (copied) with:
+git.exe clone ADRESS_TO_REPOSITORY
+
+GIT can be asked about the differences the current repository state and the previous state by asking
+git.exe status
+
+Changes are managed in a three layer system. The add command collects local changes.
+git.exe add FILE TO ADD		//Adds a specific file
+git.exe add .				//Adds all new files in the repository
+
+After collecting the changes, independent from the number of changes added via "add", they are packed into an
+local update with "commit"
+git.exe commit -m "description"		//Packs the local changes into a local update package.
+									//"-m "description" " describes what the idea of this update package is, e.g. -m "added comments"
+									
+When changes are processed locally, they can be transferred to an online repository (highly recommended). This is done via "push"
+git.exe push
+
+This works perfectly as long as changes are only send from a single copy of the online repository.
+In case multiple persons work on a project or a project is worked on from home, one needs to get possible changes integrated into his/her local repository.
+For this, the "pull" command is used.
+git.exe pull
+
+GIT is a conservative version control system. Therefore before a change to the online repository can be "pushed", all changes present on the online
+repository which are unknown to the local repository have to be pulled, otherwise programmer A's push could easily overwrite the hard work from programmer B. 
+
+Therefore the typical order of GIT commands is:
+
+1. git add
+2. git commit -m "description"
+3. git pull
+4. git push
+
+When two programmer change the same part of the code, between step 3 and 4 a merge conflict may arise. An example of this is two programmers fixing the same bug
+and programmer A pushed before programmer B. If B were to push his/her code, it would overwrite the changes made by A which is potentially harmful
+(A's fix to the bug might be superior). Therefore before B can push is changes to the code, the merge conflict has to be solved. To do this, B compares his 
+changes to the code to changes made by programmer A.
+
+Hint: If programmer A and B modify different parts of the code, a pull before push is still necessary, but there is no merge conflict as pushing B's
+changes would not overwrite the code written by A.

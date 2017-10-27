@@ -1,0 +1,10 @@
+There are five primary steps which have to be followed:
+
+1)	Look for the website of the toolbox you want to know more about. In the scope of this example, it will be numpy. (https://docs.scipy.org/doc/)
+2)	Select the right version of the toolkit you are using. It may seem negligible, but looking at the wrong version of the toolkit
+	can be quit severe. An example is that the default parameter of a function may have changed and therefore the code relying on the changed function
+	will produce incorrect results.
+3)	Identify the function of interest
+4)	What "goes in"? After identifying the function of interest, the order and TYPE of the input parameters are of major importance.
+5) 	What "comes out"? is the final question. Does the data format match the programmers expectation, does it need to be transformed, is all necessary information
+	included in the output?
