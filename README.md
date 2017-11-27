@@ -29,8 +29,16 @@ And here is a direct link to our [GitHub Account](https://github.com/translation
 
 [RStudio](https://www.rstudio.com/products/RStudio/#Desktop)
 
-# Sphinx and ReSt
+# ReST &  Creating Documentation with Sphinx
 [Sphinx Intro](https://thomas-cokelaer.info/tutorials/sphinx/introduction.html)
+
+[Numyp and Google Style Documentation Strings](http://www.sphinx-doc.org/en/stable/ext/napoleon.html)
+
+[An idiot’s guide to Python documentation with Sphinx and ReadTheDocs](https://samnicholls.net/2016/06/15/how-to-sphinx-readthedocs/)
+
+# Creating Figures
+
+[Dot](http://www.graphviz.org/Documentation.php)
 
 # Python Packaging
 [Alice in Python projectland](http://veekaybee.github.io/2017/09/26/python-packaging/)
