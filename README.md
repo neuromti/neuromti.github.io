@@ -36,6 +36,8 @@ And here is a direct link to our [GitHub Account](https://github.com/translation
 
 [An idiot’s guide to Python documentation with Sphinx and ReadTheDocs](https://samnicholls.net/2016/06/15/how-to-sphinx-readthedocs/)
 
+[Autosummary](https://stackoverflow.com/questions/2701998/sphinx-autodoc-is-not-automatic-enough)
+
 # Creating Figures
 
 [Dot](http://www.graphviz.org/Documentation.php)

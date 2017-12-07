@@ -1,0 +1,297 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>experiment.protocol &#8212; Experiment Framework 0.2.1. documentation</title>
+    <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.2.1.',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="experiment.device" href="experiment.device.html" />
+    <link rel="prev" title="Main API" href="../../_api.html" /> 
+  </head>
+  <body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="experiment.device.html" title="experiment.device"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="../../_api.html" title="Main API"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Experiment Framework 0.2.1. documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../_api.html" accesskey="U">Main API</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-experiment.protocol">
+<span id="experiment-protocol"></span><h1>experiment.protocol<a class="headerlink" href="#module-experiment.protocol" title="Permalink to this headline">¶</a></h1>
+<p>This module contains classes to control the low of an experiment</p>
+<div class="section" id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>cues, e.g.  i.e. <a class="reference internal" href="#experiment.protocol.Cue" title="experiment.protocol.Cue"><code class="xref py py-class docutils literal"><span class="pre">Cue</span></code></a></li>
+<li>session, i.e. <a class="reference internal" href="#experiment.protocol.Session" title="experiment.protocol.Session"><code class="xref py py-class docutils literal"><span class="pre">Session</span></code></a></li>
+<li>runfiles, i.e. <a class="reference internal" href="#experiment.protocol.Run" title="experiment.protocol.Run"><code class="xref py py-class docutils literal"><span class="pre">Run</span></code></a></li>
+<li>logging, e.g.  i.e. <code class="xref py py-class docutils literal"><span class="pre">Logger</span></code></li>
+<li>timing, i.e. <a class="reference internal" href="#experiment.protocol.Timing" title="experiment.protocol.Timing"><code class="xref py py-class docutils literal"><span class="pre">Timing</span></code></a></li>
+</ul>
+</div>
+<div class="section" id="documentation">
+<h2>Documentation<a class="headerlink" href="#documentation" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="experiment.protocol.Cue">
+<em class="property">class </em><code class="descclassname">experiment.protocol.</code><code class="descname">Cue</code><span class="sig-paren">(</span><em>Sound</em>, <em>Frame</em>, <em>Duration</em>, <em>trigger=&lt;function register_triggerdevice.&lt;locals&gt;.register_markervalue.&lt;locals&gt;.send_marker&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/protocol.html#Cue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.protocol.Cue" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class representing a Cue</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>Sound</strong> (<a class="reference internal" href="experiment.stimulus.html#experiment.stimulus.Sound" title="experiment.stimulus.Sound"><code class="xref py py-class docutils literal"><span class="pre">Sound</span></code></a>) – The acoustic part of the cue</li>
+<li><strong>Frame</strong> (<a class="reference internal" href="experiment.stimulus.html#experiment.stimulus.Frame" title="experiment.stimulus.Frame"><code class="xref py py-class docutils literal"><span class="pre">Frame</span></code></a>) – The visual part of the cue</li>
+<li><strong>Duration</strong> (<em>float</em>) – Duration in seconds</li>
+<li><strong>Marker</strong> (<em>function</em>) – a function sending a trigger on evaluation</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Example:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">speaker</span>     <span class="o">=</span> <span class="n">device</span><span class="o">.</span><span class="n">Speaker</span><span class="p">()</span>
+<span class="n">sound</span>       <span class="o">=</span> <span class="n">stimulus</span><span class="o">.</span><span class="n">Sound</span><span class="p">(</span><span class="n">speaker</span><span class="p">,</span> <span class="n">pathToWavFile</span><span class="p">)</span>
+<span class="n">screen</span>      <span class="o">=</span> <span class="n">device</span><span class="o">.</span><span class="n">Screen</span><span class="p">()</span>
+<span class="n">frame</span>       <span class="o">=</span> <span class="n">stimulus</span><span class="o">.</span><span class="n">Cross</span><span class="p">(</span><span class="n">screen</span><span class="p">)</span>
+<span class="n">duration</span>    <span class="o">=</span> <span class="mi">5</span>
+<span class="n">interface</span>   <span class="o">=</span> <span class="n">device</span><span class="o">.</span><span class="n">SerialTrigger</span><span class="p">()</span>
+<span class="n">marker</span>      <span class="o">=</span> <span class="n">protocol</span><span class="o">.</span><span class="n">register_triggerdevice</span><span class="p">(</span><span class="n">interface</span><span class="p">)</span>
+<span class="n">cue</span>         <span class="o">=</span> <span class="n">protocol</span><span class="o">.</span><span class="n">Cue</span><span class="p">(</span><span class="n">sound</span><span class="p">,</span> <span class="n">frame</span><span class="p">,</span> <span class="n">duration</span><span class="p">,</span> <span class="n">marker</span><span class="p">(</span><span class="mi">6</span><span class="p">))</span>
+<span class="n">interface</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+<span class="n">cue</span><span class="o">.</span><span class="n">present</span><span class="p">()</span>
+<span class="n">interface</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="admonition tip">
+<p class="first admonition-title">Tip</p>
+<p class="last">use the dictionary of cues, sounds and visuals in         <a class="reference internal" href="../../_api.html#module-experiment.api" title="experiment.api"><code class="xref py py-mod docutils literal"><span class="pre">api</span></code></a></p>
+</div>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<ul class="last simple">
+<li><a class="reference internal" href="#experiment.protocol.register_triggerdevice" title="experiment.protocol.register_triggerdevice"><code class="xref py py-func docutils literal"><span class="pre">register_triggerdevice()</span></code></a></li>
+<li><a class="reference internal" href="experiment.stimulus.html#module-experiment.stimulus" title="experiment.stimulus"><code class="xref py py-mod docutils literal"><span class="pre">stimulus</span></code></a></li>
+</ul>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="experiment.protocol.Logger">
+<code class="descclassname">experiment.protocol.</code><code class="descname">Logger</code><span class="sig-paren">(</span><em>filepath='C:\\recording'</em>, <em>fname='session.log'</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/protocol.html#Logger"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.protocol.Logger" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt id="experiment.protocol.Run">
+<em class="property">class </em><code class="descclassname">experiment.protocol.</code><code class="descname">Run</code><a class="reference internal" href="../../_modules/experiment/protocol.html#Run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.protocol.Run" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="staticmethod">
+<dt id="experiment.protocol.Run.FileIterator">
+<em class="property">static </em><code class="descname">FileIterator</code><span class="sig-paren">(</span><em>fullPath</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/protocol.html#Run.FileIterator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.protocol.Run.FileIterator" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="experiment.protocol.Run.condition">
+<em class="property">static </em><code class="descname">condition</code><span class="sig-paren">(</span><em>generic='temporary'</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/protocol.html#Run.condition"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.protocol.Run.condition" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="experiment.protocol.Run.filename">
+<em class="property">static </em><code class="descname">filename</code><span class="sig-paren">(</span><em>folderPath</em>, <em>fileName</em>, <em>ext='.eeg'</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/protocol.html#Run.filename"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.protocol.Run.filename" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes a folder and filename and extension as argument,
+if file already exists, it increases its indicator value and
+returns the new filename</p>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="experiment.protocol.Run.join">
+<em class="property">static </em><code class="descname">join</code><span class="sig-paren">(</span><em>path</em>, <em>run</em>, <em>file</em>, <em>ext='.eeg'</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/protocol.html#Run.join"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.protocol.Run.join" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="experiment.protocol.Session">
+<em class="property">class </em><code class="descclassname">experiment.protocol.</code><code class="descname">Session</code><span class="sig-paren">(</span><em>folder: str, subfolder: list = ['pre', 'post']</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/protocol.html#Session"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.protocol.Session" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="experiment.protocol.Session.config">
+<code class="descname">config</code><span class="sig-paren">(</span><em>key=None</em>, <em>val=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/protocol.html#Session.config"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.protocol.Session.config" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="experiment.protocol.Session.create_sessionfolder">
+<em class="property">static </em><code class="descname">create_sessionfolder</code><span class="sig-paren">(</span><em>folder, subfolder: list = ['pre', 'post']</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/protocol.html#Session.create_sessionfolder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.protocol.Session.create_sessionfolder" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="experiment.protocol.Session.dump">
+<code class="descname">dump</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/protocol.html#Session.dump"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.protocol.Session.dump" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="experiment.protocol.Session.saveDir">
+<code class="descname">saveDir</code><span class="sig-paren">(</span><em>which: int = None</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/protocol.html#Session.saveDir"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.protocol.Session.saveDir" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="experiment.protocol.Session.transfer2post">
+<code class="descname">transfer2post</code><span class="sig-paren">(</span><em>filename, order=[0, 1]</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/protocol.html#Session.transfer2post"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.protocol.Session.transfer2post" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="experiment.protocol.Timing">
+<em class="property">class </em><code class="descclassname">experiment.protocol.</code><code class="descname">Timing</code><span class="sig-paren">(</span><em>Duration=0</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/protocol.html#Timing"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.protocol.Timing" title="Permalink to this definition">¶</a></dt>
+<dd><p>Timings are used to synchronize the presentation of cues
+(from experiment.protocol.Cue)</p>
+<p>A minimal working example:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">Timing</span>  <span class="o">=</span> <span class="n">experiment</span><span class="o">.</span><span class="n">protocol</span><span class="o">.</span><span class="n">Timing</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">%</span><span class="n">sets</span> <span class="n">a</span> <span class="n">Timer</span> <span class="k">for</span> <span class="mi">1</span> <span class="n">second</span>
+</pre></div>
+</div>
+<dl class="method">
+<dt id="experiment.protocol.Timing.ready">
+<code class="descname">ready</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/protocol.html#Timing.ready"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.protocol.Timing.ready" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="experiment.protocol.register_triggerdevice">
+<code class="descclassname">experiment.protocol.</code><code class="descname">register_triggerdevice</code><span class="sig-paren">(</span><em>td=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/protocol.html#register_triggerdevice"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.protocol.register_triggerdevice" title="Permalink to this definition">¶</a></dt>
+<dd><p>registers a TriggerDevice</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><strong>function</strong></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">a function for this device</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>the returned function in turn registers marker values and
+returns a function that sends this marker</p>
+<p>Example:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">m</span> <span class="o">=</span> <span class="n">register_triggerdevice</span><span class="p">(</span><span class="kc">None</span><span class="p">)(</span><span class="kc">None</span><span class="p">)</span>
+<span class="n">Marker</span> <span class="o">=</span> <span class="n">register_triggerdevice</span><span class="p">(</span><span class="n">HardWareTrigger</span><span class="p">)</span>
+<span class="n">m</span>   <span class="o">=</span> <span class="n">Marker</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span> <span class="c1"># creates a function to send 5 with this device</span>
+<span class="n">m</span><span class="o">.</span><span class="n">get</span><span class="p">()</span> <span class="c1"># returns the value of the device</span>
+</pre></div>
+</div>
+<div class="admonition tip">
+<p class="first admonition-title">Tip</p>
+<p class="last"><cite>m = register_triggerdevice(None)(None)</cite> sends to a nulldevice</p>
+</div>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="#experiment.protocol.Cue" title="experiment.protocol.Cue"><code class="xref py py-class docutils literal"><span class="pre">Cue</span></code></a></p>
+</div>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">experiment.protocol</a><ul>
+<li><a class="reference internal" href="#overview">Overview</a></li>
+<li><a class="reference internal" href="#documentation">Documentation</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="../../_api.html"
+                        title="previous chapter">Main API</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="experiment.device.html"
+                        title="next chapter">experiment.device</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/_autosummary/api/experiment.protocol.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="experiment.device.html" title="experiment.device"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="../../_api.html" title="Main API"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Experiment Framework 0.2.1. documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../_api.html" >Main API</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, Robert Guggenberger &amp; Max Scherer.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
+    </div>
+  </body>
+</html>

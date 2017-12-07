@@ -1,0 +1,10 @@
+C++ Wrappers
+============
+
+.. automodule:: cues.acoustic
+    :members:
+    :undoc-members:
+
+.. automodule:: cues.visual
+    :members:
+    :undoc-members:

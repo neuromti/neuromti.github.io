@@ -1,0 +1,182 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>experiment.tasks.emg.mvc &#8212; Experiment Framework 0.2.1. documentation</title>
+    <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.2.1.',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="experiment.tasks.other.rest" href="experiment.tasks.other.rest.html" />
+    <link rel="prev" title="experiment.tasks.emg.feedback" href="experiment.tasks.emg.feedback.html" /> 
+  </head>
+  <body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="experiment.tasks.other.rest.html" title="experiment.tasks.other.rest"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="experiment.tasks.emg.feedback.html" title="experiment.tasks.emg.feedback"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Experiment Framework 0.2.1. documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../_tasks.html" accesskey="U">Tasks</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-experiment.tasks.emg.mvc">
+<span id="experiment-tasks-emg-mvc"></span><h1>experiment.tasks.emg.mvc<a class="headerlink" href="#module-experiment.tasks.emg.mvc" title="Permalink to this headline">¶</a></h1>
+<p>Measure maximum voluntary contraction</p>
+<div class="section" id="documentation">
+<h2>Documentation<a class="headerlink" href="#documentation" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="experiment.tasks.emg.mvc.start">
+<code class="descclassname">experiment.tasks.emg.mvc.</code><code class="descname">start</code><span class="sig-paren">(</span><em>chanOfInterest='EDC_L'</em>, <em>numberOfRuns=1</em>, <em>saveDir='C:\\projects\\recording'</em>, <em>rwksp='C:\\projects\\config\\bvr_workspace.json'</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/tasks/emg/mvc.html#start"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.tasks.emg.mvc.start" title="Permalink to this definition">¶</a></dt>
+<dd><p class="rubric">Notes</p>
+<p>A visual emg-contraction task for a single muscle to measure maximum
+voluntary contraction. It presents a vertical red bar representing the
+current contraction power. Whenever this bar reaches a horizontal
+target line at 100%, the bar turns green, and maximum value is updated.
+In that regard, the target is adaptive. It resets after each trial.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>chanOfInterest</strong> (<em>the channel used for feedback</em>) – </li>
+<li><strong>numberOfTrials</strong> (<em>A trial consists of 10s feedback and 4s rest</em>) – </li>
+<li><strong>saveDir</strong> (<em>where the runFile will be stored</em>) – </li>
+<li><strong>rwskp</strong> (<em>a json file containing the EEG workspace</em>) – </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition-side-effect admonition">
+<p class="first admonition-title">side effect</p>
+<ul class="last simple">
+<li>saves a Brainvisionrecorder eeg file to saveDir</li>
+<li>saves a json file containing the MVC values to saveDir</li>
+</ul>
+</div>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<ul class="last simple">
+<li>Uses <a class="reference internal" href="../api/experiment.protocol.html#experiment.protocol.Run" title="experiment.protocol.Run"><code class="xref py py-class docutils literal"><span class="pre">Run</span></code></a> to count runs</li>
+<li>Uses <a class="reference internal" href="../api/experiment.device.html#experiment.device.SerialTrigger" title="experiment.device.SerialTrigger"><code class="xref py py-class docutils literal"><span class="pre">SerialTrigger</span></code></a>  to send markers</li>
+<li>Uses <a class="reference internal" href="../api/experiment.stimulus.html#experiment.stimulus.Bar" title="experiment.stimulus.Bar"><code class="xref py py-class docutils literal"><span class="pre">Bar</span></code></a> for visual feedback</li>
+</ul>
+</div>
+<div class="admonition tip">
+<p class="first admonition-title">Tip</p>
+<p class="last">The json file is created for the specific target channel and saved
+within saveDir. Use it for EMG-feedback with
+<a class="reference internal" href="experiment.tasks.emg.feedback.html#module-experiment.tasks.emg.feedback" title="experiment.tasks.emg.feedback"><code class="xref py py-mod docutils literal"><span class="pre">feedback</span></code></a></p>
+</div>
+<div class="admonition-bvr-markers admonition">
+<p class="first admonition-title">BVR Markers</p>
+<ul class="last simple">
+<li>Ready starts at ‘S  6’</li>
+<li>Go starts at ‘S  14’</li>
+<li>Feedback ends at ‘S  10’</li>
+</ul>
+</div>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">experiment.tasks.emg.mvc</a><ul>
+<li><a class="reference internal" href="#documentation">Documentation</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="experiment.tasks.emg.feedback.html"
+                        title="previous chapter">experiment.tasks.emg.feedback</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="experiment.tasks.other.rest.html"
+                        title="next chapter">experiment.tasks.other.rest</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/_autosummary/tasks/experiment.tasks.emg.mvc.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="experiment.tasks.other.rest.html" title="experiment.tasks.other.rest"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="experiment.tasks.emg.feedback.html" title="experiment.tasks.emg.feedback"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Experiment Framework 0.2.1. documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../_tasks.html" >Tasks</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, Robert Guggenberger &amp; Max Scherer.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
+    </div>
+  </body>
+</html>

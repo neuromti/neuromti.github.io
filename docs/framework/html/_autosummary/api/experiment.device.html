@@ -1,0 +1,1056 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>experiment.device &#8212; Experiment Framework 0.2.1. documentation</title>
+    <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.2.1.',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="experiment.stimulus" href="experiment.stimulus.html" />
+    <link rel="prev" title="experiment.protocol" href="experiment.protocol.html" /> 
+  </head>
+  <body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="experiment.stimulus.html" title="experiment.stimulus"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="experiment.protocol.html" title="experiment.protocol"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Experiment Framework 0.2.1. documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../_api.html" accesskey="U">Main API</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-experiment.device">
+<span id="experiment-device"></span><h1>experiment.device<a class="headerlink" href="#module-experiment.device" title="Permalink to this headline">¶</a></h1>
+<p>This module contains classes resembling devices</p>
+<div class="section" id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>triggerdevices, e.g.  i.e. <a class="reference internal" href="#experiment.device.SerialTrigger" title="experiment.device.SerialTrigger"><code class="xref py py-class docutils literal"><span class="pre">SerialTrigger</span></code></a> or <a class="reference internal" href="#experiment.device.SoftwareTrigger" title="experiment.device.SoftwareTrigger"><code class="xref py py-class docutils literal"><span class="pre">SoftwareTrigger</span></code></a></li>
+<li>screen, i.e. <a class="reference internal" href="#experiment.device.Screen" title="experiment.device.Screen"><code class="xref py py-class docutils literal"><span class="pre">Screen</span></code></a></li>
+<li>speaker, i.e. <a class="reference internal" href="#experiment.device.Speaker" title="experiment.device.Speaker"><code class="xref py py-class docutils literal"><span class="pre">Speaker</span></code></a></li>
+<li>stimulators, e.g. <a class="reference internal" href="#experiment.device.neuroConnDC" title="experiment.device.neuroConnDC"><code class="xref py py-class docutils literal"><span class="pre">neuroConnDC</span></code></a> or <a class="reference internal" href="#experiment.device.multiChannelSystems" title="experiment.device.multiChannelSystems"><code class="xref py py-class docutils literal"><span class="pre">multiChannelSystems</span></code></a></li>
+<li>amplifiers, e.g. <a class="reference internal" href="#experiment.device.BrainAmp" title="experiment.device.BrainAmp"><code class="xref py py-class docutils literal"><span class="pre">BrainAmp</span></code></a> or  <a class="reference internal" href="#experiment.device.VisionRecorder" title="experiment.device.VisionRecorder"><code class="xref py py-class docutils literal"><span class="pre">VisionRecorder</span></code></a></li>
+</ul>
+</div>
+<div class="section" id="documentation">
+<h2>Documentation<a class="headerlink" href="#documentation" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="experiment.device.ArduinoTrigger">
+<em class="property">class </em><code class="descclassname">experiment.device.</code><code class="descname">ArduinoTrigger</code><span class="sig-paren">(</span><em>BaudRate=115200</em>, <em>ComPort='COM1'</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/device.html#ArduinoTrigger"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.device.ArduinoTrigger" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class resembling the simple one-byte Arduino-based SerialTrigger</p>
+<p>Example:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">trigger</span> <span class="o">=</span> <span class="n">SerialTrigger</span><span class="p">()</span>
+<span class="n">trigger</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">127</span><span class="p">):</span>
+    <span class="n">trigger</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">trigger</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)</span>
+
+<span class="n">trigger</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<ul class="last simple">
+<li><a class="reference internal" href="../../ext/triggerbox/triggerbox.html#tab-triggerbox-commands"><span class="std std-ref">Triggerbox Commands and Parameters</span></a></li>
+</ul>
+</div>
+<dl class="method">
+<dt id="experiment.device.ArduinoTrigger.bell">
+<code class="descname">bell</code><span class="sig-paren">(</span><em>question: int</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/device.html#ArduinoTrigger.bell"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.device.ArduinoTrigger.bell" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="experiment.device.ArduinoTrigger.close">
+<code class="descname">close</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/device.html#ArduinoTrigger.close"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.device.ArduinoTrigger.close" title="Permalink to this definition">¶</a></dt>
+<dd><p>Close connection</p>
+<p>Close the Connection to the SerialTrigger</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="experiment.device.ArduinoTrigger.connect">
+<code class="descname">connect</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/device.html#ArduinoTrigger.connect"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.device.ArduinoTrigger.connect" title="Permalink to this definition">¶</a></dt>
+<dd><p>Connect</p>
+<p>Connect with the SerialTrigger, automatically selects the Port with
+the lowest PortNumber, or the one specified during init</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="experiment.device.ArduinoTrigger.enquire">
+<code class="descname">enquire</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/device.html#ArduinoTrigger.enquire"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.device.ArduinoTrigger.enquire" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="experiment.device.ArduinoTrigger.newline">
+<code class="descname">newline</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/device.html#ArduinoTrigger.newline"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.device.ArduinoTrigger.newline" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="experiment.device.ArduinoTrigger.onehot">
+<code class="descname">onehot</code><span class="sig-paren">(</span><em>channel: int</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/device.html#ArduinoTrigger.onehot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.device.ArduinoTrigger.onehot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sends the onehot command to the arduino</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>channel</strong> (<em>int</em>) – The channel to be set, with 0: Off</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="experiment.device.ArduinoTrigger.pull_low">
+<code class="descname">pull_low</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/device.html#ArduinoTrigger.pull_low"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.device.ArduinoTrigger.pull_low" title="Permalink to this definition">¶</a></dt>
+<dd><p>immediately pull all pins low</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="experiment.device.ArduinoTrigger.reset">
+<code class="descname">reset</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/device.html#ArduinoTrigger.reset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.device.ArduinoTrigger.reset" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="experiment.device.ArduinoTrigger.response">
+<code class="descname">response</code><span class="sig-paren">(</span><em>parameter: int</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/device.html#ArduinoTrigger.response"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.device.ArduinoTrigger.response" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="experiment.device.ArduinoTrigger.send">
+<code class="descname">send</code><span class="sig-paren">(</span><em>command: bytes</em>, <em>parameter: bytes</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/device.html#ArduinoTrigger.send"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.device.ArduinoTrigger.send" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="experiment.device.ArduinoTrigger.set_forwardDelay">
+<code class="descname">set_forwardDelay</code><span class="sig-paren">(</span><em>delayDuration: int</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/device.html#ArduinoTrigger.set_forwardDelay"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.device.ArduinoTrigger.set_forwardDelay" title="Permalink to this definition">¶</a></dt>
+<dd><p>set the delay duration from TrigIn to forwardPin</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>delayDuration</strong> (<em>int</em>) – delayDuration in microseconds in steps of 250 microseconds
+default is 0 ms</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Resolution of delayDuration is in 250µs and will be rounded down!</p>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="experiment.device.ArduinoTrigger.set_forwardPin">
+<code class="descname">set_forwardPin</code><span class="sig-paren">(</span><em>pinNumber: int</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/device.html#ArduinoTrigger.set_forwardPin"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.device.ArduinoTrigger.set_forwardPin" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="experiment.device.ArduinoTrigger.set_pulseduration">
+<code class="descname">set_pulseduration</code><span class="sig-paren">(</span><em>duration: int</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/device.html#ArduinoTrigger.set_pulseduration"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.device.ArduinoTrigger.set_pulseduration" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="experiment.device.ArduinoTrigger.set_threshold">
+<code class="descname">set_threshold</code><span class="sig-paren">(</span><em>threshold: int</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/device.html#ArduinoTrigger.set_threshold"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.device.ArduinoTrigger.set_threshold" title="Permalink to this definition">¶</a></dt>
+<dd><p>set the threshold for detecting a signal at TrigIn</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>threshold</strong> (<em>int</em>) – threshold in 1023rds of 5V, in steps of 4ths
+default is 512, i.e. 2.5V</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="experiment.device.ArduinoTrigger.stimulus">
+<code class="descname">stimulus</code><span class="sig-paren">(</span><em>parameter: int</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/device.html#ArduinoTrigger.stimulus"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.device.ArduinoTrigger.stimulus" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="experiment.device.ArduinoTrigger.test">
+<code class="descname">test</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/device.html#ArduinoTrigger.test"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.device.ArduinoTrigger.test" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="experiment.device.ArduinoTrigger.trigger_loud">
+<code class="descname">trigger_loud</code><span class="sig-paren">(</span><em>forwardStimulus: int = 1</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/device.html#ArduinoTrigger.trigger_loud"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.device.ArduinoTrigger.trigger_loud" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sends the loud_trigger command to the arduino</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>forwardStimulus</strong> (<em>int</em>) – <ul class="simple">
+<li>0: Off</li>
+<li>Any other value: On, and will be forwarded to stimulus within the arduino</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="experiment.device.ArduinoTrigger.trigger_silent">
+<code class="descname">trigger_silent</code><span class="sig-paren">(</span><em>state: bool = True</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/device.html#ArduinoTrigger.trigger_silent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.device.ArduinoTrigger.trigger_silent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sends the silent_trigger command to the arduino</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>parameter</strong> (<em>bool</em>) – The parameter of the command, with
+- False: Off
+- True or larger: On</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition tip">
+<p class="first admonition-title">Tip</p>
+<p class="last">use trigger_silent(0) to pull <em>all</em> pins low, i.e. external trigOut as well as all D-SUB 26 and D-SUB 9 Pins</p>
+</div>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="experiment.device.ArduinoTrigger.wrap_marker">
+<em class="property">static </em><code class="descname">wrap_marker</code><span class="sig-paren">(</span><em>foo</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/device.html#ArduinoTrigger.wrap_marker"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.device.ArduinoTrigger.wrap_marker" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="experiment.device.ArduinoTrigger.write">
+<code class="descname">write</code><span class="sig-paren">(</span><em>message: bytes</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/device.html#ArduinoTrigger.write"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.device.ArduinoTrigger.write" title="Permalink to this definition">¶</a></dt>
+<dd><p>writes an 8-Bit Messages to the SerialTrigger</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>triggerVal</strong> (<em>bytes</em>) – 8-Bit Messages are allowed, i.e. 0x00 - 0xff</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition-sideeffect admonition">
+<p class="first admonition-title">sideeffect</p>
+<p class="last">uses the hardware resource to the SerialTrigger</p>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="experiment.device.BrainAmp">
+<em class="property">class </em><code class="descclassname">experiment.device.</code><code class="descname">BrainAmp</code><span class="sig-paren">(</span><em>ringLen=2000</em>, <em>blockLen=50</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/device.html#BrainAmp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.device.BrainAmp" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="experiment.device.BrainAmp.channel2index">
+<code class="descname">channel2index</code><span class="sig-paren">(</span><em>chanOfInterest: str</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/device.html#BrainAmp.channel2index"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.device.BrainAmp.channel2index" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a logical array indexing a channel</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>chanOfInterest</strong> (<em>str</em>) – the name of the channel to be indexed</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>array</strong></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">a list of bools indexing the chanOfInterest</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition tip">
+<p class="first admonition-title">Tip</p>
+<p class="last">use BrainAmp.channel2index(chanOfInterest).index(1) to get             the index</p>
+</div>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<ul class="last simple">
+<li><a class="reference internal" href="#experiment.device.VisionRecorder.load_workspace" title="experiment.device.VisionRecorder.load_workspace"><code class="xref py py-meth docutils literal"><span class="pre">load_workspace()</span></code></a></li>
+<li><a class="reference internal" href="#experiment.device.VisionRecorder.scan_workspace" title="experiment.device.VisionRecorder.scan_workspace"><code class="xref py py-meth docutils literal"><span class="pre">scan_workspace()</span></code></a></li>
+</ul>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="experiment.device.BrainAmp.connect">
+<code class="descname">connect</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/device.html#BrainAmp.connect"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.device.BrainAmp.connect" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="experiment.device.BrainAmp.fullstop">
+<code class="descname">fullstop</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/device.html#BrainAmp.fullstop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.device.BrainAmp.fullstop" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="experiment.device.BrainAmp.isConnected">
+<code class="descname">isConnected</code><em class="property"> = False</em><a class="headerlink" href="#experiment.device.BrainAmp.isConnected" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="experiment.device.BrainAmp.receive">
+<code class="descname">receive</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/device.html#BrainAmp.receive"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.device.BrainAmp.receive" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="experiment.device.BrainAmp.receive_blocks">
+<code class="descname">receive_blocks</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/device.html#BrainAmp.receive_blocks"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.device.BrainAmp.receive_blocks" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns blocks of size 50 ms of data</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="experiment.device.BrainAmp.receive_ring">
+<code class="descname">receive_ring</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/device.html#BrainAmp.receive_ring"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.device.BrainAmp.receive_ring" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns the last 1000 ms of data</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="experiment.device.BrainAmp.stop">
+<code class="descname">stop</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/device.html#BrainAmp.stop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.device.BrainAmp.stop" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="experiment.device.Screen">
+<em class="property">class </em><code class="descclassname">experiment.device.</code><code class="descname">Screen</code><span class="sig-paren">(</span><em>FontName='inconsolata'</em>, <em>selectedMonitor=1</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/device.html#Screen"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.device.Screen" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class representing the display screen for cue presentation</p>
+<p>Example:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">screen</span> <span class="o">=</span> <span class="n">Screen</span><span class="p">(</span><span class="n">FontName</span> <span class="o">=</span> <span class="s2">&quot;freesans&quot;</span><span class="p">,</span> <span class="n">selectedMonitor</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">screen</span><span class="o">.</span><span class="n">open</span><span class="p">()</span>
+<span class="c1"># fills monitor 2 with a black background</span>
+<span class="n">screen</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>The screen offers a class-wide dictionary with several default colors
+(e.g. red, green, gray, etc) at <em>screen.colors</em>. It allows to select fonts
+and automatically reads the screensize of currently connected displays</p>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="../../cppwrapper.html#module-cues.visual" title="cues.visual"><code class="xref py py-mod docutils literal"><span class="pre">cues.visual</span></code></a></p>
+</div>
+<dl class="method">
+<dt id="experiment.device.Screen.clear">
+<code class="descname">clear</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/device.html#Screen.clear"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.device.Screen.clear" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clears the display screen to full black</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="experiment.device.Screen.close">
+<code class="descname">close</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/device.html#Screen.close"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.device.Screen.close" title="Permalink to this definition">¶</a></dt>
+<dd><p>Closes the display screen</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="experiment.device.Screen.colors">
+<code class="descname">colors</code><em class="property"> = {'red': [0.9, 0.1, 0.1], 'pink': [0.9, 0.5, 0.9], 'green': [0.25, 0.8, 0.25], 'white': [1, 1, 1], 'black': [0, 0, 0], 'gray': [0.25, 0.25, 0.25], 'light': [0.5, 0.5, 0.5], 'dark': [0.1, 0.1, 0.1]}</em><a class="headerlink" href="#experiment.device.Screen.colors" title="Permalink to this definition">¶</a></dt>
+<dd><p>A dictionary of color strings encoding a tuple in RGB</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="experiment.device.Screen.fonts">
+<code class="descname">fonts</code><em class="property"> = {'dyslexic': ['opendyslexic\\OpenDyslexicMono-Regular.otf'], 'inconsolata': ['inconsolata\\Inconsolata-Regular.ttf'], 'freesans': ['freesans\\FreeSans.ttf']}</em><a class="headerlink" href="#experiment.device.Screen.fonts" title="Permalink to this definition">¶</a></dt>
+<dd><p>A dictionary of fontname strings encoding paths to fonts</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="experiment.device.Screen.libActive">
+<code class="descname">libActive</code><em class="property"> = False</em><a class="headerlink" href="#experiment.device.Screen.libActive" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="experiment.device.Screen.open">
+<code class="descname">open</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/device.html#Screen.open"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.device.Screen.open" title="Permalink to this definition">¶</a></dt>
+<dd><p>Opens the display screen</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="experiment.device.Screen.setFeedbackColors">
+<code class="descname">setFeedbackColors</code><span class="sig-paren">(</span><em>OnTarget=[0.25, 0.8, 0.25], BelowTarget=[0.9, 0.1, 0.1], AboveTarget=[0.9, 0.1, 0.1]</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/device.html#Screen.setFeedbackColors"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.device.Screen.setFeedbackColors" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the Default colors used for feedback on this display</p>
+<p>Defaults are green, red, red</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>OnTarget</strong> (<em>tuple</em>) – 3 RGB values</li>
+<li><strong>BelowTarget</strong> (<em>tuple</em>) – 3 RGB values</li>
+<li><strong>AboveTarget</strong> (<em>tuple</em>) – 3 RGB values</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition tip">
+<p class="first admonition-title">Tip</p>
+<p class="last">Use a key to <a class="reference internal" href="#experiment.device.Screen.colors" title="experiment.device.Screen.colors"><code class="xref py py-attr docutils literal"><span class="pre">colors</span></code></a> for several
+default colors</p>
+</div>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="experiment.stimulus.html#experiment.stimulus.Dynamic" title="experiment.stimulus.Dynamic"><code class="xref py py-class docutils literal"><span class="pre">Dynamic</span></code></a></p>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="experiment.device.Screen.setScreenSize">
+<code class="descname">setScreenSize</code><span class="sig-paren">(</span><em>width</em>, <em>height</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/device.html#Screen.setScreenSize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.device.Screen.setScreenSize" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="experiment.device.SerialTrigger">
+<em class="property">class </em><code class="descclassname">experiment.device.</code><code class="descname">SerialTrigger</code><a class="reference internal" href="../../_modules/experiment/device.html#SerialTrigger"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.device.SerialTrigger" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt id="experiment.device.SoftwareTrigger">
+<em class="property">class </em><code class="descclassname">experiment.device.</code><code class="descname">SoftwareTrigger</code><a class="reference internal" href="../../_modules/experiment/device.html#SoftwareTrigger"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.device.SoftwareTrigger" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="experiment.device.SoftwareTrigger.connect">
+<code class="descname">connect</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/device.html#SoftwareTrigger.connect"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.device.SoftwareTrigger.connect" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="experiment.device.SoftwareTrigger.makeMessage">
+<code class="descname">makeMessage</code><a class="reference internal" href="../../_modules/experiment/device.html#SoftwareTrigger.makeMessage"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.device.SoftwareTrigger.makeMessage" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="experiment.device.SoftwareTrigger.send">
+<code class="descname">send</code><span class="sig-paren">(</span><em>TriggerNumber</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/device.html#SoftwareTrigger.send"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.device.SoftwareTrigger.send" title="Permalink to this definition">¶</a></dt>
+<dd><p>Send a Marker to BVR</p>
+<p>Example:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">trigger</span> <span class="o">=</span> <span class="n">SoftwareTrigger</span><span class="p">()</span>
+<span class="n">trigger</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="experiment.device.Speaker">
+<em class="property">class </em><code class="descclassname">experiment.device.</code><code class="descname">Speaker</code><a class="reference internal" href="../../_modules/experiment/device.html#Speaker"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.device.Speaker" title="Permalink to this definition">¶</a></dt>
+<dd><p>Represents a speaker box</p>
+<p>Example:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">box</span> <span class="o">=</span> <span class="n">Speaker</span><span class="p">()</span>
+<span class="n">box</span><span class="o">.</span><span class="n">forceplay</span><span class="p">(</span><span class="n">Sound</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>does this:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">box</span> <span class="o">=</span> <span class="n">Speaker</span><span class="p">()</span>
+<span class="n">box</span><span class="o">.</span><span class="n">open</span><span class="p">()</span>
+<span class="n">box</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+<span class="n">box</span><span class="o">.</span><span class="n">buffer</span><span class="p">(</span><span class="n">Sound</span><span class="p">)</span>
+<span class="n">box</span><span class="o">.</span><span class="n">play</span><span class="p">(</span><span class="n">Sound</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="rubric">Notes</p>
+<p>The Speaker requires a sound object to play</p>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<ul class="last simple">
+<li><a class="reference internal" href="experiment.stimulus.html#experiment.stimulus.Sound" title="experiment.stimulus.Sound"><code class="xref py py-class docutils literal"><span class="pre">Sound</span></code></a></li>
+<li><a class="reference internal" href="../../cppwrapper.html#module-cues.acoustic" title="cues.acoustic"><code class="xref py py-mod docutils literal"><span class="pre">cues.acoustic</span></code></a></li>
+</ul>
+</div>
+<dl class="method">
+<dt id="experiment.device.Speaker.buffer">
+<code class="descname">buffer</code><span class="sig-paren">(</span><em>Sound</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/device.html#Speaker.buffer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.device.Speaker.buffer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Puts a sound object into the stream buffer</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>sound</strong> (<code class="xref py py-class docutils literal"><span class="pre">Sound</span></code>) – A sound to played</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition-sideeffect admonition">
+<p class="first admonition-title">sideeffect</p>
+<p class="last">flushes the current buffer</p>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="experiment.device.Speaker.clear">
+<code class="descname">clear</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/device.html#Speaker.clear"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.device.Speaker.clear" title="Permalink to this definition">¶</a></dt>
+<dd><p>flushes the stream buffer and forgets the sound played</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="experiment.device.Speaker.close">
+<code class="descname">close</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/device.html#Speaker.close"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.device.Speaker.close" title="Permalink to this definition">¶</a></dt>
+<dd><p>Closes connection to the Speaker Box</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="experiment.device.Speaker.flush">
+<code class="descname">flush</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/device.html#Speaker.flush"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.device.Speaker.flush" title="Permalink to this definition">¶</a></dt>
+<dd><p>Flushes the stream buffer</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="experiment.device.Speaker.forceplay">
+<code class="descname">forceplay</code><span class="sig-paren">(</span><em>sound</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/device.html#Speaker.forceplay"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.device.Speaker.forceplay" title="Permalink to this definition">¶</a></dt>
+<dd><p>Enforces the immediate play of a sound object</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>sound</strong> (<code class="xref py py-class docutils literal"><span class="pre">Sound</span></code>) – A sound to played</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition-sideeffect admonition">
+<p class="first admonition-title">sideeffect</p>
+<p class="last">flushes the Speakers buffer</p>
+</div>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="experiment.device.Speaker.libActive">
+<code class="descname">libActive</code><em class="property"> = False</em><a class="headerlink" href="#experiment.device.Speaker.libActive" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="experiment.device.Speaker.open">
+<code class="descname">open</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/device.html#Speaker.open"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.device.Speaker.open" title="Permalink to this definition">¶</a></dt>
+<dd><p>Connect to the Speaker box</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="experiment.device.Speaker.play">
+<code class="descname">play</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/device.html#Speaker.play"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.device.Speaker.play" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plays the sound object currently in the stream buffer</p>
+<p class="rubric">Notes</p>
+<p>will ignore the command if it is still playing the last sound</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="experiment.device.Speaker.replay">
+<code class="descname">replay</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/device.html#Speaker.replay"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.device.Speaker.replay" title="Permalink to this definition">¶</a></dt>
+<dd><p>Replays the sound object played last if still in history or buffer</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="experiment.device.Stimulator">
+<em class="property">class </em><code class="descclassname">experiment.device.</code><code class="descname">Stimulator</code><span class="sig-paren">(</span><em>interface=&lt;experiment.device.ArduinoTrigger object&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/device.html#Stimulator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.device.Stimulator" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="experiment.device.Stimulator.close">
+<code class="descname">close</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/device.html#Stimulator.close"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.device.Stimulator.close" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="experiment.device.Stimulator.connect">
+<code class="descname">connect</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/device.html#Stimulator.connect"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.device.Stimulator.connect" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="experiment.device.TriggerDevice">
+<em class="property">class </em><code class="descclassname">experiment.device.</code><code class="descname">TriggerDevice</code><a class="reference internal" href="../../_modules/experiment/device.html#TriggerDevice"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.device.TriggerDevice" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt id="experiment.device.VisionRecorder">
+<em class="property">class </em><code class="descclassname">experiment.device.</code><code class="descname">VisionRecorder</code><a class="reference internal" href="../../_modules/experiment/device.html#VisionRecorder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.device.VisionRecorder" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="experiment.device.VisionRecorder.close">
+<code class="descname">close</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/device.html#VisionRecorder.close"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.device.VisionRecorder.close" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="experiment.device.VisionRecorder.correct_DC">
+<code class="descname">correct_DC</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/device.html#VisionRecorder.correct_DC"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.device.VisionRecorder.correct_DC" title="Permalink to this definition">¶</a></dt>
+<dd><p>Performs a DC Correction
+Blocks Control during duration of this correction</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="experiment.device.VisionRecorder.load_workspace">
+<code class="descname">load_workspace</code><span class="sig-paren">(</span><em>fname</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/device.html#VisionRecorder.load_workspace"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.device.VisionRecorder.load_workspace" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="experiment.device.VisionRecorder.save_workspace">
+<code class="descname">save_workspace</code><span class="sig-paren">(</span><em>fname</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/device.html#VisionRecorder.save_workspace"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.device.VisionRecorder.save_workspace" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="experiment.device.VisionRecorder.scan_workspace">
+<code class="descname">scan_workspace</code><span class="sig-paren">(</span><em>workingFilePath='C:\\Vision\\Raw Files'</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/device.html#VisionRecorder.scan_workspace"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.device.VisionRecorder.scan_workspace" title="Permalink to this definition">¶</a></dt>
+<dd><p>Records 200ms of data with the current workspace into
+workingFilePath and reads channels and Fs from this recording</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="experiment.device.VisionRecorder.set_workspace">
+<code class="descname">set_workspace</code><span class="sig-paren">(</span><em>workSpaceFile</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/device.html#VisionRecorder.set_workspace"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.device.VisionRecorder.set_workspace" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="experiment.device.VisionRecorder.start_recording">
+<code class="descname">start_recording</code><span class="sig-paren">(</span><em>fname</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/device.html#VisionRecorder.start_recording"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.device.VisionRecorder.start_recording" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="experiment.device.VisionRecorder.start_viewing">
+<code class="descname">start_viewing</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/device.html#VisionRecorder.start_viewing"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.device.VisionRecorder.start_viewing" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="experiment.device.VisionRecorder.state">
+<code class="descname">state</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/device.html#VisionRecorder.state"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.device.VisionRecorder.state" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="experiment.device.VisionRecorder.stateDict">
+<code class="descname">stateDict</code><em class="property"> = {-1: 'Server Error', 0: 'Idle state', 1: 'Viewing EEGs', 2: 'Test signal', 3: 'Impedance measurement', 4: 'Saving data', 5: 'Saving test signals', 6: 'Data saving paused', 7: 'Data saving paused, displaying test signal', 8: 'Data saving paused, displaying impedance'}</em><a class="headerlink" href="#experiment.device.VisionRecorder.stateDict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="experiment.device.VisionRecorder.stop_recording">
+<code class="descname">stop_recording</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/device.html#VisionRecorder.stop_recording"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.device.VisionRecorder.stop_recording" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="experiment.device.VisionRecorder.stop_viewing">
+<code class="descname">stop_viewing</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/device.html#VisionRecorder.stop_viewing"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.device.VisionRecorder.stop_viewing" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="experiment.device.multiChannelSystems">
+<em class="property">class </em><code class="descclassname">experiment.device.</code><code class="descname">multiChannelSystems</code><span class="sig-paren">(</span><em>modus='mf8'</em>, <em>interface=&lt;experiment.device.ArduinoTrigger object&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/device.html#multiChannelSystems"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.device.multiChannelSystems" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class resembling the multiChannelSystems STG 4000</p>
+<p class="rubric">Notes</p>
+<p>Represents the interface to the multichannelsystem STG 4008 from
+<a class="reference external" href="http://www.multichannelsystems.com/products/stg4000-series">mcs</a>.</p>
+<p>A minimal working example:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">xp</span><span class="o">.</span><span class="n">device</span><span class="o">.</span><span class="n">MCS</span><span class="p">(</span><span class="n">modus</span> <span class="o">=</span> <span class="s1">&#39;single&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">mcs</span><span class="p">:</span>
+    <span class="n">mcs</span><span class="o">.</span><span class="n">trigger</span><span class="p">(</span><span class="n">settleDuration</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Triggers the mcs at its current stimulation setting in single mode</p>
+<p>Another minimal working example:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">xp</span><span class="o">.</span><span class="n">device</span><span class="o">.</span><span class="n">MCS</span><span class="p">(</span><span class="n">modus</span><span class="o">=</span><span class="s1">&#39;mf8&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">mcs</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">stimKey</span> <span class="ow">in</span> <span class="n">mcs</span><span class="o">.</span><span class="n">stimDict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="n">mcs</span><span class="o">.</span><span class="n">trigger</span><span class="p">(</span><span class="n">stimKey</span><span class="p">,</span> <span class="n">settleDuration</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">mcs</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.05</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Triggers the mcs at each available stimulation settings in mf8 mode</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>modus</strong> – can be mf8, mf255 or single</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition tip">
+<p class="first admonition-title">Tip</p>
+<p class="last">Beware of possible conflicts between the mcs in mf255 mode and
+other external devices.</p>
+</div>
+<div class="admonition-bvr-marker-in-single-mode admonition">
+<p class="first admonition-title">BVR Marker in single mode</p>
+<ul class="last simple">
+<li>Trigger: ‘S  1’</li>
+</ul>
+</div>
+<div class="admonition-bvr-marker-in-mf8-mode admonition">
+<p class="first admonition-title">BVR Marker in mf8 mode</p>
+<ul class="last simple">
+<li>Trigger 1 : ‘S  1’</li>
+<li>Trigger 2 : ‘S  2’</li>
+<li>Trigger 3 : ‘S  4’</li>
+<li>Trigger 4 : ‘S  8’</li>
+<li>Trigger 5 : ‘S 16’</li>
+<li>Trigger 6 : ‘S 32’</li>
+<li>Trigger 7 : ‘S 64’</li>
+<li>Trigger 8 : ‘S128’</li>
+</ul>
+</div>
+<div class="admonition-bvr-marker-in-mf255-mode admonition">
+<p class="first admonition-title">BVR Marker in mf255 mode</p>
+<ul class="last simple">
+<li>Trigger 1 : ‘S  1’</li>
+<li>Trigger 2 : ‘S  2’</li>
+<li>Trigger 3 : ‘S  3’</li>
+<li>…</li>
+<li>Trigger 253 : ‘S253’</li>
+<li>Trigger 254 : ‘S254’</li>
+<li>Trigger 255 : ‘S255’</li>
+</ul>
+</div>
+<dl class="method">
+<dt id="experiment.device.multiChannelSystems.dump">
+<code class="descname">dump</code><span class="sig-paren">(</span><em>filename</em>, <em>modus='wyrm'</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/device.html#multiChannelSystems.dump"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.device.multiChannelSystems.dump" title="Permalink to this definition">¶</a></dt>
+<dd><p>Saves the current setting</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>filename</strong> (<em>str</em>) – saves the current stimDict to filename as a json</li>
+<li><strong>mod</strong> (<em>str</em>) – <ul>
+<li>‘wyrm’ saves in easy format for loading into wyrm</li>
+<li>’raw’ saves in default dict -&gt; json format</li>
+</ul>
+</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="experiment.device.multiChannelSystems.random_isi">
+<code class="descname">random_isi</code><span class="sig-paren">(</span><em>minduration</em>, <em>maxduration</em>, <em>count: int = None</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/device.html#multiChannelSystems.random_isi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.device.multiChannelSystems.random_isi" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a list of random interstimulus intervals</p>
+<p>Example:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">stim</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">100</span><span class="p">,</span><span class="mi">1</span><span class="p">):</span>
+    <span class="n">stimKey</span> <span class="o">=</span> <span class="n">mcs</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">count</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">isi</span> <span class="o">=</span> <span class="n">mcs</span><span class="o">.</span><span class="n">isi</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">count</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">mcs</span><span class="o">.</span><span class="n">trigger</span><span class="p">(</span><span class="n">stimKey</span><span class="p">)</span>
+    <span class="n">mcs</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">isi</span><span class="p">)</span>
+</pre></div>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>minduration</strong> – minimum and</li>
+<li><strong>maxduration</strong> – maximum duration ISI duration</li>
+<li><strong>count</strong> – number of ISIs to create. Defaults is len of stimDict</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a list of uniform random ISIs</p>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="#experiment.device.nanoClock.sleep" title="experiment.device.nanoClock.sleep"><code class="xref py py-meth docutils literal"><span class="pre">sleep()</span></code></a></p>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="experiment.device.multiChannelSystems.reset_shuffle">
+<code class="descname">reset_shuffle</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/device.html#multiChannelSystems.reset_shuffle"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.device.multiChannelSystems.reset_shuffle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reset the shuffle generator</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="experiment.device.multiChannelSystems.shuffle">
+<code class="descname">shuffle</code><span class="sig-paren">(</span><em>counts: int = None</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/device.html#multiChannelSystems.shuffle"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.device.multiChannelSystems.shuffle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Permutate keys to stimDict</p>
+<p>Returns a list of keys to access the current stimDict in randomly
+permutated order. It memorizes the already returned keys to maintain
+permutation across repetitive stimulations.</p>
+<p>Example:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">stim</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">100</span><span class="p">,</span><span class="mi">1</span><span class="p">):</span>
+    <span class="n">stimKey</span> <span class="o">=</span> <span class="n">mcs</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">mcs</span><span class="o">.</span><span class="n">trigger</span><span class="p">(</span><span class="n">stimKey</span><span class="p">)</span>
+</pre></div>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>counts</strong> (<em>int</em>) – Number of permutated keys to generate. Defaults to len of stimDict</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">a permutated list of keys for adressing stimDict</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">list</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="#experiment.device.multiChannelSystems.reset_shuffle" title="experiment.device.multiChannelSystems.reset_shuffle"><code class="xref py py-meth docutils literal"><span class="pre">reset_shuffle()</span></code></a></p>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="experiment.device.multiChannelSystems.trigger">
+<code class="descname">trigger</code><span class="sig-paren">(</span><em>stimKey: str</em>, <em>settleDuration=2</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/device.html#multiChannelSystems.trigger"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.device.multiChannelSystems.trigger" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="experiment.device.nanoClock">
+<em class="property">class </em><code class="descclassname">experiment.device.</code><code class="descname">nanoClock</code><a class="reference internal" href="../../_modules/experiment/device.html#nanoClock"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.device.nanoClock" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class representing a nanoClock</p>
+<p>A minimal working example:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">Clock</span>   <span class="o">=</span> <span class="n">experiment</span><span class="o">.</span><span class="n">device</span><span class="o">.</span><span class="n">nanoClock</span><span class="p">()</span>
+<span class="n">Clock</span><span class="o">.</span><span class="n">sleep</span>
+</pre></div>
+</div>
+<div class="admonition tip">
+<p class="first admonition-title">Tip</p>
+<p class="last">use nanoClock device used to synchronize the presentation of cues
+e.g. (from <a class="reference internal" href="experiment.protocol.html#experiment.protocol.Cue" title="experiment.protocol.Cue"><code class="xref py py-class docutils literal"><span class="pre">Cue</span></code></a>)</p>
+</div>
+<dl class="method">
+<dt id="experiment.device.nanoClock.delay">
+<code class="descname">delay</code><span class="sig-paren">(</span><em>Duration</em>, <em>function=&lt;function nanoClock.&lt;lambda&gt;&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/device.html#nanoClock.delay"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.device.nanoClock.delay" title="Permalink to this definition">¶</a></dt>
+<dd><p>delays evaluation of function for Duration
+:param Duration: in seconds
+:type Duration: int
+:param .. admonition:: sideeffects: Blocks the script</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="experiment.device.nanoClock.getreferenceTime">
+<code class="descname">getreferenceTime</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/device.html#nanoClock.getreferenceTime"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.device.nanoClock.getreferenceTime" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns time of last rest in absolute time</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="experiment.device.nanoClock.getrelativeTime">
+<code class="descname">getrelativeTime</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/device.html#nanoClock.getrelativeTime"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.device.nanoClock.getrelativeTime" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns time since last reset in nanoseconds</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="experiment.device.nanoClock.isi_sleep">
+<code class="descname">isi_sleep</code><span class="sig-paren">(</span><em>minduration</em>, <em>maxduration</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/device.html#nanoClock.isi_sleep"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.device.nanoClock.isi_sleep" title="Permalink to this definition">¶</a></dt>
+<dd><p>sleeps for random uniform duration</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>minduration</strong> (<em>float</em>) – at least minduration in seconds</li>
+<li><strong>maxduration</strong> (<em>float</em>) – at most maxduration in seconds</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="experiment.device.nanoClock.nano2sec">
+<code class="descname">nano2sec</code><span class="sig-paren">(</span><em>timeValue</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/device.html#nanoClock.nano2sec"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.device.nanoClock.nano2sec" title="Permalink to this definition">¶</a></dt>
+<dd><p>transforms nanoseconds to seconds</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="experiment.device.nanoClock.reset">
+<code class="descname">reset</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/device.html#nanoClock.reset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.device.nanoClock.reset" title="Permalink to this definition">¶</a></dt>
+<dd><p>resets the internal timer</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="experiment.device.nanoClock.sec2nano">
+<code class="descname">sec2nano</code><span class="sig-paren">(</span><em>timeValue</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/device.html#nanoClock.sec2nano"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.device.nanoClock.sec2nano" title="Permalink to this definition">¶</a></dt>
+<dd><p>transforms seconds to nanoseconds</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="experiment.device.nanoClock.sleep">
+<code class="descname">sleep</code><span class="sig-paren">(</span><em>Duration</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/device.html#nanoClock.sleep"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.device.nanoClock.sleep" title="Permalink to this definition">¶</a></dt>
+<dd><p>sleeps for Duration in seconds</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="experiment.device.nanoClock.soft_delay">
+<code class="descname">soft_delay</code><span class="sig-paren">(</span><em>Duration</em>, <em>function=&lt;function nanoClock.&lt;lambda&gt;&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/device.html#nanoClock.soft_delay"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.device.nanoClock.soft_delay" title="Permalink to this definition">¶</a></dt>
+<dd><p>delays evaluation of function  without blocking</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>Duration</strong> (<em>int</em>) – in seconds</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="experiment.device.nanoClock.timing">
+<code class="descname">timing</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/device.html#nanoClock.timing"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.device.nanoClock.timing" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns time since last reset in seconds</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="experiment.device.neuroConnDC">
+<em class="property">class </em><code class="descclassname">experiment.device.</code><code class="descname">neuroConnDC</code><span class="sig-paren">(</span><em>stimDuration=None</em>, <em>interface=&lt;experiment.device.SerialTrigger object&gt;</em>, <em>triggerValue=254</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/device.html#neuroConnDC"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.device.neuroConnDC" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class resembling the neuroConn DC Stimulator</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Represents the interface to DC-Plus stimulator from
+<a class="reference external" href="http://www.neurocaregroup.com/dc_stimulator_plus.html">neuroConn</a>.</p>
+</div>
+<p>A minimal working example:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">ncdc</span> <span class="o">=</span> <span class="n">neuroConnDC</span><span class="p">(</span><span class="n">stimDuration</span> <span class="o">=</span> <span class="mi">15</span><span class="p">)</span>
+<span class="n">ncdc</span><span class="o">.</span><span class="n">trigger</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Triggers the neuroconnDC and blocks the script for 15 seconds</p>
+<div class="admonition tip">
+<p class="first admonition-title">Tip</p>
+<p class="last">Set the neuroConnDC to listen to its TrigIn. If repetitive blocks of
+stimulation are planned, add ~7s pause after stimulation to allow the
+neuroConnDC to return to listening state.</p>
+</div>
+<div class="admonition-bvr-marker admonition">
+<p class="first admonition-title">BVR Marker</p>
+<ul class="last simple">
+<li>neuroConnDC is marked at ‘S254’ and/or ‘R  1’</li>
+</ul>
+</div>
+<dl class="method">
+<dt id="experiment.device.neuroConnDC.dump">
+<code class="descname">dump</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/device.html#neuroConnDC.dump"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.device.neuroConnDC.dump" title="Permalink to this definition">¶</a></dt>
+<dd><p>Saves the curent parameters</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>filename</strong> – saves the current parameters to filename</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="experiment.device.neuroConnDC.register_duration_from_file">
+<code class="descname">register_duration_from_file</code><span class="sig-paren">(</span><em>fname</em>, <em>parameter='Beta_Location'</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/device.html#neuroConnDC.register_duration_from_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.device.neuroConnDC.register_duration_from_file" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="experiment.device.neuroConnDC.return_duration">
+<em class="property">static </em><code class="descname">return_duration</code><span class="sig-paren">(</span><em>saveDir</em>, <em>stimTarget='EDC_L'</em>, <em>cycles=100</em>, <em>parameter='Beta_Location'</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/device.html#neuroConnDC.return_duration"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.device.neuroConnDC.return_duration" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="experiment.device.neuroConnDC.trigger">
+<code class="descname">trigger</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/device.html#neuroConnDC.trigger"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.device.neuroConnDC.trigger" title="Permalink to this definition">¶</a></dt>
+<dd><p>Triggers the NeuroConnDC</p>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><code class="xref py py-class docutils literal"><span class="pre">Serialtrigger</span></code></p>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">experiment.device</a><ul>
+<li><a class="reference internal" href="#overview">Overview</a></li>
+<li><a class="reference internal" href="#documentation">Documentation</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="experiment.protocol.html"
+                        title="previous chapter">experiment.protocol</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="experiment.stimulus.html"
+                        title="next chapter">experiment.stimulus</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/_autosummary/api/experiment.device.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="experiment.stimulus.html" title="experiment.stimulus"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="experiment.protocol.html" title="experiment.protocol"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Experiment Framework 0.2.1. documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../_api.html" >Main API</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, Robert Guggenberger &amp; Max Scherer.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
+    </div>
+  </body>
+</html>

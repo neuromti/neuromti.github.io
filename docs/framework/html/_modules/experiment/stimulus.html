@@ -1,0 +1,640 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>experiment.stimulus &#8212; Experiment Framework 0.2.1. documentation</title>
+    <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.2.1.',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+  </head>
+  <body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Experiment Framework 0.2.1. documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for experiment.stimulus</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;This module contains classes resembling acoustic and visual stimuli</span>
+
+<span class="sd">It contains acoustic stimuli, represented by \</span>
+<span class="sd">:class:`~.experiment.stimulus.Sound` and visual stimuli \</span>
+<span class="sd">represented by the general :class:`~.experiment.stimulus.Frame`</span>
+
+<span class="sd">Visual stimuli</span>
+<span class="sd">--------------</span>
+
+<span class="sd">Are grouped into whether they are a</span>
+
+<span class="sd">- static :class:`~.experiment.stimulus.Frame`, e.g. \</span>
+<span class="sd">:class:`~.experiment.stimulus.Mural`, :class:`~.experiment.stimulus.Cross` \</span>
+<span class="sd">or :class:`~.experiment.stimulus.Rectangle`</span>
+<span class="sd">- :class:`~.experiment.stimulus.Dynamic` e.g. \</span>
+<span class="sd">:class:`~.experiment.stimulus.Ball` or :class:`~.experiment.stimulus.Bar`</span>
+
+
+<span class="sd">Documentation</span>
+<span class="sd">-------------</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="k">import</span> <span class="n">isnan</span>
+<span class="kn">import</span> <span class="nn">cues.visual</span> <span class="k">as</span> <span class="nn">_visual</span>
+<span class="kn">import</span> <span class="nn">cues.acoustic</span> <span class="k">as</span> <span class="nn">_acoustic</span>
+<span class="kn">from</span> <span class="nn">math</span> <span class="k">import</span> <span class="n">atan</span>
+<span class="kn">import</span> <span class="nn">wave</span>
+<span class="kn">from</span> <span class="nn">experiment.device</span> <span class="k">import</span> <span class="n">NullDevice</span> <span class="k">as</span> <span class="n">_NullDevice</span>
+<span class="c1"># %% --------------------------------------------------------------------------</span>
+
+
+<div class="viewcode-block" id="Sound"><a class="viewcode-back" href="../../_autosummary/api/experiment.stimulus.html#experiment.stimulus.Sound">[docs]</a><span class="k">class</span> <span class="nc">Sound</span><span class="p">(</span><span class="n">_acoustic</span><span class="o">.</span><span class="n">AcousticConfig</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Representing an Sound to be played with Speaker</span>
+<span class="sd">        Example:</span>
+
+
+<span class="sd">        create a &quot;silent&quot; Sound object</span>
+
+<span class="sd">        &gt;&gt;&gt; NullSound       = experiment.stimulus.Sound()</span>
+
+<span class="sd">        Create a Sound object based on wavfile.wav</span>
+
+<span class="sd">        &gt;&gt;&gt; WavFilePath     = &quot;wavfile.wav&quot;</span>
+<span class="sd">        &gt;&gt;&gt; Sound           = experiment.stimulus.Sound(Speaker, WavFilePath)</span>
+
+<span class="sd">        see also</span>
+
+<span class="sd">        Speaker</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">LoadedBefore</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Speaker</span><span class="o">=</span><span class="n">_NullDevice</span><span class="p">(),</span> <span class="n">filePath</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">Duration</span><span class="o">=</span><span class="s1">&#39;Automatic&#39;</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Speaker</span> <span class="o">=</span> <span class="n">Speaker</span>
+        <span class="k">if</span> <span class="n">Speaker</span><span class="o">.</span><span class="n">libActive</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="n">Speaker</span><span class="o">.</span><span class="n">open</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">soundID</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Duration</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">filePath</span> <span class="o">=</span> <span class="n">filePath</span>
+        <span class="k">if</span> <span class="n">Duration</span> <span class="o">==</span> <span class="s1">&#39;Automatic&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Duration</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">readDuration</span><span class="p">(</span><span class="n">filePath</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Duration</span> <span class="o">=</span> <span class="n">Duration</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_preload</span><span class="p">()</span>
+
+<div class="viewcode-block" id="Sound.readDuration"><a class="viewcode-back" href="../../_autosummary/api/experiment.stimulus.html#experiment.stimulus.Sound.readDuration">[docs]</a>    <span class="k">def</span> <span class="nf">readDuration</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filePath</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">filePath</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">w</span> <span class="o">=</span> <span class="n">wave</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filePath</span><span class="p">)</span>
+            <span class="n">frames</span> <span class="o">=</span> <span class="n">w</span><span class="o">.</span><span class="n">getnframes</span><span class="p">()</span>
+            <span class="n">rate</span> <span class="o">=</span> <span class="n">w</span><span class="o">.</span><span class="n">getframerate</span><span class="p">()</span>
+            <span class="n">Duration</span> <span class="o">=</span> <span class="n">frames</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">rate</span><span class="p">)</span>
+            <span class="n">w</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="k">del</span><span class="p">(</span><span class="n">w</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">Duration</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">return</span> <span class="n">Duration</span></div>
+
+    <span class="k">def</span> <span class="nf">_preload</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">Speaker</span><span class="o">.</span><span class="n">libActive</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">LoadedBefore</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">soundID</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Speaker</span><span class="o">.</span><span class="n">_lib</span><span class="o">.</span><span class="n">preLoadFile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filePath</span><span class="p">,</span>
+                                                             <span class="bp">self</span><span class="o">.</span><span class="n">Duration</span><span class="p">)</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">soundID</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;File Access Error, restarting Speaker&quot;</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">Speaker</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">Speaker</span><span class="o">.</span><span class="n">open</span><span class="p">()</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">soundID</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Speaker</span><span class="o">.</span><span class="n">_lib</span><span class="o">.</span><span class="n">preLoadFile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filePath</span><span class="p">,</span>
+                                                                 <span class="bp">self</span><span class="o">.</span><span class="n">Duration</span><span class="p">)</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">LoadedBefore</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">EnvironmentError</span><span class="p">(</span><span class="s1">&#39;Do not rewriting sound ID&#39;</span> <span class="o">+</span>
+                                       <span class="s1">&#39;Solution: create new instance&#39;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Sound.close"><a class="viewcode-back" href="../../_autosummary/api/experiment.stimulus.html#experiment.stimulus.Sound.close">[docs]</a>    <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span></div>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">f</span><span class="s1">&#39;Sound from </span><span class="si">{self.filePath}</span><span class="s1">&#39;</span>
+
+    <span class="k">def</span> <span class="nf">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Shutting Down: &quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__repr__</span><span class="p">())</span></div>
+
+<span class="c1"># %% --------------------------------------------------------------------------</span>
+
+
+<div class="viewcode-block" id="Frame"><a class="viewcode-back" href="../../_autosummary/api/experiment.stimulus.html#experiment.stimulus.Frame">[docs]</a><span class="k">class</span> <span class="nc">Frame</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Base class representing any visual stimulation</span>
+
+<span class="sd">    A minimal working example::</span>
+
+<span class="sd">        NullFrame       = experiment.stimulus.Frame(Screen)</span>
+<span class="sd">        # An existing Screen is a necessary requirement for any Frame object</span>
+<span class="sd">        # will create a black frame of full Window Size for the given Screen</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">_ZoomFactor</span> <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Screen</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_init_Window</span><span class="p">(</span><span class="n">Screen</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_init_Window</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Screen</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_Screen</span> <span class="o">=</span> <span class="n">Screen</span>
+        <span class="k">if</span> <span class="n">Screen</span><span class="o">.</span><span class="n">libActive</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;init window&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_Screen</span><span class="o">.</span><span class="n">open</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_check</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+<div class="viewcode-block" id="Frame.setZoom"><a class="viewcode-back" href="../../_autosummary/api/experiment.stimulus.html#experiment.stimulus.Frame.setZoom">[docs]</a>    <span class="k">def</span> <span class="nf">setZoom</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span></div>
+    
+    <span class="k">def</span> <span class="nf">_draw</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+<div class="viewcode-block" id="Frame.showNow"><a class="viewcode-back" href="../../_autosummary/api/experiment.stimulus.html#experiment.stimulus.Frame.showNow">[docs]</a>    <span class="k">def</span> <span class="nf">showNow</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_draw</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_Screen</span><span class="o">.</span><span class="n">_Win</span><span class="o">.</span><span class="n">showNow</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="Frame.showDelayed"><a class="viewcode-back" href="../../_autosummary/api/experiment.stimulus.html#experiment.stimulus.Frame.showDelayed">[docs]</a>    <span class="k">def</span> <span class="nf">showDelayed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nanoTimeCfg</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_draw</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_Screen</span><span class="o">.</span><span class="n">_Win</span><span class="o">.</span><span class="n">showDelayed</span><span class="p">(</span><span class="n">nanoTimeCfg</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__repr__</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39; object&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;stimulus.&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Shutting Down: &quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__repr__</span><span class="p">())</span></div>
+<span class="c1"># %% --------------------------------------------------------------------------</span>
+
+
+<div class="viewcode-block" id="Rectangle"><a class="viewcode-back" href="../../_autosummary/api/experiment.stimulus.html#experiment.stimulus.Rectangle">[docs]</a><span class="k">class</span> <span class="nc">Rectangle</span><span class="p">(</span><span class="n">Frame</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Example ::</span>
+
+<span class="sd">       rectangle = experiment.stimulus.Rectangle(Screen, xPos = 0, yPos = 0,</span>
+<span class="sd">                                              Height = 100, Width = 100,</span>
+<span class="sd">                                              Color = &quot;gray&quot;)</span>
+<span class="sd">       rectangle.showNow()</span>
+
+<span class="sd">    args</span>
+<span class="sd">    ----</span>
+<span class="sd">    Screen: :class:`~.experiment.device.Screen`</span>
+<span class="sd">        A display Screen is a necessary requirement</span>
+<span class="sd">    xPos: int</span>
+<span class="sd">        x-coordinates of center of rectangle in pixes</span>
+<span class="sd">    yPos: int</span>
+<span class="sd">        y-coordinates of center of rectangle in pixes</span>
+<span class="sd">    Height: int</span>
+<span class="sd">        heigth of rectangle in pixels</span>
+<span class="sd">    Width: int</span>
+<span class="sd">        width of rectangle in pixels</span>
+<span class="sd">    Color: tuple or str</span>
+<span class="sd">        either a string from :attr:`~.experiment.device.Screen.colors` or \</span>
+<span class="sd">        a tuple with len three defining the color in RBG, scaled either between</span>
+<span class="sd">         (0, .5, 1) or (0, 127, 255)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Screen</span><span class="p">,</span> <span class="n">xPos</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">yPos</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">Height</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">Width</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+                 <span class="n">Color</span><span class="o">=</span><span class="s2">&quot;gray&quot;</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_init_Window</span><span class="p">(</span><span class="n">Screen</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_init_Rect</span><span class="p">(</span><span class="n">xPos</span><span class="p">,</span> <span class="n">yPos</span><span class="p">,</span> <span class="n">Height</span><span class="p">,</span> <span class="n">Width</span><span class="p">,</span> <span class="n">Color</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_init_Rect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xPos</span><span class="p">,</span> <span class="n">yPos</span><span class="p">,</span> <span class="n">Height</span><span class="p">,</span> <span class="n">Width</span><span class="p">,</span> <span class="n">Color</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_Rect</span> <span class="o">=</span> <span class="n">_visual</span><span class="o">.</span><span class="n">VisualConfig</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_Rect</span><span class="o">.</span><span class="n">height</span> <span class="o">=</span> <span class="n">Height</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_Rect</span><span class="o">.</span><span class="n">width</span> <span class="o">=</span> <span class="n">Width</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_Rect</span><span class="o">.</span><span class="n">xPos</span> <span class="o">=</span> <span class="n">xPos</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_Rect</span><span class="o">.</span><span class="n">yPos</span> <span class="o">=</span> <span class="n">yPos</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setColor</span><span class="p">(</span><span class="n">Color</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Rectangle.setColor"><a class="viewcode-back" href="../../_autosummary/api/experiment.stimulus.html#experiment.stimulus.Rectangle.setColor">[docs]</a>    <span class="k">def</span> <span class="nf">setColor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Color</span><span class="o">=</span><span class="s2">&quot;gray&quot;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">Color</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_Rect</span><span class="o">.</span><span class="n">ColorRGB</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Screen</span><span class="o">.</span><span class="n">colors</span><span class="p">[</span><span class="n">Color</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">Color</span><span class="p">)</span> <span class="o">==</span> <span class="nb">list</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">Color</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">max</span><span class="p">(</span><span class="n">Color</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_Rect</span><span class="o">.</span><span class="n">ColorRGB</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span> <span class="o">/</span> <span class="mi">255</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">Color</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_Rect</span><span class="o">.</span><span class="n">ColorRGB</span> <span class="o">=</span> <span class="n">Color</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Color not correctly specified</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">+</span>
+                            <span class="s1">&#39;Solution: Choose a correct color&#39;</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_draw</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_Screen</span><span class="o">.</span><span class="n">_Win</span><span class="o">.</span><span class="n">drawRectangle</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_Rect</span><span class="p">)</span></div>
+<span class="c1"># %% --------------------------------------------------------------------------</span>
+
+
+<div class="viewcode-block" id="Cross"><a class="viewcode-back" href="../../_autosummary/api/experiment.stimulus.html#experiment.stimulus.Cross">[docs]</a><span class="k">class</span> <span class="nc">Cross</span><span class="p">(</span><span class="n">Frame</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Represents a white cross in the center of a screen</span>
+
+<span class="sd">    Example ::</span>
+
+<span class="sd">       cross = experiment.stimulus.Cross(Screen, ZoomFactor = 1)</span>
+<span class="sd">       cross.showNow()</span>
+
+<span class="sd">    args</span>
+<span class="sd">    ----</span>
+<span class="sd">    Screen: :class:`~.experiment.device.Screen`</span>
+<span class="sd">        A display Screen is a necessary requirement</span>
+<span class="sd">    Zoomfactor: float</span>
+<span class="sd">        The relative size of the cross, higher values indicate a larger cross</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Screen</span><span class="p">,</span> <span class="n">ZoomFactor</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_init_Window</span><span class="p">(</span><span class="n">Screen</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setZoom</span><span class="p">(</span><span class="n">ZoomFactor</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_init_Cross</span><span class="p">()</span>
+
+<div class="viewcode-block" id="Cross.setZoom"><a class="viewcode-back" href="../../_autosummary/api/experiment.stimulus.html#experiment.stimulus.Cross.setZoom">[docs]</a>    <span class="k">def</span> <span class="nf">setZoom</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ZoomFactor</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Sets the Zoomfactor</span>
+
+<span class="sd">        .. admonition:: Sanity Checks</span>
+
+<span class="sd">           will use the default of 1 if a 0 is used as Zoomfactor</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ZoomFactor</span> <span class="o">=</span> <span class="p">(</span><span class="n">ZoomFactor</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="n">ZoomFactor</span> <span class="o">==</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_init_Cross</span><span class="p">()</span></div>
+
+    <span class="k">def</span> <span class="nf">_init_Cross</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_Cross</span> <span class="o">=</span> <span class="n">_visual</span><span class="o">.</span><span class="n">VisualConfig</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_Cross</span><span class="o">.</span><span class="n">ColorRGB</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Screen</span><span class="o">.</span><span class="n">colors</span><span class="p">[</span><span class="s2">&quot;white&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_Cross</span><span class="o">.</span><span class="n">height</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_Screen</span><span class="o">.</span><span class="n">diag</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ZoomFactor</span> <span class="o">/</span> <span class="mi">10</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_Cross</span><span class="o">.</span><span class="n">width</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Cross</span><span class="o">.</span><span class="n">height</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_Cross</span><span class="o">.</span><span class="n">thickness</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_Cross</span><span class="o">.</span><span class="n">height</span> <span class="o">*</span> <span class="mf">0.2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_Cross</span><span class="o">.</span><span class="n">xPos</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_Cross</span><span class="o">.</span><span class="n">yPos</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">def</span> <span class="nf">_draw</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_Screen</span><span class="o">.</span><span class="n">_Win</span><span class="o">.</span><span class="n">drawFixationCross</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_Cross</span><span class="p">)</span></div>
+
+<span class="c1"># %% --------------------------------------------------------------------------</span>
+
+
+<div class="viewcode-block" id="Mural"><a class="viewcode-back" href="../../_autosummary/api/experiment.stimulus.html#experiment.stimulus.Mural">[docs]</a><span class="k">class</span> <span class="nc">Mural</span><span class="p">(</span><span class="n">Frame</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Represents white text in the center of a screen</span>
+
+<span class="sd">    Example ::</span>
+
+<span class="sd">        mural = stimulus.Mural(Screen, Mural=&#39;Example&#39;, ZoomFactor=1)</span>
+<span class="sd">        mural.showNow()</span>
+
+<span class="sd">    args</span>
+<span class="sd">    ----</span>
+<span class="sd">    Screen: :class:`~.experiment.device.Screen`</span>
+<span class="sd">        A display Screen is a necessary requirement</span>
+<span class="sd">    Mural: str</span>
+<span class="sd">        The string to be shown</span>
+<span class="sd">    Zoomfactor: float</span>
+<span class="sd">        The relative size of the cross, higher values indicate a larger cross</span>
+
+
+<span class="sd">    .. tip::</span>
+<span class="sd">        The font used will be the default font of the \</span>
+<span class="sd">        :class:`~.experiment.device.Screen`</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Screen</span><span class="p">,</span> <span class="n">Mural</span><span class="o">=</span><span class="s2">&quot;TxT&quot;</span><span class="p">,</span> <span class="n">ZoomFactor</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_init_Window</span><span class="p">(</span><span class="n">Screen</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_init_Mural</span><span class="p">(</span><span class="n">Mural</span><span class="p">,</span> <span class="n">ZoomFactor</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_init_Mural</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Mural</span><span class="o">=</span><span class="s2">&quot;TxT&quot;</span><span class="p">,</span> <span class="n">ZoomFactor</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_Mural</span> <span class="o">=</span> <span class="n">_visual</span><span class="o">.</span><span class="n">VisualConfig</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_Mural</span><span class="o">.</span><span class="n">ColorRGB</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Screen</span><span class="o">.</span><span class="n">colors</span><span class="p">[</span><span class="s2">&quot;white&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_Mural</span><span class="o">.</span><span class="n">fontPath</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Screen</span><span class="o">.</span><span class="n">fontPath</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_Mural</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="n">Mural</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setZoom</span><span class="p">(</span><span class="n">ZoomFactor</span><span class="p">)</span>   <span class="c1"># sets also text</span>
+
+<div class="viewcode-block" id="Mural.setZoom"><a class="viewcode-back" href="../../_autosummary/api/experiment.stimulus.html#experiment.stimulus.Mural.setZoom">[docs]</a>    <span class="k">def</span> <span class="nf">setZoom</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ZoomFactor</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Sets the Zoomfactor</span>
+
+<span class="sd">        .. admonition:: Sanity Checks</span>
+
+<span class="sd">           will use the default of 1 if a 0 is used as Zoomfactor</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ZoomFactor</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="k">if</span> <span class="n">ZoomFactor</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">ZoomFactor</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_Mural</span><span class="o">.</span><span class="n">text</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Mural.setText"><a class="viewcode-back" href="../../_autosummary/api/experiment.stimulus.html#experiment.stimulus.Mural.setText">[docs]</a>    <span class="k">def</span> <span class="nf">setText</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Mural</span><span class="o">=</span><span class="s1">&#39;TxT&#39;</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Changes the text to be shown</span>
+
+<span class="sd">        args</span>
+<span class="sd">        ----</span>
+<span class="sd">        Mural: str</span>
+<span class="sd">            The string to be shown</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_Mural</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="n">Mural</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_Mural</span><span class="o">.</span><span class="n">size</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mi">64</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ZoomFactor</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_Mural</span><span class="o">.</span><span class="n">xPos</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(((</span><span class="o">-</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_Mural</span><span class="o">.</span><span class="n">text</span><span class="p">)</span> <span class="o">*</span> <span class="mf">0.25</span><span class="p">)</span> <span class="o">*</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">_Mural</span><span class="o">.</span><span class="n">size</span><span class="p">)))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_Mural</span><span class="o">.</span><span class="n">yPos</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mf">0.125</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Mural</span><span class="o">.</span><span class="n">size</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_draw</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_Screen</span><span class="o">.</span><span class="n">_Win</span><span class="o">.</span><span class="n">drawText</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_Mural</span><span class="p">)</span></div>
+<span class="c1"># %% --------------------------------------------------------------------------</span>
+
+
+<div class="viewcode-block" id="Dynamic"><a class="viewcode-back" href="../../_autosummary/api/experiment.stimulus.html#experiment.stimulus.Dynamic">[docs]</a><span class="k">class</span> <span class="nc">Dynamic</span><span class="p">(</span><span class="n">Frame</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Base class resembling dynamic visual stimuli</span>
+
+<span class="sd">    args</span>
+<span class="sd">    ----</span>
+<span class="sd">    Screen: :class:`~.experiment.device.Screen`</span>
+<span class="sd">        A display Screen is a necessary requirement</span>
+<span class="sd">    Target: float</span>
+<span class="sd">        value between 0 and 100 defining the target level</span>
+<span class="sd">    State: float</span>
+<span class="sd">        value between 0 and 100 defining the current level</span>
+<span class="sd">    Tolerance: float</span>
+<span class="sd">        value between 0 and 100 defining the range of values \</span>
+<span class="sd">        accepted around target as sufficient</span>
+
+
+<span class="sd">    .. caution::</span>
+<span class="sd">       as this is the base class, most methods are abstract and need to be</span>
+<span class="sd">       implemented, e.g. as in :class:`~.experiment.stimulus.Bar` or</span>
+<span class="sd">       :class:`~.experiment.stimulus.Ball`</span>
+
+<span class="sd">    .. tip::</span>
+<span class="sd">        - you can use print(Dynamic) for debugging purposes</span>
+<span class="sd">        - will use the default colors of its \</span>
+<span class="sd">        :class:`~.experiment.device.Screen` change these accordingly</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Screen</span><span class="p">,</span> <span class="n">Target</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">State</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">Tolerance</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Tolerance</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1">#: the tolerance defaults</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">TargetLevel</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1">#: the target defaults</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">StateLevel</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1">#: the current state</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_init_Window</span><span class="p">(</span><span class="n">Screen</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setTolerance</span><span class="p">(</span><span class="n">Tolerance</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_init_BackGrnd</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_init_State</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_init_Target</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">updateTarget</span><span class="p">(</span><span class="n">Target</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">updateState</span><span class="p">(</span><span class="n">State</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_init_BackGrnd</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span> <span class="nf">_init_Target</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span> <span class="nf">_init_State</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+<div class="viewcode-block" id="Dynamic.updateState"><a class="viewcode-back" href="../../_autosummary/api/experiment.stimulus.html#experiment.stimulus.Dynamic.updateState">[docs]</a>    <span class="k">def</span> <span class="nf">updateState</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Level</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="s1">&#39;Updates the current state&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">StateLevel</span> <span class="o">=</span> <span class="n">Level</span></div>
+
+<div class="viewcode-block" id="Dynamic.updateTarget"><a class="viewcode-back" href="../../_autosummary/api/experiment.stimulus.html#experiment.stimulus.Dynamic.updateTarget">[docs]</a>    <span class="k">def</span> <span class="nf">updateTarget</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Level</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
+        <span class="s1">&#39;Sets the target level&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">TargetLevel</span> <span class="o">=</span> <span class="n">Level</span></div>
+
+<div class="viewcode-block" id="Dynamic.setTolerance"><a class="viewcode-back" href="../../_autosummary/api/experiment.stimulus.html#experiment.stimulus.Dynamic.setTolerance">[docs]</a>    <span class="k">def</span> <span class="nf">setTolerance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Tolerance</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+        <span class="s1">&#39;Sets the tolerance&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Tolerance</span> <span class="o">=</span> <span class="n">Tolerance</span></div>
+
+    <span class="k">def</span> <span class="nf">_updateColor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Above</span><span class="p">,</span> <span class="n">Below</span><span class="p">,</span> <span class="n">On</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">StateLevel</span> <span class="o">&gt;</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">TargetLevel</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">Tolerance</span> <span class="o">/</span> <span class="mi">2</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_State</span><span class="o">.</span><span class="n">ColorRGB</span> <span class="o">=</span> <span class="n">Above</span>
+            <span class="c1"># print(&quot;Above&quot;)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">StateLevel</span> <span class="o">&lt;</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">TargetLevel</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">Tolerance</span> <span class="o">/</span> <span class="mi">2</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_State</span><span class="o">.</span><span class="n">ColorRGB</span> <span class="o">=</span> <span class="n">Below</span>
+            <span class="c1"># print(&quot;Below&quot;)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_State</span><span class="o">.</span><span class="n">ColorRGB</span> <span class="o">=</span> <span class="n">On</span>
+            <span class="c1"># print(&quot;Equal&quot;)</span>
+
+    <span class="k">def</span> <span class="nf">_check</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_updateColor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_Screen</span><span class="o">.</span><span class="n">_ABOVE</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Screen</span><span class="o">.</span><span class="n">_BELOW</span><span class="p">,</span>
+                          <span class="bp">self</span><span class="o">.</span><span class="n">_Screen</span><span class="o">.</span><span class="n">_ON</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">coretext</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;State: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">StateLevel</span><span class="p">)</span> <span class="o">+</span>
+                    <span class="s2">&quot; versus Target &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">TargetLevel</span><span class="p">))</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">StateLevel</span> <span class="o">&gt;</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">TargetLevel</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">Tolerance</span> <span class="o">/</span> <span class="mi">2</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">coretext</span> <span class="o">+</span> <span class="s2">&quot; </span><span class="se">\x1b</span><span class="s2">[5;30;41mAbove</span><span class="se">\x1b</span><span class="s2">[0m&quot;</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">StateLevel</span> <span class="o">&lt;</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">TargetLevel</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">Tolerance</span> <span class="o">/</span> <span class="mi">2</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">coretext</span> <span class="o">+</span> <span class="s2">&quot; </span><span class="se">\x1b</span><span class="s2">[5;30;41mBelow</span><span class="se">\x1b</span><span class="s2">[0m&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">coretext</span> <span class="o">+</span> <span class="s2">&quot; </span><span class="se">\x1b</span><span class="s2">[5;30;42mEqual</span><span class="se">\x1b</span><span class="s2">[0m&quot;</span></div>
+<span class="c1"># %% --------------------------------------------------------------------------</span>
+
+
+<div class="viewcode-block" id="Bar"><a class="viewcode-back" href="../../_autosummary/api/experiment.stimulus.html#experiment.stimulus.Bar">[docs]</a><span class="k">class</span> <span class="nc">Bar</span><span class="p">(</span><span class="n">Dynamic</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Dynamic Feedback with a bar changing height</span>
+
+<span class="sd">    Example::</span>
+
+<span class="sd">        screen  = cues.feedback.Screen()</span>
+<span class="sd">        bar     = cues.feedback.Bar(Screen)</span>
+<span class="sd">        bar.showNow()</span>
+
+<span class="sd">        for i in range(1,101,1):</span>
+<span class="sd">            bar.updateState(i)</span>
+<span class="sd">            bar.showNow()</span>
+
+<span class="sd">        bar.clear()</span>
+
+
+<span class="sd">    .. seealso::</span>
+<span class="sd">       :class:`~.experiment.stimulus.Dynamic`</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">_draw</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_Screen</span><span class="o">.</span><span class="n">_Win</span><span class="o">.</span><span class="n">drawRectangle</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_BackGrnd</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_Screen</span><span class="o">.</span><span class="n">_Win</span><span class="o">.</span><span class="n">drawRectangle</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_State</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_Screen</span><span class="o">.</span><span class="n">_Win</span><span class="o">.</span><span class="n">drawRectangle</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_Target</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_init_Target</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_Target</span> <span class="o">=</span> <span class="n">_visual</span><span class="o">.</span><span class="n">VisualConfig</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_Target</span><span class="o">.</span><span class="n">ColorRGB</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Screen</span><span class="o">.</span><span class="n">colors</span><span class="p">[</span><span class="s2">&quot;white&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_Target</span><span class="o">.</span><span class="n">height</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_State</span><span class="o">.</span><span class="n">MaxHeight</span> <span class="o">*</span>
+                                  <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Tolerance</span> <span class="o">/</span> <span class="mi">100</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_Target</span><span class="o">.</span><span class="n">width</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_Screen</span><span class="o">.</span><span class="n">width</span> <span class="o">/</span> <span class="mi">4</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_Target</span><span class="o">.</span><span class="n">xPos</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">def</span> <span class="nf">_init_State</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_State</span> <span class="o">=</span> <span class="n">_visual</span><span class="o">.</span><span class="n">VisualConfig</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_State</span><span class="o">.</span><span class="n">ColorRGB</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Screen</span><span class="o">.</span><span class="n">_BELOW</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_State</span><span class="o">.</span><span class="n">MaxHeight</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_Screen</span><span class="o">.</span><span class="n">height</span> <span class="o">*</span> <span class="o">.</span><span class="mi">9</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_State</span><span class="o">.</span><span class="n">height</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_State</span><span class="o">.</span><span class="n">width</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_Screen</span><span class="o">.</span><span class="n">width</span> <span class="o">/</span> <span class="mi">5</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_State</span><span class="o">.</span><span class="n">xPos</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">def</span> <span class="nf">_init_BackGrnd</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_BackGrnd</span> <span class="o">=</span> <span class="n">_visual</span><span class="o">.</span><span class="n">VisualConfig</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_BackGrnd</span><span class="o">.</span><span class="n">ColorRGB</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Screen</span><span class="o">.</span><span class="n">colors</span><span class="p">[</span><span class="s2">&quot;gray&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_BackGrnd</span><span class="o">.</span><span class="n">height</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_Screen</span><span class="o">.</span><span class="n">height</span> <span class="o">*</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_BackGrnd</span><span class="o">.</span><span class="n">width</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_Screen</span><span class="o">.</span><span class="n">width</span> <span class="o">/</span> <span class="mf">4.5</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_BackGrnd</span><span class="o">.</span><span class="n">xPos</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_BackGrnd</span><span class="o">.</span><span class="n">yPos</span> <span class="o">=</span> <span class="mi">0</span>
+
+<div class="viewcode-block" id="Bar.updateState"><a class="viewcode-back" href="../../_autosummary/api/experiment.stimulus.html#experiment.stimulus.Bar.updateState">[docs]</a>    <span class="k">def</span> <span class="nf">updateState</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Level</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">StateLevel</span> <span class="o">=</span> <span class="n">Level</span>
+        <span class="n">height</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_State</span><span class="o">.</span><span class="n">MaxHeight</span> <span class="o">*</span> <span class="n">Level</span><span class="p">)</span> <span class="o">/</span> <span class="mi">100</span>
+        <span class="k">if</span> <span class="n">isnan</span><span class="p">(</span><span class="n">height</span><span class="p">):</span>
+            <span class="n">height</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_State</span><span class="o">.</span><span class="n">height</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">height</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_State</span><span class="o">.</span><span class="n">yPos</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">_Screen</span><span class="o">.</span><span class="n">height</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">-</span>
+                               <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_State</span><span class="o">.</span><span class="n">height</span> <span class="o">/</span> <span class="mi">2</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="Bar.updateTarget"><a class="viewcode-back" href="../../_autosummary/api/experiment.stimulus.html#experiment.stimulus.Bar.updateTarget">[docs]</a>    <span class="k">def</span> <span class="nf">updateTarget</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Level</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">TargetLevel</span> <span class="o">=</span> <span class="n">Level</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_Target</span><span class="o">.</span><span class="n">yPos</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">_Screen</span><span class="o">.</span><span class="n">height</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">-</span>
+                                <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_State</span><span class="o">.</span><span class="n">MaxHeight</span> <span class="o">*</span> <span class="n">Level</span><span class="p">)</span> <span class="o">/</span> <span class="mi">100</span><span class="p">)</span></div></div>
+
+<span class="c1"># %% --------------------------------------------------------------------------</span>
+
+
+<div class="viewcode-block" id="Ball"><a class="viewcode-back" href="../../_autosummary/api/experiment.stimulus.html#experiment.stimulus.Ball">[docs]</a><span class="k">class</span> <span class="nc">Ball</span><span class="p">(</span><span class="n">Dynamic</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Dynamic Feedback with a ball changing height</span>
+
+<span class="sd">    Example::</span>
+
+<span class="sd">        screen = cues.feedback.Screen()</span>
+<span class="sd">        ball = cues.feedback.Bar(Screen)</span>
+<span class="sd">        ball.showNow()</span>
+
+<span class="sd">        for i in range(1,101,1):</span>
+<span class="sd">            ball.updateState(i)</span>
+<span class="sd">            ball.showNow()</span>
+
+<span class="sd">        ball.clear()</span>
+
+
+<span class="sd">    .. seealso::</span>
+<span class="sd">       :class:`~.experiment.stimulus.Dynamic`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Screen</span><span class="p">,</span> <span class="n">Target</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">State</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">Tolerance</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">ZoomFactor</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
+        <span class="n">Dynamic</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Screen</span><span class="p">,</span> <span class="n">Target</span><span class="p">,</span> <span class="n">State</span><span class="p">,</span> <span class="n">Tolerance</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setZoom</span><span class="p">(</span><span class="n">ZoomFactor</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Ball.setZoom"><a class="viewcode-back" href="../../_autosummary/api/experiment.stimulus.html#experiment.stimulus.Ball.setZoom">[docs]</a>    <span class="k">def</span> <span class="nf">setZoom</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ZoomFactor</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ZoomFactor</span> <span class="o">=</span> <span class="p">(</span><span class="n">ZoomFactor</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="n">ZoomFactor</span> <span class="o">==</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_init_BackGrnd</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_init_Target</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_init_State</span><span class="p">()</span></div>
+
+    <span class="k">def</span> <span class="nf">_draw</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_Screen</span><span class="o">.</span><span class="n">_Win</span><span class="o">.</span><span class="n">drawRectangle</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_BackGrnd</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_Screen</span><span class="o">.</span><span class="n">_Win</span><span class="o">.</span><span class="n">drawRectangle</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_Target</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_Screen</span><span class="o">.</span><span class="n">_Win</span><span class="o">.</span><span class="n">drawCircle</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_State</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_init_Target</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_Target</span> <span class="o">=</span> <span class="n">_visual</span><span class="o">.</span><span class="n">VisualConfig</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_Target</span><span class="o">.</span><span class="n">ColorRGB</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Screen</span><span class="o">.</span><span class="n">colors</span><span class="p">[</span><span class="s2">&quot;light&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_Target</span><span class="o">.</span><span class="n">height</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_Screen</span><span class="o">.</span><span class="n">height</span> <span class="o">*</span>
+                                  <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Tolerance</span> <span class="o">/</span> <span class="mi">100</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ZoomFactor</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_Target</span><span class="o">.</span><span class="n">width</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_Screen</span><span class="o">.</span><span class="n">width</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_Target</span><span class="o">.</span><span class="n">xPos</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_Target</span><span class="o">.</span><span class="n">yPos</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">def</span> <span class="nf">_init_State</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_State</span> <span class="o">=</span> <span class="n">_visual</span><span class="o">.</span><span class="n">VisualConfig</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_State</span><span class="o">.</span><span class="n">ColorRGB</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Screen</span><span class="o">.</span><span class="n">colors</span><span class="p">[</span><span class="s2">&quot;light&quot;</span><span class="p">]</span>
+        <span class="c1"># scaling by .5 because it looks otherwise too large</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_State</span><span class="o">.</span><span class="n">radius</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_Screen</span><span class="o">.</span><span class="n">height</span> <span class="o">*</span>
+                                 <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Tolerance</span> <span class="o">/</span> <span class="mi">100</span><span class="p">)</span> <span class="o">*</span>
+                                 <span class="bp">self</span><span class="o">.</span><span class="n">_ZoomFactor</span> <span class="o">*</span> <span class="mf">0.5</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_State</span><span class="o">.</span><span class="n">xPos</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">def</span> <span class="nf">_init_BackGrnd</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_BackGrnd</span> <span class="o">=</span> <span class="n">_visual</span><span class="o">.</span><span class="n">VisualConfig</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_BackGrnd</span><span class="o">.</span><span class="n">ColorRGB</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Screen</span><span class="o">.</span><span class="n">colors</span><span class="p">[</span><span class="s2">&quot;gray&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_BackGrnd</span><span class="o">.</span><span class="n">Tolerance</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Tolerance</span> <span class="o">*</span> <span class="mf">1.25</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_BackGrnd</span><span class="o">.</span><span class="n">height</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_Screen</span><span class="o">.</span><span class="n">height</span> <span class="o">*</span>
+                                    <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_BackGrnd</span><span class="o">.</span><span class="n">Tolerance</span> <span class="o">/</span> <span class="mi">100</span><span class="p">)</span> <span class="o">*</span>
+                                    <span class="bp">self</span><span class="o">.</span><span class="n">_ZoomFactor</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_BackGrnd</span><span class="o">.</span><span class="n">width</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_Screen</span><span class="o">.</span><span class="n">width</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_BackGrnd</span><span class="o">.</span><span class="n">xPos</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_BackGrnd</span><span class="o">.</span><span class="n">yPos</span> <span class="o">=</span> <span class="mi">0</span>
+
+<div class="viewcode-block" id="Ball.updateState"><a class="viewcode-back" href="../../_autosummary/api/experiment.stimulus.html#experiment.stimulus.Ball.updateState">[docs]</a>    <span class="k">def</span> <span class="nf">updateState</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Level</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">StateLevel</span> <span class="o">=</span> <span class="n">Level</span>
+        <span class="n">scaler</span> <span class="o">=</span> <span class="n">atan</span><span class="p">(((</span><span class="bp">self</span><span class="o">.</span><span class="n">StateLevel</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">TargetLevel</span><span class="p">)</span> <span class="o">/</span> <span class="mi">50</span><span class="p">)</span> <span class="o">*</span>
+                      <span class="bp">self</span><span class="o">.</span><span class="n">_ZoomFactor</span><span class="p">)</span>
+        <span class="n">height</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_Screen</span><span class="o">.</span><span class="n">height</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">scaler</span>
+        <span class="k">if</span> <span class="n">isnan</span><span class="p">(</span><span class="n">height</span><span class="p">):</span>
+            <span class="n">height</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_State</span><span class="o">.</span><span class="n">yPos</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">height</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Ball.updateTarget"><a class="viewcode-back" href="../../_autosummary/api/experiment.stimulus.html#experiment.stimulus.Ball.updateTarget">[docs]</a>    <span class="k">def</span> <span class="nf">updateTarget</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Level</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">TargetLevel</span> <span class="o">=</span> <span class="n">Level</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Experiment Framework 0.2.1. documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, Robert Guggenberger &amp; Max Scherer.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
+    </div>
+  </body>
+</html>

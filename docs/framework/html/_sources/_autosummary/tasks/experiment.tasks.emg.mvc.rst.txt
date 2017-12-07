@@ -1,0 +1,6 @@
+experiment.tasks.emg.mvc
+========================
+
+.. automodule:: experiment.tasks.emg.mvc
+    :members:
+    :undoc-members:

@@ -1,0 +1,368 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>cues.visual &#8212; Experiment Framework 0.2.1. documentation</title>
+    <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.2.1.',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+  </head>
+  <body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Experiment Framework 0.2.1. documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for cues.visual</h1><div class="highlight"><pre>
+<span></span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">Created on Apr 19, 2017</span>
+
+<span class="sd">@author: Maximilian Scherer</span>
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="kn">import</span> <span class="nn">ctypes</span>
+
+<span class="c1">#import utils.time</span>
+
+<div class="viewcode-block" id="VisualConfig"><a class="viewcode-back" href="../../cppwrapper.html#cues.visual.VisualConfig">[docs]</a><span class="k">class</span> <span class="nc">VisualConfig</span><span class="p">:</span>
+    <span class="n">width</span> <span class="o">=</span> <span class="mi">100</span>
+    <span class="n">height</span> <span class="o">=</span> <span class="mi">100</span>
+    <span class="n">ColorRGB</span> <span class="o">=</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">]</span>
+    <span class="n">xPos</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">yPos</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">radius</span> <span class="o">=</span> <span class="mi">50</span>
+    <span class="n">thickness</span> <span class="o">=</span> <span class="mi">20</span>
+    <span class="n">size</span> <span class="o">=</span> <span class="mi">64</span>
+    <span class="n">imgAddress</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="n">selectedMonitor</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">shaderPath</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="n">fontPath</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="n">text</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="n">pathList</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">fileId</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">isTexture</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">enableVSync</span> <span class="o">=</span> <span class="kc">True</span></div>
+        
+<div class="viewcode-block" id="Visual"><a class="viewcode-back" href="../../cppwrapper.html#cues.visual.Visual">[docs]</a><span class="k">class</span> <span class="nc">Visual</span><span class="p">:</span>
+    
+    <span class="n">isActive</span> <span class="o">=</span> <span class="mi">0</span>
+    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">libPath</span><span class="p">):</span>
+        <span class="n">lib</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">windll</span><span class="o">.</span><span class="n">LoadLibrary</span><span class="p">(</span><span class="n">libPath</span><span class="p">)</span>
+        
+        <span class="n">protoFunction</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">WINFUNCTYPE</span><span class="p">(</span>
+        <span class="n">ctypes</span><span class="o">.</span><span class="n">c_void_p</span><span class="p">,</span> 
+        <span class="n">ctypes</span><span class="o">.</span><span class="n">c_void_p</span><span class="p">,</span> 
+        <span class="n">ctypes</span><span class="o">.</span><span class="n">c_void_p</span><span class="p">,</span> 
+        <span class="n">ctypes</span><span class="o">.</span><span class="n">c_void_p</span><span class="p">,</span>
+        <span class="n">ctypes</span><span class="o">.</span><span class="n">c_void_p</span><span class="p">,</span>
+        <span class="n">ctypes</span><span class="o">.</span><span class="n">c_void_p</span><span class="p">)</span>    
+        <span class="n">protoParams</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;p1&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;p2&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;p3&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;p4&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;p5&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>    
+        <span class="bp">self</span><span class="o">.</span><span class="n">wrappedCreateWindow</span> <span class="o">=</span> <span class="n">protoFunction</span><span class="p">((</span><span class="s2">&quot;createWindow&quot;</span><span class="p">,</span> <span class="n">lib</span><span class="p">),</span> <span class="n">protoParams</span><span class="p">)</span>
+        
+        
+        <span class="n">protoFunction</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">WINFUNCTYPE</span><span class="p">(</span>
+        <span class="n">ctypes</span><span class="o">.</span><span class="n">c_void_p</span><span class="p">)</span>            
+        <span class="bp">self</span><span class="o">.</span><span class="n">wrappedDeleteWindow</span> <span class="o">=</span> <span class="n">protoFunction</span><span class="p">((</span><span class="s2">&quot;deleteWindow&quot;</span><span class="p">,</span> <span class="n">lib</span><span class="p">))</span>
+        
+        
+        <span class="n">protoFunction</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">WINFUNCTYPE</span><span class="p">(</span>
+            <span class="n">ctypes</span><span class="o">.</span><span class="n">c_void_p</span><span class="p">,</span> 
+            <span class="n">ctypes</span><span class="o">.</span><span class="n">c_void_p</span><span class="p">,</span> 
+            <span class="n">ctypes</span><span class="o">.</span><span class="n">c_void_p</span><span class="p">,</span> 
+            <span class="n">ctypes</span><span class="o">.</span><span class="n">c_void_p</span><span class="p">)</span>        
+        <span class="n">protoParams</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;pp1&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;pp2&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;pp3&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>        
+        <span class="bp">self</span><span class="o">.</span><span class="n">wrappedDrawRectangle</span> <span class="o">=</span> <span class="n">protoFunction</span><span class="p">((</span><span class="s2">&quot;drawRectangle&quot;</span><span class="p">,</span> <span class="n">lib</span><span class="p">),</span> <span class="n">protoParams</span><span class="p">)</span>   
+        
+        
+        <span class="n">protoFunction</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">WINFUNCTYPE</span><span class="p">(</span>
+            <span class="n">ctypes</span><span class="o">.</span><span class="n">c_void_p</span><span class="p">,</span> 
+            <span class="n">ctypes</span><span class="o">.</span><span class="n">c_void_p</span><span class="p">,</span> 
+            <span class="n">ctypes</span><span class="o">.</span><span class="n">c_void_p</span><span class="p">,</span> 
+            <span class="n">ctypes</span><span class="o">.</span><span class="n">c_void_p</span><span class="p">)</span>        
+        <span class="n">protoParams</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;pp1&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;pp2&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;pp3&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>        
+        <span class="bp">self</span><span class="o">.</span><span class="n">wrappedDrawCircle</span> <span class="o">=</span> <span class="n">protoFunction</span><span class="p">((</span><span class="s2">&quot;drawCircle&quot;</span><span class="p">,</span> <span class="n">lib</span><span class="p">),</span> <span class="n">protoParams</span><span class="p">)</span>
+        
+        
+        <span class="n">protoFunction</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">WINFUNCTYPE</span><span class="p">(</span>
+            <span class="n">ctypes</span><span class="o">.</span><span class="n">c_void_p</span><span class="p">,</span> 
+            <span class="n">ctypes</span><span class="o">.</span><span class="n">c_void_p</span><span class="p">,</span> 
+            <span class="n">ctypes</span><span class="o">.</span><span class="n">c_void_p</span><span class="p">,</span> 
+            <span class="n">ctypes</span><span class="o">.</span><span class="n">c_void_p</span><span class="p">,</span> 
+            <span class="n">ctypes</span><span class="o">.</span><span class="n">c_void_p</span><span class="p">)</span>        
+        <span class="n">protoParams</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;pp1&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;pp2&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;pp3&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;pp4&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>        
+        <span class="bp">self</span><span class="o">.</span><span class="n">wrappedDrawFixationCross</span> <span class="o">=</span> <span class="n">protoFunction</span><span class="p">((</span><span class="s2">&quot;drawFixationCross&quot;</span><span class="p">,</span> <span class="n">lib</span><span class="p">),</span> <span class="n">protoParams</span><span class="p">)</span>
+        
+                
+        <span class="n">protoFunction</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">WINFUNCTYPE</span><span class="p">(</span>
+            <span class="n">ctypes</span><span class="o">.</span><span class="n">c_int</span><span class="p">,</span> 
+            <span class="n">ctypes</span><span class="o">.</span><span class="n">c_void_p</span><span class="p">)</span>        
+        <span class="n">protoParams</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;p1&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> 
+        <span class="bp">self</span><span class="o">.</span><span class="n">wrappedLoadTexture</span> <span class="o">=</span> <span class="n">protoFunction</span><span class="p">((</span><span class="s2">&quot;loadTexture&quot;</span><span class="p">,</span> <span class="n">lib</span><span class="p">),</span> <span class="n">protoParams</span><span class="p">)</span>
+        
+                
+        <span class="n">protoFunction</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">WINFUNCTYPE</span><span class="p">(</span>
+            <span class="n">ctypes</span><span class="o">.</span><span class="n">c_void_p</span><span class="p">,</span> 
+            <span class="n">ctypes</span><span class="o">.</span><span class="n">c_void_p</span><span class="p">,</span> 
+            <span class="n">ctypes</span><span class="o">.</span><span class="n">c_void_p</span><span class="p">,</span> 
+            <span class="n">ctypes</span><span class="o">.</span><span class="n">c_void_p</span><span class="p">)</span>        
+        <span class="n">protoParams</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;p1&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;pp2&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;pp3&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>        
+        <span class="bp">self</span><span class="o">.</span><span class="n">wrappedDrawTexture</span> <span class="o">=</span> <span class="n">protoFunction</span><span class="p">((</span><span class="s2">&quot;drawTexture&quot;</span><span class="p">,</span> <span class="n">lib</span><span class="p">),</span> <span class="n">protoParams</span><span class="p">)</span>
+        
+                
+        <span class="n">protoFunction</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">WINFUNCTYPE</span><span class="p">(</span>
+            <span class="n">ctypes</span><span class="o">.</span><span class="n">c_void_p</span><span class="p">,</span> 
+            <span class="n">ctypes</span><span class="o">.</span><span class="n">c_void_p</span><span class="p">,</span> 
+            <span class="n">ctypes</span><span class="o">.</span><span class="n">c_void_p</span><span class="p">,</span> 
+            <span class="n">ctypes</span><span class="o">.</span><span class="n">c_void_p</span><span class="p">,</span> 
+            <span class="n">ctypes</span><span class="o">.</span><span class="n">c_void_p</span><span class="p">)</span>        
+        <span class="n">protoParams</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;p1&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;p2&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;p3&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;p4&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>        
+        <span class="bp">self</span><span class="o">.</span><span class="n">wrappedDrawText</span> <span class="o">=</span> <span class="n">protoFunction</span><span class="p">((</span><span class="s2">&quot;drawText&quot;</span><span class="p">,</span> <span class="n">lib</span><span class="p">),</span> <span class="n">protoParams</span><span class="p">)</span>
+        
+    
+        <span class="n">protoFunction</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">WINFUNCTYPE</span><span class="p">(</span>
+        <span class="n">ctypes</span><span class="o">.</span><span class="n">c_void_p</span><span class="p">)</span>    
+        <span class="bp">self</span><span class="o">.</span><span class="n">wrappedSimple</span> <span class="o">=</span> <span class="n">protoFunction</span><span class="p">((</span><span class="s2">&quot;swapBuffers&quot;</span><span class="p">,</span> <span class="n">lib</span><span class="p">))</span>
+    
+        
+        <span class="n">protoFunction</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">WINFUNCTYPE</span><span class="p">(</span>
+        <span class="n">ctypes</span><span class="o">.</span><span class="n">c_void_p</span><span class="p">,</span> 
+        <span class="n">ctypes</span><span class="o">.</span><span class="n">c_void_p</span><span class="p">)</span>            
+        <span class="n">protoParams</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;p1&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>    
+        <span class="bp">self</span><span class="o">.</span><span class="n">wrappedTimed</span> <span class="o">=</span> <span class="n">protoFunction</span><span class="p">((</span><span class="s2">&quot;swapBuffersTimed&quot;</span><span class="p">,</span> <span class="n">lib</span><span class="p">),</span> <span class="n">protoParams</span><span class="p">)</span>     
+        
+        
+        <span class="n">protoFunction</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">WINFUNCTYPE</span><span class="p">(</span>
+        <span class="n">ctypes</span><span class="o">.</span><span class="n">c_void_p</span><span class="p">,</span> 
+        <span class="n">ctypes</span><span class="o">.</span><span class="n">c_void_p</span><span class="p">)</span>    
+        <span class="n">protoParams</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;p1&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>    
+        <span class="bp">self</span><span class="o">.</span><span class="n">wrappedTimedBlocking</span> <span class="o">=</span> <span class="n">protoFunction</span><span class="p">((</span><span class="s2">&quot;swapBuffersTimed&quot;</span><span class="p">,</span> <span class="n">lib</span><span class="p">),</span> <span class="n">protoParams</span><span class="p">)</span>   
+        
+        
+        <span class="n">protoFunction</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">WINFUNCTYPE</span><span class="p">(</span>
+        <span class="n">ctypes</span><span class="o">.</span><span class="n">c_void_p</span><span class="p">,</span> 
+        <span class="n">ctypes</span><span class="o">.</span><span class="n">c_void_p</span><span class="p">,</span> 
+        <span class="n">ctypes</span><span class="o">.</span><span class="n">c_void_p</span><span class="p">)</span>    
+        <span class="n">protoParams</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;p1&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;p2&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>    
+        <span class="bp">self</span><span class="o">.</span><span class="n">wrappedTimedBlockingLogged</span> <span class="o">=</span> <span class="n">protoFunction</span><span class="p">((</span><span class="s2">&quot;swapBuffersTimedLogged&quot;</span><span class="p">,</span> <span class="n">lib</span><span class="p">),</span> <span class="n">protoParams</span><span class="p">)</span>   
+        
+        
+        <span class="n">protoFunction</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">WINFUNCTYPE</span><span class="p">(</span> 
+        <span class="n">ctypes</span><span class="o">.</span><span class="n">c_void_p</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wrappedEnableVSync</span> <span class="o">=</span> <span class="n">protoFunction</span><span class="p">((</span><span class="s2">&quot;enableVSync&quot;</span><span class="p">,</span> <span class="n">lib</span><span class="p">))</span>   
+        
+        
+        <span class="n">protoFunction</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">WINFUNCTYPE</span><span class="p">(</span> 
+        <span class="n">ctypes</span><span class="o">.</span><span class="n">c_void_p</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wrappedDisableVSync</span> <span class="o">=</span> <span class="n">protoFunction</span><span class="p">((</span><span class="s2">&quot;disableVSync&quot;</span><span class="p">,</span> <span class="n">lib</span><span class="p">))</span>   
+        
+        
+        <span class="n">protoFunction</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">WINFUNCTYPE</span><span class="p">(</span>
+        <span class="n">ctypes</span><span class="o">.</span><span class="n">c_void_p</span><span class="p">,</span> 
+        <span class="n">ctypes</span><span class="o">.</span><span class="n">c_void_p</span><span class="p">)</span>    
+        <span class="n">protoParams</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;p1&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wrappedSetMaxDelay</span> <span class="o">=</span> <span class="n">protoFunction</span><span class="p">((</span><span class="s2">&quot;setMaxDelay&quot;</span><span class="p">,</span> <span class="n">lib</span><span class="p">),</span> <span class="n">protoParams</span><span class="p">)</span>   
+        
+        
+        <span class="n">protoFunction</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">WINFUNCTYPE</span><span class="p">(</span>
+        <span class="n">ctypes</span><span class="o">.</span><span class="n">c_void_p</span><span class="p">,</span> 
+        <span class="n">ctypes</span><span class="o">.</span><span class="n">c_void_p</span><span class="p">)</span>    
+        <span class="n">protoParams</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;p1&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wrappedSetFramerateAsDelay</span> <span class="o">=</span> <span class="n">protoFunction</span><span class="p">((</span><span class="s2">&quot;setFramerateAsDelay&quot;</span><span class="p">,</span> <span class="n">lib</span><span class="p">),</span> <span class="n">protoParams</span><span class="p">)</span>   
+
+    <span class="k">def</span> <span class="nf">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">isActive</span> <span class="o">==</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">deleteWindow</span>
+                
+<div class="viewcode-block" id="Visual.createWindow"><a class="viewcode-back" href="../../cppwrapper.html#cues.visual.Visual.createWindow">[docs]</a>    <span class="k">def</span> <span class="nf">createWindow</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">windowConfig</span><span class="p">):</span>
+        <span class="n">p1</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_uint32</span><span class="p">(</span><span class="n">windowConfig</span><span class="o">.</span><span class="n">width</span><span class="p">)</span>
+        <span class="n">p2</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_uint32</span><span class="p">(</span><span class="n">windowConfig</span><span class="o">.</span><span class="n">height</span><span class="p">)</span>
+        <span class="n">p3</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_int32</span><span class="p">(</span><span class="n">windowConfig</span><span class="o">.</span><span class="n">selectedMonitor</span><span class="p">)</span>
+        <span class="n">bShaderPath</span> <span class="o">=</span> <span class="n">windowConfig</span><span class="o">.</span><span class="n">shaderPath</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf_8&#39;</span><span class="p">)</span>
+        <span class="n">p4</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_char_p</span><span class="p">(</span><span class="n">bShaderPath</span><span class="p">)</span>
+        <span class="n">bFontPath</span> <span class="o">=</span> <span class="n">windowConfig</span><span class="o">.</span><span class="n">fontPath</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf_8&#39;</span><span class="p">)</span>
+        <span class="n">p5</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_char_p</span><span class="p">(</span><span class="n">bFontPath</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">wrappedCreateWindow</span><span class="p">(</span><span class="n">ctypes</span><span class="o">.</span><span class="n">byref</span><span class="p">(</span><span class="n">p1</span><span class="p">),</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">byref</span><span class="p">(</span><span class="n">p2</span><span class="p">),</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">byref</span><span class="p">(</span><span class="n">p3</span><span class="p">),</span> <span class="n">p4</span><span class="p">,</span> <span class="n">p5</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">windowConfig</span><span class="o">.</span><span class="n">enableVSync</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">wrappedEnableVSync</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">wrappedDisableVSync</span><span class="p">()</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">isActive</span> <span class="o">=</span> <span class="mi">1</span></div>
+    
+<div class="viewcode-block" id="Visual.deleteWindow"><a class="viewcode-back" href="../../cppwrapper.html#cues.visual.Visual.deleteWindow">[docs]</a>    <span class="k">def</span> <span class="nf">deleteWindow</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wrappedDeleteWindow</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">isActive</span> <span class="o">=</span> <span class="mi">0</span></div>
+        
+<div class="viewcode-block" id="Visual.drawRectangle"><a class="viewcode-back" href="../../cppwrapper.html#cues.visual.Visual.drawRectangle">[docs]</a>    <span class="k">def</span> <span class="nf">drawRectangle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">visualConfig</span><span class="p">):</span>
+        <span class="n">p1</span> <span class="o">=</span> <span class="p">[</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_uint32</span><span class="p">(</span><span class="n">visualConfig</span><span class="o">.</span><span class="n">width</span><span class="p">),</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_uint32</span><span class="p">(</span><span class="n">visualConfig</span><span class="o">.</span><span class="n">height</span><span class="p">)]</span>
+        <span class="n">pp1</span> <span class="o">=</span> <span class="p">(</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_uint32</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">p1</span><span class="p">))(</span><span class="o">*</span><span class="n">p1</span><span class="p">)</span>
+        <span class="n">p2</span> <span class="o">=</span> <span class="p">[</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_int32</span><span class="p">(</span><span class="n">visualConfig</span><span class="o">.</span><span class="n">xPos</span><span class="p">),</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_int32</span><span class="p">(</span><span class="o">-</span><span class="n">visualConfig</span><span class="o">.</span><span class="n">yPos</span><span class="p">)]</span>
+        <span class="n">pp2</span> <span class="o">=</span> <span class="p">(</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_int32</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">p2</span><span class="p">))(</span><span class="o">*</span><span class="n">p2</span><span class="p">)</span>
+        <span class="n">p3</span> <span class="o">=</span> <span class="p">[</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_float</span><span class="p">(</span><span class="n">visualConfig</span><span class="o">.</span><span class="n">ColorRGB</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_float</span><span class="p">(</span><span class="n">visualConfig</span><span class="o">.</span><span class="n">ColorRGB</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_float</span><span class="p">(</span><span class="n">visualConfig</span><span class="o">.</span><span class="n">ColorRGB</span><span class="p">[</span><span class="mi">2</span><span class="p">])]</span>
+        <span class="n">pp3</span> <span class="o">=</span> <span class="p">(</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_float</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">p3</span><span class="p">))(</span><span class="o">*</span><span class="n">p3</span><span class="p">)</span>        
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">wrappedDrawRectangle</span><span class="p">(</span><span class="n">pp1</span><span class="p">,</span> <span class="n">pp2</span><span class="p">,</span> <span class="n">pp3</span><span class="p">)</span></div>
+    
+<div class="viewcode-block" id="Visual.drawCircle"><a class="viewcode-back" href="../../cppwrapper.html#cues.visual.Visual.drawCircle">[docs]</a>    <span class="k">def</span> <span class="nf">drawCircle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">visualConfig</span><span class="p">):</span>
+        <span class="n">p1</span> <span class="o">=</span> <span class="p">[</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_float</span><span class="p">(</span><span class="n">visualConfig</span><span class="o">.</span><span class="n">radius</span><span class="p">)]</span>
+        <span class="n">pp1</span> <span class="o">=</span> <span class="p">(</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_float</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">p1</span><span class="p">))(</span><span class="o">*</span><span class="n">p1</span><span class="p">)</span>
+        <span class="n">p2</span> <span class="o">=</span> <span class="p">[</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_int32</span><span class="p">(</span><span class="n">visualConfig</span><span class="o">.</span><span class="n">xPos</span><span class="p">),</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_int32</span><span class="p">(</span><span class="o">-</span><span class="n">visualConfig</span><span class="o">.</span><span class="n">yPos</span><span class="p">)]</span>
+        <span class="n">pp2</span> <span class="o">=</span> <span class="p">(</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_int32</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">p2</span><span class="p">))(</span><span class="o">*</span><span class="n">p2</span><span class="p">)</span>
+        <span class="n">p3</span> <span class="o">=</span> <span class="p">[</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_float</span><span class="p">(</span><span class="n">visualConfig</span><span class="o">.</span><span class="n">ColorRGB</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_float</span><span class="p">(</span><span class="n">visualConfig</span><span class="o">.</span><span class="n">ColorRGB</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_float</span><span class="p">(</span><span class="n">visualConfig</span><span class="o">.</span><span class="n">ColorRGB</span><span class="p">[</span><span class="mi">2</span><span class="p">])]</span>
+        <span class="n">pp3</span> <span class="o">=</span> <span class="p">(</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_float</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">p3</span><span class="p">))(</span><span class="o">*</span><span class="n">p3</span><span class="p">)</span>   
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">wrappedDrawCircle</span><span class="p">(</span><span class="n">pp1</span><span class="p">,</span> <span class="n">pp2</span><span class="p">,</span> <span class="n">pp3</span><span class="p">)</span></div>
+    
+<div class="viewcode-block" id="Visual.drawFixationCross"><a class="viewcode-back" href="../../cppwrapper.html#cues.visual.Visual.drawFixationCross">[docs]</a>    <span class="k">def</span> <span class="nf">drawFixationCross</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">visualConfig</span><span class="p">):</span>
+        <span class="n">p1</span> <span class="o">=</span> <span class="p">[</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_uint32</span><span class="p">(</span><span class="n">visualConfig</span><span class="o">.</span><span class="n">width</span><span class="p">),</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_uint32</span><span class="p">(</span><span class="n">visualConfig</span><span class="o">.</span><span class="n">height</span><span class="p">)]</span>
+        <span class="n">pp1</span> <span class="o">=</span> <span class="p">(</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_uint32</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">p1</span><span class="p">))(</span><span class="o">*</span><span class="n">p1</span><span class="p">)</span>
+        <span class="n">p2</span> <span class="o">=</span> <span class="p">[</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_uint32</span><span class="p">(</span><span class="n">visualConfig</span><span class="o">.</span><span class="n">thickness</span><span class="p">)]</span>
+        <span class="n">pp2</span> <span class="o">=</span> <span class="p">(</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_uint32</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">p2</span><span class="p">))(</span><span class="o">*</span><span class="n">p2</span><span class="p">)</span>
+        <span class="n">p3</span> <span class="o">=</span> <span class="p">[</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_int32</span><span class="p">(</span><span class="n">visualConfig</span><span class="o">.</span><span class="n">xPos</span><span class="p">),</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_int32</span><span class="p">(</span><span class="o">-</span><span class="n">visualConfig</span><span class="o">.</span><span class="n">yPos</span><span class="p">)]</span>
+        <span class="n">pp3</span> <span class="o">=</span> <span class="p">(</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_int32</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">p3</span><span class="p">))(</span><span class="o">*</span><span class="n">p3</span><span class="p">)</span>
+        <span class="n">p4</span> <span class="o">=</span> <span class="p">[</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_float</span><span class="p">(</span><span class="n">visualConfig</span><span class="o">.</span><span class="n">ColorRGB</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_float</span><span class="p">(</span><span class="n">visualConfig</span><span class="o">.</span><span class="n">ColorRGB</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_float</span><span class="p">(</span><span class="n">visualConfig</span><span class="o">.</span><span class="n">ColorRGB</span><span class="p">[</span><span class="mi">2</span><span class="p">])]</span>
+        <span class="n">pp4</span> <span class="o">=</span> <span class="p">(</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_float</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">p4</span><span class="p">))(</span><span class="o">*</span><span class="n">p4</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">wrappedDrawFixationCross</span><span class="p">(</span><span class="n">pp1</span><span class="p">,</span> <span class="n">pp2</span><span class="p">,</span> <span class="n">pp3</span><span class="p">,</span> <span class="n">pp4</span><span class="p">)</span></div>
+           
+<div class="viewcode-block" id="Visual.loadTexture"><a class="viewcode-back" href="../../cppwrapper.html#cues.visual.Visual.loadTexture">[docs]</a>    <span class="k">def</span> <span class="nf">loadTexture</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">visualConfig</span><span class="p">):</span>
+        <span class="n">bImgAddress</span> <span class="o">=</span> <span class="n">visualConfig</span><span class="o">.</span><span class="n">imgAddress</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf_8&#39;</span><span class="p">)</span>
+        <span class="n">p1</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_char_p</span><span class="p">(</span><span class="n">bImgAddress</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">wrappedLoadTexture</span><span class="p">(</span><span class="n">p1</span><span class="p">)</span></div>
+           
+<div class="viewcode-block" id="Visual.preLoadTexture"><a class="viewcode-back" href="../../cppwrapper.html#cues.visual.Visual.preLoadTexture">[docs]</a>    <span class="k">def</span> <span class="nf">preLoadTexture</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">imgAddress</span><span class="p">):</span>
+        <span class="n">bImgAddress</span> <span class="o">=</span> <span class="n">imgAddress</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf_8&#39;</span><span class="p">)</span>
+        <span class="n">p1</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_char_p</span><span class="p">(</span><span class="n">bImgAddress</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">wrappedLoadTexture</span><span class="p">(</span><span class="n">p1</span><span class="p">)</span></div>
+               
+<div class="viewcode-block" id="Visual.drawTexture"><a class="viewcode-back" href="../../cppwrapper.html#cues.visual.Visual.drawTexture">[docs]</a>    <span class="k">def</span> <span class="nf">drawTexture</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">visualConfig</span><span class="p">):</span>
+        <span class="n">p1</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_uint</span><span class="p">(</span><span class="n">visualConfig</span><span class="o">.</span><span class="n">fileId</span><span class="p">)</span>
+        <span class="n">p2</span> <span class="o">=</span> <span class="p">[</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_uint32</span><span class="p">(</span><span class="n">visualConfig</span><span class="o">.</span><span class="n">width</span><span class="p">),</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_uint32</span><span class="p">(</span><span class="n">visualConfig</span><span class="o">.</span><span class="n">height</span><span class="p">)]</span>
+        <span class="n">pp2</span> <span class="o">=</span> <span class="p">(</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_uint32</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">p2</span><span class="p">))(</span><span class="o">*</span><span class="n">p2</span><span class="p">)</span>
+        <span class="n">p3</span> <span class="o">=</span> <span class="p">[</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_int32</span><span class="p">(</span><span class="n">visualConfig</span><span class="o">.</span><span class="n">xPos</span><span class="p">),</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_int32</span><span class="p">(</span><span class="o">-</span><span class="n">visualConfig</span><span class="o">.</span><span class="n">yPos</span><span class="p">)]</span>
+        <span class="n">pp3</span> <span class="o">=</span> <span class="p">(</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_int32</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">p3</span><span class="p">))(</span><span class="o">*</span><span class="n">p3</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">wrappedDrawTexture</span><span class="p">(</span><span class="n">ctypes</span><span class="o">.</span><span class="n">byref</span><span class="p">(</span><span class="n">p1</span><span class="p">),</span> <span class="n">pp2</span><span class="p">,</span> <span class="n">pp3</span><span class="p">)</span></div>
+        
+<div class="viewcode-block" id="Visual.drawText"><a class="viewcode-back" href="../../cppwrapper.html#cues.visual.Visual.drawText">[docs]</a>    <span class="k">def</span> <span class="nf">drawText</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">visualConfig</span><span class="p">):</span>
+        <span class="n">bText</span> <span class="o">=</span> <span class="n">visualConfig</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf_8&#39;</span><span class="p">)</span>
+        <span class="n">p1</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_char_p</span><span class="p">(</span><span class="n">bText</span><span class="p">)</span>
+        <span class="n">p2</span> <span class="o">=</span> <span class="p">[</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_uint32</span><span class="p">(</span><span class="n">visualConfig</span><span class="o">.</span><span class="n">size</span><span class="p">)]</span>
+        <span class="n">pp2</span> <span class="o">=</span> <span class="p">(</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_uint32</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">p2</span><span class="p">))(</span><span class="o">*</span><span class="n">p2</span><span class="p">)</span>
+        <span class="n">p3</span> <span class="o">=</span> <span class="p">[</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_int32</span><span class="p">(</span><span class="n">visualConfig</span><span class="o">.</span><span class="n">xPos</span><span class="p">),</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_int32</span><span class="p">(</span><span class="o">-</span><span class="n">visualConfig</span><span class="o">.</span><span class="n">yPos</span><span class="p">)]</span>
+        <span class="n">pp3</span> <span class="o">=</span> <span class="p">(</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_int32</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">p3</span><span class="p">))(</span><span class="o">*</span><span class="n">p3</span><span class="p">)</span>
+        <span class="n">p4</span> <span class="o">=</span> <span class="p">[</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_float</span><span class="p">(</span><span class="n">visualConfig</span><span class="o">.</span><span class="n">ColorRGB</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_float</span><span class="p">(</span><span class="n">visualConfig</span><span class="o">.</span><span class="n">ColorRGB</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_float</span><span class="p">(</span><span class="n">visualConfig</span><span class="o">.</span><span class="n">ColorRGB</span><span class="p">[</span><span class="mi">2</span><span class="p">])]</span>
+        <span class="n">pp4</span> <span class="o">=</span> <span class="p">(</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_float</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">p4</span><span class="p">))(</span><span class="o">*</span><span class="n">p4</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">wrappedDrawText</span><span class="p">(</span><span class="n">p1</span><span class="p">,</span> <span class="n">pp2</span><span class="p">,</span> <span class="n">pp3</span><span class="p">,</span> <span class="n">pp4</span><span class="p">)</span></div>
+        
+<div class="viewcode-block" id="Visual.showNow"><a class="viewcode-back" href="../../cppwrapper.html#cues.visual.Visual.showNow">[docs]</a>    <span class="k">def</span> <span class="nf">showNow</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wrappedSimple</span><span class="p">();</span></div>
+    
+<div class="viewcode-block" id="Visual.showDelayed"><a class="viewcode-back" href="../../cppwrapper.html#cues.visual.Visual.showDelayed">[docs]</a>    <span class="k">def</span> <span class="nf">showDelayed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nanoTimeConfig</span><span class="p">):</span>
+        <span class="n">p1</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_longlong</span><span class="p">(</span><span class="n">nanoTimeConfig</span><span class="o">.</span><span class="n">referenceTime</span> <span class="o">+</span> <span class="n">nanoTimeConfig</span><span class="o">.</span><span class="n">delay</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">wrappedTimed</span><span class="p">(</span><span class="n">ctypes</span><span class="o">.</span><span class="n">byref</span><span class="p">(</span><span class="n">p1</span><span class="p">))</span></div>
+           
+<div class="viewcode-block" id="Visual.showDelayedFast"><a class="viewcode-back" href="../../cppwrapper.html#cues.visual.Visual.showDelayedFast">[docs]</a>    <span class="k">def</span> <span class="nf">showDelayedFast</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nanoTimeConfig</span><span class="p">,</span> <span class="n">dummy</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="n">p1</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_longlong</span><span class="p">(</span><span class="n">nanoTimeConfig</span><span class="o">.</span><span class="n">referenceTime</span> <span class="o">+</span> <span class="n">nanoTimeConfig</span><span class="o">.</span><span class="n">delay</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">wrappedTimedBlocking</span><span class="p">(</span><span class="n">ctypes</span><span class="o">.</span><span class="n">byref</span><span class="p">(</span><span class="n">p1</span><span class="p">))</span></div>
+           
+<div class="viewcode-block" id="Visual.showDelayedFastLogged"><a class="viewcode-back" href="../../cppwrapper.html#cues.visual.Visual.showDelayedFastLogged">[docs]</a>    <span class="k">def</span> <span class="nf">showDelayedFastLogged</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nanoTimeConfig</span><span class="p">,</span> <span class="n">logConfig</span><span class="p">):</span>
+        <span class="n">p1</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_longlong</span><span class="p">(</span><span class="n">nanoTimeConfig</span><span class="o">.</span><span class="n">referenceTime</span> <span class="o">+</span> <span class="n">nanoTimeConfig</span><span class="o">.</span><span class="n">delay</span><span class="p">)</span>
+        <span class="n">p2</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_void_p</span><span class="p">(</span><span class="n">logConfig</span><span class="o">.</span><span class="n">ptr</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">wrappedTimedBlockingLogged</span><span class="p">(</span><span class="n">ctypes</span><span class="o">.</span><span class="n">byref</span><span class="p">(</span><span class="n">p1</span><span class="p">),</span> <span class="n">p2</span><span class="p">)</span></div>
+        
+<div class="viewcode-block" id="Visual.enableVSync"><a class="viewcode-back" href="../../cppwrapper.html#cues.visual.Visual.enableVSync">[docs]</a>    <span class="k">def</span> <span class="nf">enableVSync</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>        
+        <span class="bp">self</span><span class="o">.</span><span class="n">wrappedEnableVSync</span><span class="p">()</span></div>
+        
+<div class="viewcode-block" id="Visual.disableVSync"><a class="viewcode-back" href="../../cppwrapper.html#cues.visual.Visual.disableVSync">[docs]</a>    <span class="k">def</span> <span class="nf">disableVSync</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wrappedDisableVSync</span><span class="p">()</span></div>
+        
+<div class="viewcode-block" id="Visual.setMaxDelay"><a class="viewcode-back" href="../../cppwrapper.html#cues.visual.Visual.setMaxDelay">[docs]</a>    <span class="k">def</span> <span class="nf">setMaxDelay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">maxDelay</span><span class="p">):</span>
+        <span class="n">p1</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_longlong</span><span class="p">(</span><span class="n">maxDelay</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">wrappedSetMaxDelay</span><span class="p">(</span><span class="n">ctypes</span><span class="o">.</span><span class="n">byref</span><span class="p">(</span><span class="n">p1</span><span class="p">))</span></div>
+        
+<div class="viewcode-block" id="Visual.setFramerateAsDelay"><a class="viewcode-back" href="../../cppwrapper.html#cues.visual.Visual.setFramerateAsDelay">[docs]</a>    <span class="k">def</span> <span class="nf">setFramerateAsDelay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">framerate</span><span class="p">):</span>
+        <span class="n">p1</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_longlong</span><span class="p">(</span><span class="n">framerate</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">wrappedSetFramerateAsDelay</span><span class="p">(</span><span class="n">ctypes</span><span class="o">.</span><span class="n">byref</span><span class="p">(</span><span class="n">p1</span><span class="p">))</span></div></div>
+        
+        
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Experiment Framework 0.2.1. documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, Robert Guggenberger &amp; Max Scherer.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
+    </div>
+  </body>
+</html>

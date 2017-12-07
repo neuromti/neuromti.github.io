@@ -1,0 +1,6 @@
+experiment.tasks.emg.feedback
+=============================
+
+.. automodule:: experiment.tasks.emg.feedback
+    :members:
+    :undoc-members:

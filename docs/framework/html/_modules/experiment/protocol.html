@@ -1,0 +1,420 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>experiment.protocol &#8212; Experiment Framework 0.2.1. documentation</title>
+    <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.2.1.',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+  </head>
+  <body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Experiment Framework 0.2.1. documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for experiment.protocol</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;This module contains classes to control the low of an experiment</span>
+
+<span class="sd">Overview</span>
+<span class="sd">--------</span>
+
+<span class="sd">- cues, e.g.  i.e. :class:`~.experiment.protocol.Cue`</span>
+<span class="sd">- session, i.e. :class:`~.experiment.protocol.Session`</span>
+<span class="sd">- runfiles, i.e. :class:`~.experiment.protocol.Run`</span>
+<span class="sd">- logging, e.g.  i.e. :class:`~.experiment.protocol.Logger`</span>
+<span class="sd">- timing, i.e. :class:`~.experiment.protocol.Timing`</span>
+
+<span class="sd">Documentation</span>
+<span class="sd">-------------</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">utils.time</span> <span class="k">import</span> <span class="n">NanoTimeConfig</span> <span class="k">as</span> <span class="n">_NanoTimeConfig</span>
+<span class="kn">from</span> <span class="nn">experiment.device</span> <span class="k">import</span> <span class="n">NullDevice</span> <span class="k">as</span> <span class="n">_NullDevice</span>
+<span class="kn">from</span> <span class="nn">experiment.device</span> <span class="k">import</span> <span class="n">nanoClock</span> <span class="k">as</span> <span class="n">_LocalClock</span>
+<span class="kn">import</span> <span class="nn">experiment.stimulus</span>
+<span class="kn">import</span> <span class="nn">os</span> <span class="k">as</span> <span class="nn">_os</span>
+<span class="kn">import</span> <span class="nn">wyrm.io</span> <span class="k">as</span> <span class="nn">_io</span>
+<span class="kn">import</span> <span class="nn">inspect</span> <span class="k">as</span> <span class="nn">_inspect</span>
+<span class="kn">import</span> <span class="nn">shutil</span> <span class="k">as</span> <span class="nn">_shutil</span>
+<span class="kn">import</span> <span class="nn">json</span> <span class="k">as</span> <span class="nn">_json</span>
+<span class="kn">from</span> <span class="nn">warnings</span> <span class="k">import</span> <span class="n">warn</span> <span class="k">as</span> <span class="n">_warn</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="k">import</span> <span class="n">strftime</span> <span class="k">as</span> <span class="n">_now</span>
+
+<span class="c1"># %% --------------------------------------------------------------------------</span>
+<div class="viewcode-block" id="register_triggerdevice"><a class="viewcode-back" href="../../_autosummary/api/experiment.protocol.html#experiment.protocol.register_triggerdevice">[docs]</a><span class="k">def</span> <span class="nf">register_triggerdevice</span><span class="p">(</span><span class="n">td</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;registers a TriggerDevice</span>
+
+<span class="sd">        returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        function: a function for this device</span>
+
+
+<span class="sd">        notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        the returned function in turn registers marker values and</span>
+<span class="sd">        returns a function that sends this marker</span>
+
+
+<span class="sd">        Example::</span>
+
+<span class="sd">            m = register_triggerdevice(None)(None)</span>
+<span class="sd">            Marker = register_triggerdevice(HardWareTrigger)</span>
+<span class="sd">            m   = Marker(5) # creates a function to send 5 with this device</span>
+<span class="sd">            m.get() # returns the value of the device</span>
+
+<span class="sd">        .. tip::</span>
+<span class="sd">            `m = register_triggerdevice(None)(None)` sends to a nulldevice</span>
+
+<span class="sd">        .. seealso::</span>
+<span class="sd">            :class:`~.experiment.protocol.Cue`</span>
+
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">def</span> <span class="nf">register_markervalue</span><span class="p">(</span><span class="n">mv</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">get_mv</span><span class="p">():</span>
+            <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">mv</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">mv</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">def</span> <span class="nf">send_marker</span><span class="p">():</span>
+                <span class="k">pass</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">def</span> <span class="nf">send_marker</span><span class="p">():</span>
+                <span class="n">td</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">mv</span><span class="p">)</span>
+
+        <span class="n">send_marker</span><span class="o">.</span><span class="fm">__str__</span> <span class="o">=</span> <span class="n">get_mv</span>
+        <span class="k">return</span> <span class="n">send_marker</span>
+
+    <span class="k">return</span> <span class="n">register_markervalue</span></div>
+<span class="c1"># %% --------------------------------------------------------------------------</span>
+
+
+<div class="viewcode-block" id="Cue"><a class="viewcode-back" href="../../_autosummary/api/experiment.protocol.html#experiment.protocol.Cue">[docs]</a><span class="k">class</span> <span class="nc">Cue</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Class representing a Cue</span>
+
+<span class="sd">    args</span>
+<span class="sd">    ----</span>
+<span class="sd">    Sound: :class:`~.experiment.stimulus.Sound`</span>
+<span class="sd">        The acoustic part of the cue</span>
+<span class="sd">    Frame: :class:`~.experiment.stimulus.Frame`</span>
+<span class="sd">        The visual part of the cue</span>
+<span class="sd">    Duration: float</span>
+<span class="sd">        Duration in seconds</span>
+<span class="sd">    Marker: function</span>
+<span class="sd">        a function sending a trigger on evaluation</span>
+
+
+<span class="sd">    Example::</span>
+
+<span class="sd">        speaker     = device.Speaker()</span>
+<span class="sd">        sound       = stimulus.Sound(speaker, pathToWavFile)</span>
+<span class="sd">        screen      = device.Screen()</span>
+<span class="sd">        frame       = stimulus.Cross(screen)</span>
+<span class="sd">        duration    = 5</span>
+<span class="sd">        interface   = device.SerialTrigger()</span>
+<span class="sd">        marker      = protocol.register_triggerdevice(interface)</span>
+<span class="sd">        cue         = protocol.Cue(sound, frame, duration, marker(6))</span>
+<span class="sd">        interface.connect()</span>
+<span class="sd">        cue.present()</span>
+<span class="sd">        interface.close()</span>
+
+
+<span class="sd">    .. tip::</span>
+<span class="sd">        use the dictionary of cues, sounds and visuals in \</span>
+<span class="sd">        :mod:`~.experiment.api`</span>
+
+<span class="sd">    .. seealso::</span>
+<span class="sd">        - :func:`~.experiment.protocol.register_triggerdevice`</span>
+<span class="sd">        - :mod:`~.experiment.stimulus`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Sound</span><span class="p">,</span> <span class="n">Frame</span><span class="p">,</span> <span class="n">Duration</span><span class="p">,</span>
+                 <span class="n">trigger</span><span class="o">=</span><span class="n">register_triggerdevice</span><span class="p">(</span><span class="kc">None</span><span class="p">)(</span><span class="kc">None</span><span class="p">)):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Sound</span> <span class="o">=</span> <span class="n">Sound</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Frame</span> <span class="o">=</span> <span class="n">Frame</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Timing</span> <span class="o">=</span> <span class="n">Timing</span><span class="p">(</span><span class="n">Duration</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Trigger</span> <span class="o">=</span> <span class="n">trigger</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Frame</span><span class="p">,</span> <span class="n">experiment</span><span class="o">.</span><span class="n">stimulus</span><span class="o">.</span><span class="n">Dynamic</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">update</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dynamic_update</span>
+            <span class="k">if</span> <span class="n">Sound</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">present</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dynamic_silent</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">present</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dynamic_loud</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">Sound</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">present</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_static_silent</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">present</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_static_loud</span>
+
+    <span class="k">def</span> <span class="nf">_static_silent</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Timing</span><span class="o">.</span><span class="n">ready</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Frame</span><span class="o">.</span><span class="n">showNow</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Trigger</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Frame</span><span class="o">.</span><span class="n">showDelayed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Timing</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Sound</span><span class="o">.</span><span class="n">Speaker</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_static_loud</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Sound</span><span class="o">.</span><span class="n">Speaker</span><span class="o">.</span><span class="n">buffer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Sound</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Timing</span><span class="o">.</span><span class="n">ready</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Frame</span><span class="o">.</span><span class="n">showNow</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Trigger</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Sound</span><span class="o">.</span><span class="n">Speaker</span><span class="o">.</span><span class="n">play</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Frame</span><span class="o">.</span><span class="n">showDelayed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Timing</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Sound</span><span class="o">.</span><span class="n">Speaker</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_dynamic_loud</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Sound</span><span class="o">.</span><span class="n">Speaker</span><span class="o">.</span><span class="n">buffer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Sound</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Trigger</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Frame</span><span class="o">.</span><span class="n">showNow</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Sound</span><span class="o">.</span><span class="n">Speaker</span><span class="o">.</span><span class="n">play</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Sound</span><span class="o">.</span><span class="n">Speaker</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_dynamic_silent</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Frame</span><span class="o">.</span><span class="n">showNow</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Trigger</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Sound</span><span class="o">.</span><span class="n">Speaker</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_static_update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Ignore</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span> <span class="nf">_dynamic_update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Percent</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Frame</span><span class="o">.</span><span class="n">updateState</span><span class="p">(</span><span class="n">Percent</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Frame</span><span class="o">.</span><span class="n">showNow</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Trigger</span><span class="o">.</span><span class="fm">__str__</span><span class="p">()</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Sound</span><span class="o">.</span><span class="fm">__str__</span><span class="p">()</span>
+        <span class="n">v</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Frame</span><span class="o">.</span><span class="fm">__str__</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">f</span><span class="s1">&#39;</span><span class="si">{v}</span><span class="s1"> with </span><span class="si">{s}</span><span class="s1"> marked by </span><span class="si">{m}</span><span class="s1">&#39;</span>
+
+    <span class="k">def</span> <span class="nf">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span></div>
+       <span class="c1"># print(&quot;Shutting Down: &quot; + self.__repr__())</span>
+
+<span class="c1"># %% --------------------------------------------------------------------------</span>
+
+
+<div class="viewcode-block" id="Timing"><a class="viewcode-back" href="../../_autosummary/api/experiment.protocol.html#experiment.protocol.Timing">[docs]</a><span class="k">class</span> <span class="nc">Timing</span><span class="p">(</span><span class="n">_NanoTimeConfig</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Timings are used to synchronize the presentation of cues</span>
+<span class="sd">    (from experiment.protocol.Cue)</span>
+
+<span class="sd">    A minimal working example::</span>
+
+<span class="sd">        Timing  = experiment.protocol.Timing(1) %sets a Timer for 1 second</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Duration</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Clock</span> <span class="o">=</span> <span class="n">_LocalClock</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">delay</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Clock</span><span class="o">.</span><span class="n">sec2nano</span><span class="p">(</span><span class="n">Duration</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ready</span><span class="p">()</span>
+
+<div class="viewcode-block" id="Timing.ready"><a class="viewcode-back" href="../../_autosummary/api/experiment.protocol.html#experiment.protocol.Timing.ready">[docs]</a>    <span class="k">def</span> <span class="nf">ready</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Clock</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">referenceTime</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Clock</span><span class="o">.</span><span class="n">getreferenceTime</span><span class="p">()</span></div></div>
+
+<span class="c1"># %% --------------------------------------------------------------------------</span>
+
+
+<div class="viewcode-block" id="Logger"><a class="viewcode-back" href="../../_autosummary/api/experiment.protocol.html#experiment.protocol.Logger">[docs]</a><span class="k">def</span> <span class="nf">Logger</span><span class="p">(</span><span class="n">filepath</span><span class="o">=</span><span class="sa">r</span><span class="s1">&#39;C:\recording&#39;</span><span class="p">,</span> <span class="n">fname</span><span class="o">=</span><span class="s2">&quot;session.log&quot;</span><span class="p">):</span>
+    <span class="k">global</span> <span class="n">logger</span>
+    <span class="n">logger</span> <span class="o">=</span> <span class="n">_logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">_logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
+
+    <span class="n">ch</span> <span class="o">=</span> <span class="n">_logging</span><span class="o">.</span><span class="n">StreamHandler</span><span class="p">()</span>
+    <span class="n">ch</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">_logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
+    <span class="n">ch</span><span class="o">.</span><span class="n">setFormatter</span><span class="p">(</span><span class="n">_logging</span><span class="o">.</span><span class="n">Formatter</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%(filename)s</span><span class="s1"> - </span><span class="si">%(message)s</span><span class="s1">&#39;</span><span class="p">))</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">ch</span><span class="p">)</span>
+
+    <span class="n">fh</span> <span class="o">=</span> <span class="n">_logging</span><span class="o">.</span><span class="n">FileHandler</span><span class="p">(</span><span class="n">_os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">fname</span><span class="p">))</span>
+    <span class="n">fh</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">_logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
+    <span class="n">fh</span><span class="o">.</span><span class="n">setFormatter</span><span class="p">(</span>
+        <span class="n">_logging</span><span class="o">.</span><span class="n">Formatter</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%(asctime)s</span><span class="s1"> - </span><span class="si">%(filename)s</span><span class="s1"> - </span><span class="si">%(message)s</span><span class="s1">&#39;</span><span class="p">))</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">fh</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">logger</span></div>
+
+<span class="c1"># %% --------------------------------------------------------------------------</span>
+
+
+<div class="viewcode-block" id="Session"><a class="viewcode-back" href="../../_autosummary/api/experiment.protocol.html#experiment.protocol.Session">[docs]</a><span class="k">class</span> <span class="nc">Session</span><span class="p">():</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">folder</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">subfolder</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;pre&#39;</span><span class="p">,</span> <span class="s1">&#39;post&#39;</span><span class="p">]):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">create_sessionfolder</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span> <span class="n">subfolder</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">folder</span> <span class="o">=</span> <span class="n">folder</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">subfolder</span> <span class="o">=</span> <span class="n">subfolder</span>
+
+<div class="viewcode-block" id="Session.create_sessionfolder"><a class="viewcode-back" href="../../_autosummary/api/experiment.protocol.html#experiment.protocol.Session.create_sessionfolder">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">create_sessionfolder</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span> <span class="n">subfolder</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;pre&#39;</span><span class="p">,</span> <span class="s1">&#39;post&#39;</span><span class="p">]):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">_os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">folder</span><span class="p">):</span>
+            <span class="n">_os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">folder</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">sf</span> <span class="ow">in</span> <span class="n">subfolder</span><span class="p">:</span>
+            <span class="n">newSubfolder</span> <span class="o">=</span> <span class="n">_os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span> <span class="n">sf</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">_os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">newSubfolder</span><span class="p">):</span>
+                <span class="n">_os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">newSubfolder</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Session.transfer2post"><a class="viewcode-back" href="../../_autosummary/api/experiment.protocol.html#experiment.protocol.Session.transfer2post">[docs]</a>    <span class="k">def</span> <span class="nf">transfer2post</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]):</span>
+        <span class="n">_shutil</span><span class="o">.</span><span class="n">copyfile</span><span class="p">(</span><span class="n">_os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">folder</span><span class="p">,</span>
+                                       <span class="bp">self</span><span class="o">.</span><span class="n">subfolder</span><span class="p">[</span><span class="n">order</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="n">filename</span><span class="p">),</span>
+                         <span class="n">_os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">folder</span><span class="p">,</span>
+                                       <span class="bp">self</span><span class="o">.</span><span class="n">subfolder</span><span class="p">[</span><span class="n">order</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span> <span class="n">filename</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="Session.config"><a class="viewcode-back" href="../../_autosummary/api/experiment.protocol.html#experiment.protocol.Session.config">[docs]</a>    <span class="k">def</span> <span class="nf">config</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">val</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">key</span> <span class="o">==</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">val</span> <span class="o">==</span> <span class="kc">None</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span> <span class="ow">and</span> <span class="n">val</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">del</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="p">(</span><span class="n">key</span> <span class="o">==</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">val</span> <span class="o">==</span> <span class="kc">None</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">key</span><span class="p">:</span> <span class="n">val</span><span class="p">})</span></div>
+
+<div class="viewcode-block" id="Session.saveDir"><a class="viewcode-back" href="../../_autosummary/api/experiment.protocol.html#experiment.protocol.Session.saveDir">[docs]</a>    <span class="k">def</span> <span class="nf">saveDir</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">which</span><span class="p">:</span> <span class="nb">int</span> <span class="ow">or</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">which</span><span class="p">)</span> <span class="o">==</span> <span class="nb">int</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">_os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">folder</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">subfolder</span><span class="p">[</span><span class="n">which</span><span class="p">])</span>
+        <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">which</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">_os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">folder</span><span class="p">,</span> <span class="n">which</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">which</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">_os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">folder</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+
+    <span class="k">def</span> <span class="nf">_dump_config</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s1">&#39;session.json&#39;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">_os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">filename</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;.json&#39;</span><span class="p">:</span>
+            <span class="n">_warn</span><span class="p">(</span><span class="s1">&#39;&#39;&#39;Filename does not end in .json. </span><span class="se">\n</span><span class="s1"></span>
+<span class="s1">                  Solution: I change extension to .json&#39;&#39;&#39;</span><span class="p">)</span>
+
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">_os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">folder</span><span class="p">,</span> <span class="n">filename</span><span class="p">),</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>
+            <span class="n">_json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">,</span> <span class="n">fp</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Session.dump"><a class="viewcode-back" href="../../_autosummary/api/experiment.protocol.html#experiment.protocol.Session.dump">[docs]</a>    <span class="k">def</span> <span class="nf">dump</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dump_config</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="s1">&#39;&#39;&#39;No name was set for the subject</span><span class="se">\n</span><span class="s1"></span>
+<span class="s1">                                    Solution: Set a name first&#39;&#39;&#39;</span><span class="p">)</span>
+
+        <span class="n">mainfolder</span> <span class="o">=</span> <span class="n">_os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">folder</span><span class="p">)</span>
+        <span class="n">recfolder</span> <span class="o">=</span> <span class="n">_os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">mainfolder</span><span class="p">,</span> <span class="s1">&#39;sessions&#39;</span><span class="p">)</span>
+        <span class="n">dst</span> <span class="o">=</span> <span class="n">_os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">recfolder</span><span class="p">,</span> <span class="n">_now</span><span class="p">(</span><span class="s2">&quot;%Y_%m_</span><span class="si">%d</span><span class="s2">&quot;</span><span class="p">)</span> <span class="o">+</span>
+                            <span class="s1">&#39;_&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">_os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">recfolder</span><span class="p">):</span>
+            <span class="n">_os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">recfolder</span><span class="p">)</span>
+        <span class="n">_shutil</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">folder</span><span class="p">,</span> <span class="n">dst</span><span class="p">)</span></div>
+<span class="c1">#</span>
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Run"><a class="viewcode-back" href="../../_autosummary/api/experiment.protocol.html#experiment.protocol.Run">[docs]</a><span class="k">class</span> <span class="nc">Run</span><span class="p">():</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+
+<span class="sd">    &#39;&#39;&#39;</span>
+<div class="viewcode-block" id="Run.join"><a class="viewcode-back" href="../../_autosummary/api/experiment.protocol.html#experiment.protocol.Run.join">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">run</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="n">ext</span><span class="o">=</span><span class="s1">&#39;.eeg&#39;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">_os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span>
+                             <span class="s1">&#39;</span><span class="si">{:02.0f}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">run</span><span class="p">)</span>
+                             <span class="o">+</span> <span class="s1">&#39;_&#39;</span>
+                             <span class="o">+</span> <span class="n">file</span>
+                             <span class="o">+</span> <span class="n">ext</span>
+                             <span class="p">)</span></div>
+
+<div class="viewcode-block" id="Run.condition"><a class="viewcode-back" href="../../_autosummary/api/experiment.protocol.html#experiment.protocol.Run.condition">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">condition</span><span class="p">(</span><span class="n">generic</span><span class="o">=</span><span class="s1">&#39;temporary&#39;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">_inspect</span><span class="o">.</span><span class="n">stack</span><span class="p">()[</span><span class="mi">1</span><span class="p">][</span><span class="mi">3</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;_&#39;</span> <span class="o">+</span> <span class="n">generic</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Run.filename"><a class="viewcode-back" href="../../_autosummary/api/experiment.protocol.html#experiment.protocol.Run.filename">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">filename</span><span class="p">(</span><span class="n">folderPath</span><span class="p">,</span> <span class="n">fileName</span><span class="p">,</span> <span class="n">ext</span><span class="o">=</span><span class="s1">&#39;.eeg&#39;</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">            Takes a folder and filename and extension as argument,</span>
+<span class="sd">            if file already exists, it increases its indicator value and</span>
+<span class="sd">            returns the new filename</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">run</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">return_fname</span> <span class="o">=</span> <span class="n">Run</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">folderPath</span><span class="p">,</span> <span class="n">run</span><span class="p">,</span> <span class="n">fileName</span><span class="p">,</span> <span class="n">ext</span><span class="p">)</span>
+        <span class="k">while</span> <span class="n">_os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">return_fname</span><span class="p">):</span>
+            <span class="n">run</span> <span class="o">=</span> <span class="n">run</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="n">return_fname</span> <span class="o">=</span> <span class="n">Run</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">folderPath</span><span class="p">,</span> <span class="n">run</span><span class="p">,</span> <span class="n">fileName</span><span class="p">,</span> <span class="n">ext</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">return_fname</span></div>
+
+<div class="viewcode-block" id="Run.FileIterator"><a class="viewcode-back" href="../../_autosummary/api/experiment.protocol.html#experiment.protocol.Run.FileIterator">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">FileIterator</span><span class="p">(</span><span class="n">fullPath</span><span class="p">):</span>
+        <span class="n">run</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">filename</span><span class="p">,</span> <span class="n">ext</span> <span class="o">=</span> <span class="n">_os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">fullPath</span><span class="p">)</span>
+        <span class="n">folderPath</span><span class="p">,</span> <span class="n">fileName</span> <span class="o">=</span> <span class="n">_os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">fileName</span> <span class="o">=</span> <span class="n">fileName</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">return_fname</span> <span class="o">=</span> <span class="n">Run</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">folderPath</span><span class="p">,</span> <span class="n">run</span><span class="p">,</span> <span class="n">fileName</span><span class="p">,</span> <span class="n">ext</span><span class="p">)</span>
+        <span class="k">while</span> <span class="n">_os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">return_fname</span><span class="p">):</span>
+            <span class="k">yield</span> <span class="n">return_fname</span><span class="p">,</span> <span class="n">run</span>
+            <span class="n">run</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">return_fname</span> <span class="o">=</span> <span class="n">Run</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">folderPath</span><span class="p">,</span> <span class="n">run</span><span class="p">,</span> <span class="n">fileName</span><span class="p">,</span> <span class="n">ext</span><span class="p">)</span></div></div>
+
+<span class="c1"># %% --------------------------------------------------------------------------</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Experiment Framework 0.2.1. documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, Robert Guggenberger &amp; Max Scherer.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
+    </div>
+  </body>
+</html>

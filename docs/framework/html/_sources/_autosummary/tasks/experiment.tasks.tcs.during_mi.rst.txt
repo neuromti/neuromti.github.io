@@ -1,0 +1,6 @@
+experiment.tasks.tcs.during_mi
+==============================
+
+.. automodule:: experiment.tasks.tcs.during_mi
+    :members:
+    :undoc-members:

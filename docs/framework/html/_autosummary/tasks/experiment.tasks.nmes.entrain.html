@@ -1,0 +1,192 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>experiment.tasks.nmes.entrain &#8212; Experiment Framework 0.2.1. documentation</title>
+    <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.2.1.',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="experiment.tasks.nmes.ioc" href="experiment.tasks.nmes.ioc.html" />
+    <link rel="prev" title="experiment.tasks.tcs.during_mi" href="experiment.tasks.tcs.during_mi.html" /> 
+  </head>
+  <body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="experiment.tasks.nmes.ioc.html" title="experiment.tasks.nmes.ioc"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="experiment.tasks.tcs.during_mi.html" title="experiment.tasks.tcs.during_mi"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Experiment Framework 0.2.1. documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../_tasks.html" accesskey="U">Tasks</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-experiment.tasks.nmes.entrain">
+<span id="experiment-tasks-nmes-entrain"></span><h1>experiment.tasks.nmes.entrain<a class="headerlink" href="#module-experiment.tasks.nmes.entrain" title="Permalink to this headline">¶</a></h1>
+<p>Entrain using peripheral stimulation driven by the neuroConnDC</p>
+<div class="section" id="documentation">
+<h2>Documentation<a class="headerlink" href="#documentation" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="experiment.tasks.nmes.entrain.calc_duration">
+<code class="descclassname">experiment.tasks.nmes.entrain.</code><code class="descname">calc_duration</code><span class="sig-paren">(</span><em>saveDir</em>, <em>stimTarget</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/tasks/nmes/entrain.html#calc_duration"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.tasks.nmes.entrain.calc_duration" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="experiment.tasks.nmes.entrain.start">
+<code class="descclassname">experiment.tasks.nmes.entrain.</code><code class="descname">start</code><span class="sig-paren">(</span><em>nmesTarget='EDC_L'</em>, <em>tcsTarget='C4'</em>, <em>tacsDuration=3</em>, <em>tacsFreq=20</em>, <em>tacsPhase='undefined'</em>, <em>mcsIntensity='single'</em>, <em>numberOfTrials=1</em>, <em>numProbes={'pre': 20</em>, <em>'inter': 20</em>, <em>'post': 0}</em>, <em>saveDir='C:\\projects\\recording'</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/tasks/nmes/entrain.html#start"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.tasks.nmes.entrain.start" title="Permalink to this definition">¶</a></dt>
+<dd><p class="rubric">Notes</p>
+<p>Peripheral nerve stimulation with the
+<code class="xref py py-class docutils literal"><span class="pre">multiChannelSystems</span></code> paired to
+specific phases of transcranial alternating current applied
+with the <code class="xref py py-class docutils literal"><span class="pre">neuroConnDC</span></code>. At the beginning,
+between trials and at the end of the run, probing burst of
+NMES are applied.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>nmesTarget</strong> (<em>the target muscle used for</em>) – </li>
+<li><strong>tcsTarget</strong> (<em>the target for tACS</em>) – </li>
+<li><strong>tacsDuration</strong> (<em>the duration of tACS in seconds</em>) – </li>
+<li><strong>tacsFreq</strong> (<em>the frequency of tACS</em>) – </li>
+<li><strong>tacsPhase</strong> (<em>the phase of tACS at which NMES is applied</em>) – </li>
+<li><strong>mcsIntensity</strong> (<em>the stimulation intensity of NMES</em>) – </li>
+<li><strong>numProbes</strong> (<em>a dictionary with pre</em><em>, </em><em>inter and post keys linked to integer     values</em><em>, </em><em>that define the number of test pulse beforepre and post the run     as well as between trials</em>) – </li>
+<li><strong>numberOfTrials</strong> (<em>A trial consists of tACS and paired NMES with test     pulses applied inbetween.</em>) – </li>
+<li><strong>saveDir</strong> (<em>where the runFile will be stored</em>) – </li>
+<li><strong>rwskp</strong> (<em>a json file containing the EEG workspace</em>) – </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition-side-effect admonition">
+<p class="first admonition-title">side effect</p>
+<p class="last">saves a Brainvisionrecorder eeg file to saveDir</p>
+</div>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<ul class="last simple">
+<li>Uses <a class="reference internal" href="../api/experiment.protocol.html#experiment.protocol.Run" title="experiment.protocol.Run"><code class="xref py py-class docutils literal"><span class="pre">Run</span></code></a> to count runs</li>
+<li>Uses <code class="xref py py-class docutils literal"><span class="pre">Serialtrigger</span></code> to send markers</li>
+</ul>
+</div>
+<div class="admonition tip">
+<p class="first admonition-title">Tip</p>
+<p class="last">Be aware that the stimulators have to be programmed to the desired
+settings. There is no programmatic control over these devices
+besides triggering! The multiChannelSystems needs to to be in <em>single</em>
+mode. Consider especially, that the neuroConn DC needs to listen to its
+<em>TrigIn</em> and deliver a <em>TrigOut</em> at the desired period and phase.
+Double-check the hardware setup!</p>
+</div>
+<div class="admonition-bvr-markers admonition">
+<p class="first admonition-title">BVR Markers</p>
+<ul class="last simple">
+<li>tACS starts at ‘S254’ and/or ‘R  1’</li>
+<li>A NMES pulse is applied at ‘S  1’</li>
+</ul>
+</div>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">experiment.tasks.nmes.entrain</a><ul>
+<li><a class="reference internal" href="#documentation">Documentation</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="experiment.tasks.tcs.during_mi.html"
+                        title="previous chapter">experiment.tasks.tcs.during_mi</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="experiment.tasks.nmes.ioc.html"
+                        title="next chapter">experiment.tasks.nmes.ioc</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/_autosummary/tasks/experiment.tasks.nmes.entrain.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="experiment.tasks.nmes.ioc.html" title="experiment.tasks.nmes.ioc"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="experiment.tasks.tcs.during_mi.html" title="experiment.tasks.tcs.during_mi"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Experiment Framework 0.2.1. documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../_tasks.html" >Tasks</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, Robert Guggenberger &amp; Max Scherer.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,296 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>experiment.classifier &#8212; Experiment Framework 0.2.1. documentation</title>
+    <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.2.1.',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+  </head>
+  <body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Experiment Framework 0.2.1. documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for experiment.classifier</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;This module contains classes resembling online classifiers</span>
+
+<span class="sd">Overview</span>
+<span class="sd">--------</span>
+
+<span class="sd">- BCI2000, an implementation of our old classifer used in e.g. [Bauer2015]_ \</span>
+<span class="sd">:class:`~.experiment.classifier.bci2000`</span>
+
+<span class="sd">.. [Bauer2015] Bauer, R., Fels, M., Vukelić, M., Ziemann, U., \</span>
+<span class="sd">&amp; Gharabaghi, A. (2015). Bridging the gap between motor imagery and motor \</span>
+<span class="sd">execution with a brain–robot interface. NeuroImage, 108, 319–327. \</span>
+<span class="sd">https://doi.org/10.1016/j.neuroimage.2014.12.026</span>
+
+<span class="sd">Documentation</span>
+<span class="sd">-------------</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">experiment.device</span> <span class="k">import</span> <span class="n">nanoClock</span>
+<span class="kn">import</span> <span class="nn">scipy.signal</span>
+<span class="kn">import</span> <span class="nn">scipy.linalg</span>
+<span class="kn">import</span> <span class="nn">wyrm.processing</span>
+<span class="kn">import</span> <span class="nn">wyrm.io</span>
+<span class="kn">import</span> <span class="nn">functools</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">collections</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="c1"># %% -------------------------------------------------------------------------</span>
+
+<div class="viewcode-block" id="pick_chans"><a class="viewcode-back" href="../../_autosummary/api/experiment.classifier.html#experiment.classifier.pick_chans">[docs]</a><span class="k">def</span> <span class="nf">pick_chans</span><span class="p">(</span><span class="n">allChannels</span><span class="p">,</span> <span class="n">selectedChannels</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">allChannels</span><span class="p">)</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">coi</span><span class="p">)</span> <span class="k">for</span> <span class="n">coi</span> <span class="ow">in</span> <span class="n">selectedChannels</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="autopick_chans"><a class="viewcode-back" href="../../_autosummary/api/experiment.classifier.html#experiment.classifier.autopick_chans">[docs]</a><span class="k">def</span> <span class="nf">autopick_chans</span><span class="p">(</span><span class="n">allChannels</span><span class="p">,</span> <span class="n">hemisphere</span> <span class="o">=</span> <span class="s1">&#39;L&#39;</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">hemisphere</span> <span class="o">==</span> <span class="s1">&#39;L&#39;</span><span class="p">:</span>
+        <span class="n">selectedChannels</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;FC3&#39;</span><span class="p">,</span><span class="s1">&#39;C3&#39;</span><span class="p">,</span><span class="s1">&#39;CP3&#39;</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="n">hemisphere</span> <span class="o">==</span> <span class="s1">&#39;R&#39;</span><span class="p">:</span>
+        <span class="n">selectedChannels</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;FC4&#39;</span><span class="p">,</span><span class="s1">&#39;C4&#39;</span><span class="p">,</span><span class="s1">&#39;CP4&#39;</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Selected Hemisphere does not exist&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">pick_chans</span><span class="p">(</span><span class="n">allChannels</span><span class="p">,</span> <span class="n">selectedChannels</span><span class="p">)</span></div>
+
+<span class="k">class</span> <span class="nc">_psd</span><span class="p">:</span>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">yule</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">order</span> <span class="o">=</span> <span class="mi">250</span><span class="p">,</span> <span class="n">nfft</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">,</span> <span class="n">Fs</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">):</span>
+        <span class="n">c</span>       <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">correlate</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="s1">&#39;full&#39;</span><span class="p">)</span>
+        <span class="n">mid</span>     <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">c</span><span class="p">)</span><span class="o">//</span><span class="mi">2</span>
+        <span class="n">acov</span>    <span class="o">=</span> <span class="n">c</span><span class="p">[</span><span class="n">mid</span><span class="p">:]</span>
+        <span class="n">ac</span>      <span class="o">=</span> <span class="n">acov</span><span class="o">/</span><span class="n">acov</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">order</span>   <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">([</span><span class="n">order</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">ac</span><span class="p">)])</span>
+        <span class="n">R</span>       <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">toeplitz</span><span class="p">(</span><span class="n">ac</span><span class="p">[:</span><span class="n">order</span><span class="p">])</span>
+        <span class="n">r</span>       <span class="o">=</span> <span class="n">ac</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="n">order</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">ywPhi</span>   <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">R</span><span class="p">)</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
+        <span class="n">a</span>       <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="o">-</span><span class="n">ywPhi</span><span class="p">])</span>
+        <span class="n">w</span><span class="p">,</span> <span class="n">h</span>    <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">signal</span><span class="o">.</span><span class="n">freqz</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span>
+        <span class="n">db</span>      <span class="o">=</span> <span class="mi">10</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">h</span><span class="p">)</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">h</span><span class="p">)))</span>
+        <span class="n">f</span>       <span class="o">=</span> <span class="n">w</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">Fs</span><span class="o">/</span><span class="mi">2</span>
+        <span class="k">return</span> <span class="n">f</span><span class="p">,</span> <span class="n">db</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">welch</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">order</span> <span class="o">=</span> <span class="mi">250</span><span class="p">,</span> <span class="n">nfft</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">,</span> <span class="n">Fs</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">):</span>
+        <span class="n">f</span><span class="p">,</span> <span class="n">h</span> 	<span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">signal</span><span class="o">.</span><span class="n">welch</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">nperseg</span> <span class="o">=</span> <span class="n">order</span><span class="p">,</span> <span class="n">nfft</span> <span class="o">=</span> <span class="n">nfft</span><span class="p">,</span> <span class="n">fs</span> <span class="o">=</span> <span class="n">Fs</span><span class="p">)</span>
+        <span class="n">db</span> 		<span class="o">=</span> <span class="mi">10</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">h</span><span class="p">)</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">h</span><span class="p">)))</span>
+        <span class="k">return</span> <span class="n">f</span><span class="p">,</span> <span class="n">db</span>
+
+<div class="viewcode-block" id="classifier"><a class="viewcode-back" href="../../_autosummary/api/experiment.classifier.html#experiment.classifier.classifier">[docs]</a><span class="k">class</span> <span class="nc">classifier</span><span class="p">:</span>
+    <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="bci2000"><a class="viewcode-back" href="../../_autosummary/api/experiment.classifier.html#experiment.classifier.bci2000">[docs]</a><span class="k">class</span> <span class="nc">bci2000</span><span class="p">(</span><span class="n">classifier</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">AmpSource</span><span class="p">,</span>
+                 <span class="n">chanIdx</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">],</span>
+                 <span class="n">freqRange</span> <span class="o">=</span> <span class="p">[</span><span class="mi">16</span><span class="p">,</span><span class="mi">22</span><span class="p">],</span>
+                <span class="n">filterBand</span>    <span class="o">=</span> <span class="p">[</span><span class="mi">10</span><span class="p">,</span><span class="mi">30</span><span class="p">],</span>
+                <span class="n">window</span>      <span class="o">=</span> <span class="mi">500</span><span class="p">,</span>
+                <span class="n">updateRate</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span> <span class="c1">#in ms</span>
+                <span class="n">valBufferLen</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
+                <span class="n">featureWeights</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">15</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span><span class="o">/</span><span class="mi">15</span><span class="p">,</span>
+                <span class="n">threshold</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="p">):</span>
+
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">parms</span>      <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parms</span><span class="p">[</span><span class="s1">&#39;chanIdx&#39;</span><span class="p">]</span>       <span class="o">=</span> <span class="n">chanIdx</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parms</span><span class="p">[</span><span class="s1">&#39;chanNames&#39;</span><span class="p">]</span>     <span class="o">=</span> <span class="n">AmpSource</span><span class="o">.</span><span class="n">chan</span><span class="p">[</span><span class="n">chanIdx</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parms</span><span class="p">[</span><span class="s1">&#39;freqRange&#39;</span><span class="p">]</span>     <span class="o">=</span> <span class="n">freqRange</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parms</span><span class="p">[</span><span class="s1">&#39;filterBand&#39;</span><span class="p">]</span>    <span class="o">=</span> <span class="n">filterBand</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parms</span><span class="p">[</span><span class="s1">&#39;Fs&#39;</span><span class="p">]</span>            <span class="o">=</span> <span class="n">AmpSource</span><span class="o">.</span><span class="n">fs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parms</span><span class="p">[</span><span class="s1">&#39;window&#39;</span><span class="p">]</span>        <span class="o">=</span> <span class="n">window</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parms</span><span class="p">[</span><span class="s1">&#39;updateRate&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">updateRate</span> <span class="o">/</span> <span class="mi">1000</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parms</span><span class="p">[</span><span class="s1">&#39;featureWeights&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">featureWeights</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parms</span><span class="p">[</span><span class="s1">&#39;valBufferLen&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">valBufferLen</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parms</span><span class="p">[</span><span class="s1">&#39;threshold&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">threshold</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">AmpSource</span> <span class="o">=</span> <span class="n">AmpSource</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_register_timer</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_register_filter</span><span class="p">(</span><span class="n">filterBand</span><span class="p">,</span> <span class="n">AmpSource</span><span class="o">.</span><span class="n">fs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_register_psd</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">featureBuffer</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parms</span><span class="p">[</span><span class="s1">&#39;freqBins&#39;</span><span class="p">]),</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parms</span><span class="p">[</span><span class="s1">&#39;chanIdx&#39;</span><span class="p">])))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">valBuffer</span>      <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">normMU</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">normSD</span> <span class="o">=</span> <span class="mi">1</span>
+
+<div class="viewcode-block" id="bci2000.save_config"><a class="viewcode-back" href="../../_autosummary/api/experiment.classifier.html#experiment.classifier.bci2000.save_config">[docs]</a>    <span class="k">def</span> <span class="nf">save_config</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">jsonFileName</span><span class="p">):</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">jsonFileName</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>
+            <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parms</span><span class="p">)</span><span class="o">.</span><span class="n">to_json</span><span class="p">(</span><span class="n">orient</span><span class="o">=</span><span class="s1">&#39;index&#39;</span><span class="p">),</span> <span class="n">fp</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="bci2000.register_feedback"><a class="viewcode-back" href="../../_autosummary/api/experiment.classifier.html#experiment.classifier.bci2000.register_feedback">[docs]</a>    <span class="k">def</span> <span class="nf">register_feedback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">foo</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">foo</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">feedback</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_feedback</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">feedback</span> <span class="o">=</span> <span class="n">foo</span></div>
+
+    <span class="k">def</span> <span class="nf">_feedback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">percent</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span> <span class="nf">_register_timer</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+         <span class="bp">self</span><span class="o">.</span><span class="n">timer</span> <span class="o">=</span> <span class="n">nanoClock</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_register_psd</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">psd_order</span> 	<span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parms</span><span class="p">[</span><span class="s1">&#39;window&#39;</span><span class="p">]</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">nfft</span>    	<span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parms</span><span class="p">[</span><span class="s1">&#39;Fs&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parms</span><span class="p">[</span><span class="s1">&#39;psdConfig&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;order&#39;</span><span class="p">:</span><span class="n">psd_order</span><span class="p">,</span>
+                                  <span class="s1">&#39;nfft&#39;</span><span class="p">:</span><span class="n">nfft</span><span class="p">,</span>
+                                  <span class="s1">&#39;Fs&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">parms</span><span class="p">[</span><span class="s1">&#39;Fs&#39;</span><span class="p">]</span>
+                                  <span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">psd</span> <span class="o">=</span> <span class="n">_psd</span><span class="o">.</span><span class="n">welch</span>
+        <span class="n">fR</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">parms</span><span class="p">[</span><span class="s1">&#39;Fs&#39;</span><span class="p">]</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="o">/</span><span class="n">nfft</span><span class="p">)</span>
+        <span class="n">fF</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parms</span><span class="p">[</span><span class="s1">&#39;freqRange&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parms</span><span class="p">[</span><span class="s1">&#39;freqBins&#39;</span><span class="p">]</span>  <span class="o">=</span> <span class="p">[</span><span class="n">fi</span> <span class="k">for</span> <span class="n">fi</span><span class="p">,</span><span class="n">ff</span> <span class="ow">in</span>
+                  <span class="nb">enumerate</span><span class="p">(</span><span class="n">fR</span><span class="p">)</span>
+                  <span class="k">if</span> <span class="p">(</span><span class="n">fi</span><span class="o">&gt;</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">fF</span><span class="p">)</span> <span class="ow">and</span> <span class="n">fi</span><span class="o">&lt;</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">fF</span><span class="p">))]</span>
+
+    <span class="k">def</span> <span class="nf">_register_filter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filterBand</span><span class="p">,</span> <span class="n">Fs</span><span class="p">):</span>
+        <span class="n">Nyqist</span>  <span class="o">=</span> <span class="n">Fs</span><span class="o">/</span><span class="mi">2</span>
+        <span class="n">b</span><span class="p">,</span> <span class="n">a</span>    <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">signal</span><span class="o">.</span><span class="n">butter</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="p">[</span><span class="n">filterBand</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">Nyqist</span><span class="p">,</span>
+                                       <span class="n">filterBand</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">/</span> <span class="n">Nyqist</span><span class="p">],</span> <span class="n">btype</span><span class="o">=</span><span class="s1">&#39;band&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">filter</span> <span class="o">=</span> <span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="n">scipy</span><span class="o">.</span><span class="n">signal</span><span class="o">.</span><span class="n">filtfilt</span><span class="p">,</span>
+                                            <span class="n">b</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_data2feature</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">data</span><span class="p">))</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_2d</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">parms</span><span class="p">[</span><span class="s1">&#39;window&#39;</span><span class="p">]:,</span>
+                               <span class="bp">self</span><span class="o">.</span><span class="n">parms</span><span class="p">[</span><span class="s1">&#39;chanIdx&#39;</span><span class="p">]</span>
+                               <span class="p">]</span><span class="o">.</span><span class="n">T</span>
+
+        <span class="k">for</span> <span class="n">chanID</span><span class="p">,</span><span class="n">chanData</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+            <span class="n">tmp</span>     <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">chanData</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+            <span class="n">f</span><span class="p">,</span> <span class="n">psd</span>  <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">psd</span><span class="p">(</span><span class="n">tmp</span><span class="p">,</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">parms</span><span class="p">[</span><span class="s1">&#39;psdConfig&#39;</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">featureBuffer</span><span class="p">[:,</span><span class="n">chanID</span><span class="p">]</span> <span class="o">=</span>  <span class="n">psd</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">parms</span><span class="p">[</span><span class="s1">&#39;freqBins&#39;</span><span class="p">]]</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">featureBuffer</span>
+
+    <span class="k">def</span> <span class="nf">_feature2val</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">feature</span><span class="p">):</span>
+        <span class="c1"># weight the feature</span>
+        <span class="c1">#self.rawVal = feature.flatten().dot(self.parms[&#39;featureWeights&#39;])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rawVal</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">feature</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">rawVal</span>
+
+    <span class="k">def</span> <span class="nf">_val2norm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rawVal</span><span class="p">,</span> <span class="n">weightUpdate</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">weightUpdate</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">elif</span> <span class="n">weightUpdate</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">valBuffer</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rawVal</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">valBuffer</span><span class="p">)</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">parms</span><span class="p">[</span><span class="s1">&#39;valBufferLen&#39;</span><span class="p">]:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">valBuffer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">valBuffer</span><span class="p">[</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">parms</span><span class="p">[</span><span class="s1">&#39;valBufferLen&#39;</span><span class="p">]:]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">normSD</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">valBuffer</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">normMU</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">valBuffer</span><span class="p">)</span>
+            <span class="k">pass</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">normOut</span> <span class="o">=</span> <span class="p">(</span><span class="n">rawVal</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">normMU</span><span class="p">)</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">normSD</span>
+        <span class="c1"># addition -&gt; higher thresholds are more difficult to desync</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">classOut</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">normOut</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">parms</span><span class="p">[</span><span class="s1">&#39;threshold&#39;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">normOut</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">classOut</span>
+
+    <span class="k">def</span> <span class="nf">_norm2percent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">classOut</span><span class="p">):</span>
+        <span class="c1"># higher relative power means lower percent value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">percent</span> <span class="o">=</span>  <span class="p">(</span><span class="n">scipy</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">norm</span><span class="o">.</span><span class="n">cdf</span><span class="p">(</span><span class="n">classOut</span><span class="p">))</span><span class="o">*</span><span class="mi">100</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">percent</span>
+
+<div class="viewcode-block" id="bci2000.classify"><a class="viewcode-back" href="../../_autosummary/api/experiment.classifier.html#experiment.classifier.bci2000.classify">[docs]</a>    <span class="k">def</span> <span class="nf">classify</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">weightUpdate</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+        <span class="n">feature</span>             <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data2feature</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="n">rawVal</span>              <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_feature2val</span><span class="p">(</span><span class="n">feature</span><span class="p">)</span>
+        <span class="n">normOut</span><span class="p">,</span> <span class="n">classOut</span>   <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_val2norm</span><span class="p">(</span><span class="n">rawVal</span><span class="p">,</span> <span class="n">weightUpdate</span><span class="p">)</span>
+        <span class="n">percent</span>             <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_norm2percent</span><span class="p">(</span><span class="n">classOut</span><span class="p">)</span>
+        <span class="c1"># values below zero indicate low power -&gt; ERD</span>
+        <span class="c1"># values above zero indicate: isRest</span>
+        <span class="n">isRest</span>               <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">classOut</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">isRest</span><span class="p">,</span> <span class="n">percent</span></div>
+
+<div class="viewcode-block" id="bci2000.update"><a class="viewcode-back" href="../../_autosummary/api/experiment.classifier.html#experiment.classifier.bci2000.update">[docs]</a>    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">weightUpdate</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">timer</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+        <span class="n">cnt</span>  <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">timer</span><span class="o">.</span><span class="n">delay</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parms</span><span class="p">[</span><span class="s1">&#39;updateRate&#39;</span><span class="p">],</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">AmpSource</span><span class="o">.</span><span class="n">receive_ring</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">cnt</span><span class="p">:</span>
+            <span class="n">isRest</span><span class="p">,</span> <span class="n">percent</span>  <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">classify</span><span class="p">(</span><span class="n">cnt</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">weightUpdate</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">isRest</span><span class="p">,</span> <span class="n">percent</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span><span class="p">,</span> <span class="mi">0</span></div>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">f</span><span class="s1">&#39;SD= </span><span class="si">{self.normSD}</span><span class="s1"> M= </span><span class="si">{self.normMU}</span><span class="s1"> Val= </span><span class="si">{self.valBuffer[-1]}</span><span class="s1">&#39;</span></div>
+
+<span class="c1"># %%</span>
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="k">pass</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Experiment Framework 0.2.1. documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, Robert Guggenberger &amp; Max Scherer.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
+    </div>
+  </body>
+</html>

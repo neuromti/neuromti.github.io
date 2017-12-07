@@ -1,0 +1,42 @@
+Tasks
+=====
+
+.. currentmodule:: experiment.tasks
+
+TCS
+---
+
+.. autosummary::
+   :toctree: _autosummary/tasks
+   :template: module.rst
+
+    tcs.during_mi
+
+NMES
+----
+
+.. autosummary::
+   :toctree: _autosummary/tasks
+   :template: module.rst
+
+    nmes.entrain
+    nmes.ioc
+
+EMG
+---
+
+.. autosummary::
+   :toctree: _autosummary/tasks
+   :template: module.rst
+
+    emg.feedback
+    emg.mvc
+
+other
+-----
+.. autosummary::
+   :toctree: _autosummary/tasks
+   :template: module.rst
+
+    other.rest
+    other.bomedus  

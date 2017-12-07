@@ -1,0 +1,6 @@
+experiment.tasks.other.rest
+===========================
+
+.. automodule:: experiment.tasks.other.rest
+    :members:
+    :undoc-members:

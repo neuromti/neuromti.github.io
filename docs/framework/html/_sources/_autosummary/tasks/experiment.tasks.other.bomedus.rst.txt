@@ -1,0 +1,6 @@
+experiment.tasks.other.bomedus
+==============================
+
+.. automodule:: experiment.tasks.other.bomedus
+    :members:
+    :undoc-members:

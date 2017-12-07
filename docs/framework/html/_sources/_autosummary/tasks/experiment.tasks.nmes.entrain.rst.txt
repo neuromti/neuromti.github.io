@@ -1,0 +1,6 @@
+experiment.tasks.nmes.entrain
+=============================
+
+.. automodule:: experiment.tasks.nmes.entrain
+    :members:
+    :undoc-members:

@@ -1,0 +1,1574 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>experiment.device &#8212; Experiment Framework 0.2.1. documentation</title>
+    <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.2.1.',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+  </head>
+  <body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Experiment Framework 0.2.1. documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for experiment.device</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;This module contains classes resembling devices</span>
+
+<span class="sd">Overview</span>
+<span class="sd">--------</span>
+<span class="sd">- triggerdevices, e.g.  i.e. :class:`~.experiment.device.SerialTrigger` \</span>
+<span class="sd">or :class:`~.experiment.device.SoftwareTrigger`</span>
+<span class="sd">- screen, i.e. :class:`~.experiment.device.Screen`</span>
+<span class="sd">- speaker, i.e. :class:`~.experiment.device.Speaker`</span>
+<span class="sd">- stimulators, e.g. :class:`~.experiment.device.neuroConnDC` or \</span>
+<span class="sd">:class:`~.experiment.device.multiChannelSystems`</span>
+<span class="sd">- amplifiers, e.g. :class:`~.experiment.device.BrainAmp` or \</span>
+<span class="sd"> :class:`~.experiment.device.VisionRecorder`</span>
+
+<span class="sd">Documentation</span>
+<span class="sd">-------------</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">os</span> <span class="k">as</span> <span class="nn">_os</span>
+<span class="kn">from</span> <span class="nn">warnings</span> <span class="k">import</span> <span class="n">warn</span> <span class="k">as</span> <span class="n">_warn</span>
+<span class="kn">import</span> <span class="nn">cues.visual</span> <span class="k">as</span> <span class="nn">_visual</span>
+<span class="kn">import</span> <span class="nn">cues.acoustic</span> <span class="k">as</span> <span class="nn">_acoustic</span>
+<span class="kn">from</span> <span class="nn">threading</span> <span class="k">import</span> <span class="n">Thread</span> <span class="k">as</span> <span class="n">_thread</span>
+<span class="kn">from</span> <span class="nn">threading</span> <span class="k">import</span> <span class="n">Timer</span> <span class="k">as</span> <span class="n">_timer</span>
+<span class="kn">from</span> <span class="nn">screeninfo</span> <span class="k">import</span> <span class="n">get_monitors</span> <span class="k">as</span> <span class="n">_get_monitors</span>
+<span class="kn">import</span> <span class="nn">serial</span> <span class="k">as</span> <span class="nn">_serial</span>
+<span class="kn">from</span> <span class="nn">utils</span> <span class="k">import</span> <span class="n">time</span> <span class="k">as</span> <span class="n">_nanotime</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="k">import</span> <span class="n">lru_cache</span>
+<span class="kn">import</span> <span class="nn">wyrm.io</span> <span class="k">as</span> <span class="nn">_io</span>
+<span class="kn">import</span> <span class="nn">wyrm.types</span> <span class="k">as</span> <span class="nn">_wtypes</span>
+<span class="kn">import</span> <span class="nn">libmushu</span> <span class="k">as</span> <span class="nn">_libmushu</span>
+<span class="kn">import</span> <span class="nn">json</span> <span class="k">as</span> <span class="nn">_json</span>
+<span class="kn">from</span> <span class="nn">warnings</span> <span class="k">import</span> <span class="n">warn</span> <span class="k">as</span> <span class="n">_warn</span>
+<span class="kn">from</span> <span class="nn">unittest.mock</span> <span class="k">import</span> <span class="n">Mock</span> <span class="k">as</span> <span class="n">NullDevice</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">_np</span>
+<span class="kn">import</span> <span class="nn">gc</span>
+<span class="kn">import</span> <span class="nn">experiment</span> <span class="k">as</span> <span class="nn">_experiment</span>
+
+<span class="k">if</span> <span class="n">_experiment</span><span class="o">.</span><span class="n">PLATFORM</span> <span class="o">==</span> <span class="s2">&quot;win32&quot;</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">win32api</span> <span class="k">as</span> <span class="nn">_win32api</span>
+    <span class="kn">from</span> <span class="nn">win32com.client</span> <span class="k">import</span> <span class="n">Dispatch</span> <span class="k">as</span> <span class="n">_Dispatch</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="n">_warn</span><span class="p">(</span><span class="s1">&#39;Can not load Win32API&#39;</span><span class="p">)</span>
+
+
+<span class="c1"># %% --------------------------------------------------------------------------</span>
+
+
+<div class="viewcode-block" id="Speaker"><a class="viewcode-back" href="../../_autosummary/api/experiment.device.html#experiment.device.Speaker">[docs]</a><span class="k">class</span> <span class="nc">Speaker</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Represents a speaker box</span>
+
+<span class="sd">    Example::</span>
+
+<span class="sd">        box = Speaker()</span>
+<span class="sd">        box.forceplay(Sound)</span>
+
+<span class="sd">    does this::</span>
+
+<span class="sd">        box = Speaker()</span>
+<span class="sd">        box.open()</span>
+<span class="sd">        box.flush()</span>
+<span class="sd">        box.buffer(Sound)</span>
+<span class="sd">        box.play(Sound)</span>
+
+<span class="sd">    notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    The Speaker requires a sound object to play</span>
+
+<span class="sd">    .. seealso::</span>
+<span class="sd">        - :class:`~.experiment.stimulus.Sound`</span>
+<span class="sd">        - :mod:`cues.acoustic`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">libActive</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ThreadState</span> <span class="o">=</span> <span class="s1">&#39;Empty&#39;</span>
+
+        <span class="k">if</span> <span class="n">_experiment</span><span class="o">.</span><span class="n">PLATFORM</span> <span class="o">==</span> <span class="s1">&#39;win32&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_acousticDllPath</span> <span class="o">=</span> <span class="n">_os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                <span class="n">_experiment</span><span class="o">.</span><span class="n">LIBPATH</span><span class="p">,</span> <span class="s1">&#39;dll&#39;</span><span class="p">,</span> <span class="s1">&#39;release&#39;</span><span class="p">,</span> <span class="s1">&#39;libacoustic.dll&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">_warn</span><span class="p">(</span><span class="s1">&#39;Platform not Windows, Library was not loaded</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">+</span>
+                  <span class="s1">&#39;Using a nulldevice instead&#39;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_thread</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sound</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="Speaker.open"><a class="viewcode-back" href="../../_autosummary/api/experiment.device.html#experiment.device.Speaker.open">[docs]</a>    <span class="k">def</span> <span class="nf">open</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Connect to the Speaker box</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">libActive</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">_experiment</span><span class="o">.</span><span class="n">PLATFORM</span> <span class="o">==</span> <span class="s1">&#39;win32&#39;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_lib</span> <span class="o">=</span> <span class="n">_acoustic</span><span class="o">.</span><span class="n">Acoustic</span><span class="p">(</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">_acousticDllPath</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_lib</span> <span class="o">=</span> <span class="n">NullDevice</span><span class="p">(</span><span class="n">_acoustic</span><span class="o">.</span><span class="n">Acoustic</span><span class="p">(</span>
+                                       <span class="bp">self</span><span class="o">.</span><span class="n">_acousticDllPath</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">libActive</span> <span class="o">=</span> <span class="kc">True</span></div>
+
+<div class="viewcode-block" id="Speaker.buffer"><a class="viewcode-back" href="../../_autosummary/api/experiment.device.html#experiment.device.Speaker.buffer">[docs]</a>    <span class="k">def</span> <span class="nf">buffer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Sound</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Puts a sound object into the stream buffer</span>
+
+<span class="sd">        args</span>
+<span class="sd">        ----</span>
+<span class="sd">        sound: :class:`~.experiment.protocol.Sound`</span>
+<span class="sd">            A sound to played</span>
+
+
+<span class="sd">        .. admonition:: sideeffect</span>
+
+<span class="sd">            flushes the current buffer</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ThreadState</span> <span class="o">==</span> <span class="s1">&#39;Buffered&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="p">(</span><span class="n">Sound</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ThreadState</span> <span class="o">==</span> <span class="s1">&#39;Empty&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_lib</span><span class="o">.</span><span class="n">setupFileDirectly</span><span class="p">(</span><span class="n">Sound</span><span class="o">.</span><span class="n">soundID</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_thread</span> <span class="o">=</span> <span class="n">_thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_lib</span><span class="o">.</span><span class="n">playFileNow</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">())</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_ThreadState</span> <span class="o">=</span> <span class="s1">&#39;Buffered&#39;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_sound</span> <span class="o">=</span> <span class="n">Sound</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="Speaker.flush"><a class="viewcode-back" href="../../_autosummary/api/experiment.device.html#experiment.device.Speaker.flush">[docs]</a>    <span class="k">def</span> <span class="nf">flush</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Flushes the stream buffer</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ThreadState</span> <span class="o">==</span> <span class="s1">&#39;Running&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_thread</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+            <span class="k">del</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_thread</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_ThreadState</span> <span class="o">=</span> <span class="s1">&#39;Empty&#39;</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ThreadState</span> <span class="o">==</span> <span class="s1">&#39;Buffered&#39;</span><span class="p">:</span>
+            <span class="k">del</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_thread</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_ThreadState</span> <span class="o">=</span> <span class="s1">&#39;Empty&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="Speaker.play"><a class="viewcode-back" href="../../_autosummary/api/experiment.device.html#experiment.device.Speaker.play">[docs]</a>    <span class="k">def</span> <span class="nf">play</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Plays the sound object currently in the stream buffer</span>
+
+<span class="sd">        notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        will ignore the command if it is still playing the last sound</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ThreadState</span> <span class="o">==</span> <span class="s1">&#39;Buffered&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_thread</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_ThreadState</span> <span class="o">=</span> <span class="s1">&#39;Running&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="Speaker.forceplay"><a class="viewcode-back" href="../../_autosummary/api/experiment.device.html#experiment.device.Speaker.forceplay">[docs]</a>    <span class="k">def</span> <span class="nf">forceplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sound</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Enforces the immediate play of a sound object</span>
+
+<span class="sd">        args</span>
+<span class="sd">        ----</span>
+<span class="sd">            sound: :class:`~.experiment.protocol.Sound`</span>
+<span class="sd">                A sound to played</span>
+
+<span class="sd">        .. admonition:: sideeffect</span>
+
+<span class="sd">            flushes the Speakers buffer</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">libActive</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">open</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="p">(</span><span class="n">sound</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">play</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="Speaker.replay"><a class="viewcode-back" href="../../_autosummary/api/experiment.device.html#experiment.device.Speaker.replay">[docs]</a>    <span class="k">def</span> <span class="nf">replay</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Replays the sound object played last if still in history or buffer</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sound</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ThreadState</span> <span class="o">==</span> <span class="s1">&#39;Empty&#39;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_sound</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ThreadState</span> <span class="o">==</span> <span class="s1">&#39;Buffered&#39;</span><span class="p">:</span>
+                <span class="k">pass</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ThreadState</span> <span class="o">==</span> <span class="s1">&#39;Running&#39;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_sound</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">play</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">LookupError</span><span class="p">(</span><span class="s1">&#39;No sound in history&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Speaker.clear"><a class="viewcode-back" href="../../_autosummary/api/experiment.device.html#experiment.device.Speaker.clear">[docs]</a>    <span class="k">def</span> <span class="nf">clear</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;flushes the stream buffer and forgets the sound played</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sound</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="Speaker.close"><a class="viewcode-back" href="../../_autosummary/api/experiment.device.html#experiment.device.Speaker.close">[docs]</a>    <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Closes connection to the Speaker Box</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">libActive</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+            <span class="k">del</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_lib</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">libActive</span> <span class="o">=</span> <span class="kc">False</span></div>
+
+    <span class="k">def</span> <span class="nf">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+<span class="c1"># %%---------------------------------------------------------------------------</span>
+
+
+<div class="viewcode-block" id="Screen"><a class="viewcode-back" href="../../_autosummary/api/experiment.device.html#experiment.device.Screen">[docs]</a><span class="k">class</span> <span class="nc">Screen</span><span class="p">(</span><span class="n">_visual</span><span class="o">.</span><span class="n">VisualConfig</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Class representing the display screen for cue presentation</span>
+
+<span class="sd">    Example::</span>
+
+<span class="sd">        screen = Screen(FontName = &quot;freesans&quot;, selectedMonitor = 1)</span>
+<span class="sd">        screen.open()</span>
+<span class="sd">        # fills monitor 2 with a black background</span>
+<span class="sd">        screen.close()</span>
+
+<span class="sd">    The screen offers a class-wide dictionary with several default colors</span>
+<span class="sd">    (e.g. red, green, gray, etc) at *screen.colors*. It allows to select fonts</span>
+<span class="sd">    and automatically reads the screensize of currently connected displays</span>
+
+
+<span class="sd">    .. seealso::</span>
+
+<span class="sd">        :mod:`cues.visual`</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">libActive</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="n">colors</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;red&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.9</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">],</span>
+        <span class="s2">&quot;pink&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.9</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">],</span>
+        <span class="s2">&quot;green&quot;</span><span class="p">:</span> <span class="p">[</span><span class="o">.</span><span class="mi">25</span><span class="p">,</span> <span class="o">.</span><span class="mi">8</span><span class="p">,</span> <span class="o">.</span><span class="mi">25</span><span class="p">],</span>
+        <span class="s2">&quot;white&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+        <span class="s2">&quot;black&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+        <span class="s2">&quot;gray&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.25</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">],</span>
+        <span class="s2">&quot;light&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">],</span>
+        <span class="s2">&quot;dark&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">],</span>
+    <span class="p">}</span>  <span class="c1">#: A dictionary of color strings encoding a tuple in RGB</span>
+
+    <span class="n">fonts</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;dyslexic&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;opendyslexic</span><span class="se">\\</span><span class="s2">OpenDyslexicMono-Regular.otf&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;inconsolata&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;inconsolata</span><span class="se">\\</span><span class="s2">Inconsolata-Regular.ttf&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;freesans&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;freesans</span><span class="se">\\</span><span class="s2">FreeSans.ttf&quot;</span><span class="p">],</span>
+    <span class="p">}</span>  <span class="c1">#: A dictionary of fontname strings encoding paths to fonts</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">FontName</span><span class="o">=</span><span class="s2">&quot;inconsolata&quot;</span><span class="p">,</span> <span class="n">selectedMonitor</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Creates a new display screen instance</span>
+
+<span class="sd">        notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        Requires a win32 environment to access the dll library and *warns* if</span>
+<span class="sd">        this is not the case. Attempts toa automatically detect dlls at</span>
+<span class="sd">        ``~\dll\release`` during import.</span>
+
+
+<span class="sd">        args</span>
+<span class="sd">        ----</span>
+<span class="sd">        FontName: str</span>
+<span class="sd">            select a fontname from :attr:`~.experiment.device.Screen.fonts`</span>
+<span class="sd">        selectedMonitor: int</span>
+<span class="sd">            starts indexing at 0, defaults to 1</span>
+
+
+<span class="sd">        .. seealso::</span>
+<span class="sd">            :class:`~.experiment.stimulus.frame `</span>
+
+<span class="sd">        .. tip::</span>
+<span class="sd">            You can find and add additional fonts in ``~\fonts```</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="n">_experiment</span><span class="o">.</span><span class="n">PLATFORM</span> <span class="o">==</span> <span class="s1">&#39;win32&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">_os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">_experiment</span><span class="o">.</span><span class="n">LIBPATH</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">visualDllPath</span> <span class="o">=</span> <span class="p">(</span><span class="n">_experiment</span><span class="o">.</span><span class="n">LIBPATH</span> <span class="o">+</span>
+                                      <span class="s2">&quot;</span><span class="se">\\</span><span class="s2">dll</span><span class="se">\\</span><span class="s2">release</span><span class="se">\\</span><span class="s2">libvisual.dll&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">selectedMonitor</span> <span class="o">=</span> <span class="n">selectedMonitor</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">shaderPath</span> <span class="o">=</span> <span class="p">(</span><span class="n">_experiment</span><span class="o">.</span><span class="n">LIBPATH</span> <span class="o">+</span>
+                                   <span class="s2">&quot;</span><span class="se">\\</span><span class="s2">code</span><span class="se">\\</span><span class="s2">cues</span><span class="se">\\</span><span class="s2">visual</span><span class="se">\\</span><span class="s2">Shader</span><span class="se">\\</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">fontPath</span> <span class="o">=</span> <span class="p">(</span><span class="n">_experiment</span><span class="o">.</span><span class="n">LIBPATH</span> <span class="o">+</span>
+                                 <span class="s2">&quot;</span><span class="se">\\</span><span class="s2">fonts</span><span class="se">\\</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">fonts</span><span class="p">[</span><span class="n">FontName</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">_warn</span><span class="p">(</span><span class="s1">&#39;Platform not Windows, Library was not loaded</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">+</span>
+                  <span class="s1">&#39;Using a nulldevice instead&#39;</span><span class="p">)</span>
+
+        <span class="c1"># set screensize</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="p">[</span><span class="n">m</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">_get_monitors</span><span class="p">()]</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">monitor</span> <span class="o">=</span> <span class="n">m</span><span class="p">[</span><span class="n">selectedMonitor</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ResourceWarning</span><span class="p">(</span><span class="s1">&#39;&#39;&#39;This screen is not available.</span><span class="se">\n</span><span class="s1"></span>
+<span class="s1">                       Solution: Select a different screen&#39;&#39;&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setScreenSize</span><span class="p">(</span><span class="n">monitor</span><span class="o">.</span><span class="n">width</span><span class="p">,</span> <span class="n">monitor</span><span class="o">.</span><span class="n">height</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setFeedbackColors</span><span class="p">()</span>
+
+<div class="viewcode-block" id="Screen.setScreenSize"><a class="viewcode-back" href="../../_autosummary/api/experiment.device.html#experiment.device.Screen.setScreenSize">[docs]</a>    <span class="k">def</span> <span class="nf">setScreenSize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">=</span> <span class="n">width</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">height</span> <span class="o">=</span> <span class="n">height</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">diag</span> <span class="o">=</span> <span class="p">(</span><span class="n">height</span> <span class="o">*</span> <span class="n">width</span><span class="p">)</span><span class="o">**</span><span class="mf">0.5</span></div>
+
+<div class="viewcode-block" id="Screen.setFeedbackColors"><a class="viewcode-back" href="../../_autosummary/api/experiment.device.html#experiment.device.Screen.setFeedbackColors">[docs]</a>    <span class="k">def</span> <span class="nf">setFeedbackColors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                          <span class="n">OnTarget</span><span class="o">=</span><span class="n">colors</span><span class="p">[</span><span class="s2">&quot;green&quot;</span><span class="p">],</span>
+                          <span class="n">BelowTarget</span><span class="o">=</span><span class="n">colors</span><span class="p">[</span><span class="s2">&quot;red&quot;</span><span class="p">],</span>
+                          <span class="n">AboveTarget</span><span class="o">=</span><span class="n">colors</span><span class="p">[</span><span class="s2">&quot;red&quot;</span><span class="p">]</span>
+                          <span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Sets the Default colors used for feedback on this display</span>
+
+<span class="sd">        Defaults are green, red, red</span>
+
+<span class="sd">        args</span>
+<span class="sd">        ----</span>
+
+<span class="sd">        OnTarget: tuple</span>
+<span class="sd">            3 RGB values</span>
+<span class="sd">        BelowTarget: tuple</span>
+<span class="sd">            3 RGB values</span>
+<span class="sd">        AboveTarget: tuple</span>
+<span class="sd">            3 RGB values</span>
+
+
+<span class="sd">        .. tip::</span>
+<span class="sd">            Use a key to :attr:`~.experiment.device.Screen.colors` for several</span>
+<span class="sd">            default colors</span>
+
+
+<span class="sd">        .. seealso::</span>
+<span class="sd">            :class:`~.experiment.stimulus.Dynamic`</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ON</span> <span class="o">=</span> <span class="n">OnTarget</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ABOVE</span> <span class="o">=</span> <span class="n">AboveTarget</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_BELOW</span> <span class="o">=</span> <span class="n">BelowTarget</span></div>
+
+<div class="viewcode-block" id="Screen.open"><a class="viewcode-back" href="../../_autosummary/api/experiment.device.html#experiment.device.Screen.open">[docs]</a>    <span class="k">def</span> <span class="nf">open</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Opens the display screen</span>
+
+<span class="sd">        .. admonition: side-effect</span>
+
+<span class="sd">           sets the cursor position to (0,0)</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">libActive</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">_experiment</span><span class="o">.</span><span class="n">PLATFORM</span> <span class="o">==</span> <span class="s1">&#39;win32&#39;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_Win</span> <span class="o">=</span> <span class="n">_visual</span><span class="o">.</span><span class="n">Visual</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">visualDllPath</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_Win</span><span class="o">.</span><span class="n">createWindow</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_Win</span><span class="o">.</span><span class="n">enableVSync</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">libActive</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_init_Blank</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+                <span class="n">_win32api</span><span class="o">.</span><span class="n">SetCursorPos</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">_warn</span><span class="p">(</span><span class="s1">&#39;Platform not Windows, Library was not loaded&#39;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_Win</span> <span class="o">=</span> <span class="n">NullDevice</span><span class="p">(</span><span class="n">_visual</span><span class="o">.</span><span class="n">Visual</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_init_Blank</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_Blank</span> <span class="o">=</span> <span class="n">_visual</span><span class="o">.</span><span class="n">VisualConfig</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_Blank</span><span class="o">.</span><span class="n">ColorRGB</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">colors</span><span class="p">[</span><span class="s2">&quot;black&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_Blank</span><span class="o">.</span><span class="n">height</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_Blank</span><span class="o">.</span><span class="n">width</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_Blank</span><span class="o">.</span><span class="n">xPos</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_Blank</span><span class="o">.</span><span class="n">yPos</span> <span class="o">=</span> <span class="mi">0</span>
+
+<div class="viewcode-block" id="Screen.clear"><a class="viewcode-back" href="../../_autosummary/api/experiment.device.html#experiment.device.Screen.clear">[docs]</a>    <span class="k">def</span> <span class="nf">clear</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Clears the display screen to full black</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">libActive</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">open</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_Win</span><span class="o">.</span><span class="n">drawRectangle</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_Blank</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_Win</span><span class="o">.</span><span class="n">showNow</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="Screen.close"><a class="viewcode-back" href="../../_autosummary/api/experiment.device.html#experiment.device.Screen.close">[docs]</a>    <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Closes the display screen</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">libActive</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">_experiment</span><span class="o">.</span><span class="n">PLATFORM</span> <span class="o">==</span> <span class="s1">&#39;win32&#39;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_Win</span><span class="o">.</span><span class="n">deleteWindow</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">pass</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">libActive</span> <span class="o">=</span> <span class="kc">False</span></div>
+
+    <span class="k">def</span> <span class="nf">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span></div>
+    <span class="c1">#    print(&quot;Shutting Down: &quot; + self.__repr__())</span>
+
+<span class="c1"># %%---------------------------------------------------------------------------</span>
+
+
+<div class="viewcode-block" id="nanoClock"><a class="viewcode-back" href="../../_autosummary/api/experiment.device.html#experiment.device.nanoClock">[docs]</a><span class="k">class</span> <span class="nc">nanoClock</span><span class="p">(</span><span class="n">_nanotime</span><span class="o">.</span><span class="n">NanoTime</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Class representing a nanoClock</span>
+
+<span class="sd">    A minimal working example::</span>
+
+<span class="sd">        Clock   = experiment.device.nanoClock()</span>
+<span class="sd">        Clock.sleep</span>
+
+<span class="sd">    .. tip::</span>
+<span class="sd">       use nanoClock device used to synchronize the presentation of cues</span>
+<span class="sd">       e.g. (from :class:`~.experiment.protocol.Cue`)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;</span><span class="si">%2.3f</span><span class="s2"> seconds&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nano2sec</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getrelativeTime</span><span class="p">()))</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">_experiment</span><span class="o">.</span><span class="n">PLATFORM</span> <span class="o">==</span> <span class="s1">&#39;win32&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">_os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">_experiment</span><span class="o">.</span><span class="n">LIBPATH</span><span class="p">):</span>
+                <span class="n">_nanotime</span><span class="o">.</span><span class="n">NanoTime</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_experiment</span><span class="o">.</span><span class="n">LIBPATH</span> <span class="o">+</span>
+                                            <span class="s2">&quot;</span><span class="se">\\</span><span class="s2">dll</span><span class="se">\\</span><span class="s2">release</span><span class="se">\\</span><span class="s2">libtime.dll&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_timeDllPath</span> <span class="o">=</span> <span class="p">(</span><span class="n">_experiment</span><span class="o">.</span><span class="n">LIBPATH</span> <span class="o">+</span>
+                                     <span class="s2">&quot;</span><span class="se">\\</span><span class="s2">dll</span><span class="se">\\</span><span class="s2">release</span><span class="se">\\</span><span class="s2">libtime.dll&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">_warn</span><span class="p">(</span><span class="s2">&quot;Folder for nanoClock dll not found&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">_warn</span><span class="p">(</span><span class="s1">&#39;Platform not Windows, Library was not loaded</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">+</span>
+                  <span class="s1">&#39;Using a nulldevice instead&#39;</span><span class="p">)</span>
+            <span class="kn">import</span> <span class="nn">time</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sleep</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">sleep</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">getTime</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span>
+
+<div class="viewcode-block" id="nanoClock.nano2sec"><a class="viewcode-back" href="../../_autosummary/api/experiment.device.html#experiment.device.nanoClock.nano2sec">[docs]</a>    <span class="k">def</span> <span class="nf">nano2sec</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timeValue</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;transforms nanoseconds to seconds&#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="n">timeValue</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1000</span> <span class="o">*</span> <span class="mi">1000</span> <span class="o">*</span> <span class="mi">1000</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="nanoClock.sec2nano"><a class="viewcode-back" href="../../_autosummary/api/experiment.device.html#experiment.device.nanoClock.sec2nano">[docs]</a>    <span class="k">def</span> <span class="nf">sec2nano</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timeValue</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;transforms seconds to nanoseconds&#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="n">timeValue</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1000</span> <span class="o">*</span> <span class="mi">1000</span> <span class="o">*</span> <span class="mi">1000</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="nanoClock.getreferenceTime"><a class="viewcode-back" href="../../_autosummary/api/experiment.device.html#experiment.device.nanoClock.getreferenceTime">[docs]</a>    <span class="k">def</span> <span class="nf">getreferenceTime</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;returns time of last rest in absolute time&#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">referenceTime</span></div>
+
+<div class="viewcode-block" id="nanoClock.getrelativeTime"><a class="viewcode-back" href="../../_autosummary/api/experiment.device.html#experiment.device.nanoClock.getrelativeTime">[docs]</a>    <span class="k">def</span> <span class="nf">getrelativeTime</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;returns time since last reset in nanoseconds&#39;&#39;&#39;</span>
+        <span class="n">passedTime</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getTime</span><span class="p">()</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">referenceTime</span>
+        <span class="k">return</span> <span class="n">passedTime</span></div>
+
+<div class="viewcode-block" id="nanoClock.timing"><a class="viewcode-back" href="../../_autosummary/api/experiment.device.html#experiment.device.nanoClock.timing">[docs]</a>    <span class="k">def</span> <span class="nf">timing</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;returns time since last reset in seconds&#39;&#39;&#39;</span>
+        <span class="n">passedTime</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getTime</span><span class="p">()</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">referenceTime</span>
+        <span class="k">return</span> <span class="n">passedTime</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1000</span> <span class="o">*</span> <span class="mi">1000</span> <span class="o">*</span> <span class="mi">1000</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="nanoClock.reset"><a class="viewcode-back" href="../../_autosummary/api/experiment.device.html#experiment.device.nanoClock.reset">[docs]</a>    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;resets the internal timer&#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">referenceTime</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getTime</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="nanoClock.sleep"><a class="viewcode-back" href="../../_autosummary/api/experiment.device.html#experiment.device.nanoClock.sleep">[docs]</a>    <span class="k">def</span> <span class="nf">sleep</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Duration</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;sleeps for Duration in seconds&#39;&#39;&#39;</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getTime</span><span class="p">()</span>
+        <span class="c1"># Fall asleep</span>
+        <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">nano2sec</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getTime</span><span class="p">()</span> <span class="o">-</span> <span class="n">a</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">Duration</span><span class="p">:</span>
+            <span class="k">pass</span></div>
+        <span class="c1"># Woke up</span>
+
+<div class="viewcode-block" id="nanoClock.isi_sleep"><a class="viewcode-back" href="../../_autosummary/api/experiment.device.html#experiment.device.nanoClock.isi_sleep">[docs]</a>    <span class="k">def</span> <span class="nf">isi_sleep</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">minduration</span><span class="p">,</span> <span class="n">maxduration</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;sleeps for random uniform duration</span>
+
+<span class="sd">        args</span>
+<span class="sd">        ----</span>
+<span class="sd">        minduration: float</span>
+<span class="sd">            at least minduration in seconds</span>
+<span class="sd">        maxduration: float</span>
+<span class="sd">            at most maxduration in seconds</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">isi</span> <span class="o">=</span> <span class="n">_np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="n">minduration</span><span class="p">,</span> <span class="n">maxduration</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">isi</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">isi</span></div>
+
+<div class="viewcode-block" id="nanoClock.delay"><a class="viewcode-back" href="../../_autosummary/api/experiment.device.html#experiment.device.nanoClock.delay">[docs]</a>    <span class="k">def</span> <span class="nf">delay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Duration</span><span class="p">,</span>
+              <span class="n">function</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Function Handle not set&#39;</span><span class="p">)):</span>
+        <span class="sd">&#39;&#39;&#39;delays evaluation of function for Duration</span>
+<span class="sd">        args</span>
+<span class="sd">        ----</span>
+
+<span class="sd">        Duration: int</span>
+<span class="sd">                in seconds</span>
+
+<span class="sd">        .. admonition:: sideeffects</span>
+
+<span class="sd">            Blocks the script</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">nanosecondsDelay</span> <span class="o">=</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getTime</span><span class="p">()</span> <span class="o">+</span>
+                                <span class="n">Duration</span> <span class="o">*</span> <span class="mi">1000</span> <span class="o">*</span> <span class="mi">1000</span> <span class="o">*</span> <span class="mi">1000</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">waitUntilBlocking</span><span class="p">(</span><span class="n">nanosecondsDelay</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">function</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="nanoClock.soft_delay"><a class="viewcode-back" href="../../_autosummary/api/experiment.device.html#experiment.device.nanoClock.soft_delay">[docs]</a>    <span class="k">def</span> <span class="nf">soft_delay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Duration</span><span class="p">,</span>
+                   <span class="n">function</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Function Handle not set&#39;</span><span class="p">)):</span>
+        <span class="sd">&#39;&#39;&#39;delays evaluation of function  without blocking</span>
+
+<span class="sd">        args</span>
+<span class="sd">        ----</span>
+
+<span class="sd">        Duration: int</span>
+<span class="sd">                in seconds</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="n">_timer</span><span class="p">(</span><span class="n">Duration</span><span class="p">,</span> <span class="n">function</span><span class="p">)</span>
+        <span class="n">d</span><span class="o">.</span><span class="n">start</span><span class="p">()</span></div></div>
+<span class="c1"># %%</span>
+
+
+<div class="viewcode-block" id="VisionRecorder"><a class="viewcode-back" href="../../_autosummary/api/experiment.device.html#experiment.device.VisionRecorder">[docs]</a><span class="k">class</span> <span class="nc">VisionRecorder</span><span class="p">():</span>
+    <span class="n">stateDict</span> <span class="o">=</span> <span class="p">{</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span> <span class="s1">&#39;Server Error&#39;</span><span class="p">,</span>
+                 <span class="mi">0</span><span class="p">:</span> <span class="s1">&#39;Idle state&#39;</span><span class="p">,</span>
+                 <span class="mi">1</span><span class="p">:</span> <span class="s1">&#39;Viewing EEGs&#39;</span><span class="p">,</span>
+                 <span class="mi">2</span><span class="p">:</span> <span class="s1">&#39;Test signal&#39;</span><span class="p">,</span>
+                 <span class="mi">3</span><span class="p">:</span> <span class="s1">&#39;Impedance measurement&#39;</span><span class="p">,</span>
+                 <span class="mi">4</span><span class="p">:</span> <span class="s1">&#39;Saving data&#39;</span><span class="p">,</span>
+                 <span class="mi">5</span><span class="p">:</span> <span class="s1">&#39;Saving test signals&#39;</span><span class="p">,</span>
+                 <span class="mi">6</span><span class="p">:</span> <span class="s1">&#39;Data saving paused&#39;</span><span class="p">,</span>
+                 <span class="mi">7</span><span class="p">:</span> <span class="s1">&#39;Data saving paused, displaying test signal&#39;</span><span class="p">,</span>
+                 <span class="mi">8</span><span class="p">:</span> <span class="s1">&#39;Data saving paused, displaying impedance&#39;</span>
+                 <span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bvr</span> <span class="o">=</span> <span class="n">_Dispatch</span><span class="p">(</span><span class="s1">&#39;VisionRecorder.Application&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s1">&#39;Brain Vision Recorder which is &#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">stateDict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">()]</span>
+
+<div class="viewcode-block" id="VisionRecorder.state"><a class="viewcode-back" href="../../_autosummary/api/experiment.device.html#experiment.device.VisionRecorder.state">[docs]</a>    <span class="k">def</span> <span class="nf">state</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">bvr</span><span class="o">.</span><span class="n">state</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">e</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;Ausnahmefehler des Servers.&#39;</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span>
+                        <span class="sd">&#39;&#39;&#39;Attempting to connect to Vision Recorder throws an Exception.\n</span>
+<span class="sd">                          Likely Solution: Connect the Dongle&#39;&#39;&#39;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="o">-</span><span class="mi">1</span></div>
+
+<div class="viewcode-block" id="VisionRecorder.start_viewing"><a class="viewcode-back" href="../../_autosummary/api/experiment.device.html#experiment.device.VisionRecorder.start_viewing">[docs]</a>    <span class="k">def</span> <span class="nf">start_viewing</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">()</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">()</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">bvr</span><span class="o">.</span><span class="n">Acquisition</span><span class="o">.</span><span class="n">ViewData</span><span class="p">()</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Wrong Workspace&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="VisionRecorder.stop_viewing"><a class="viewcode-back" href="../../_autosummary/api/experiment.device.html#experiment.device.VisionRecorder.stop_viewing">[docs]</a>    <span class="k">def</span> <span class="nf">stop_viewing</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">()</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">bvr</span><span class="o">.</span><span class="n">Acquisition</span><span class="o">.</span><span class="n">StopViewing</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="VisionRecorder.correct_DC"><a class="viewcode-back" href="../../_autosummary/api/experiment.device.html#experiment.device.VisionRecorder.correct_DC">[docs]</a>    <span class="k">def</span> <span class="nf">correct_DC</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">            Performs a DC Correction</span>
+<span class="sd">            Blocks Control during duration of this correction</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bvr</span><span class="o">.</span><span class="n">Acquisition</span><span class="o">.</span><span class="n">DCCorrection</span><span class="p">()</span>
+        <span class="n">nanoClock</span><span class="p">()</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="VisionRecorder.start_recording"><a class="viewcode-back" href="../../_autosummary/api/experiment.device.html#experiment.device.VisionRecorder.start_recording">[docs]</a>    <span class="k">def</span> <span class="nf">start_recording</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fname</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">()</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+             <span class="n">_warn</span><span class="p">(</span><span class="s1">&#39;Currently Recording, will stop and restart&#39;</span><span class="p">)</span>
+             <span class="bp">self</span><span class="o">.</span><span class="n">stop_recording</span><span class="p">()</span>
+             <span class="bp">self</span><span class="o">.</span><span class="n">start_recording</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">start_viewing</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">start_recording</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">()</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="k">pass</span>  <span class="c1"># dongle missing, warning already sent in self.state</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">bvr</span><span class="o">.</span><span class="n">Acquisition</span><span class="o">.</span><span class="n">StartRecording</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="VisionRecorder.stop_recording"><a class="viewcode-back" href="../../_autosummary/api/experiment.device.html#experiment.device.VisionRecorder.stop_recording">[docs]</a>    <span class="k">def</span> <span class="nf">stop_recording</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">()</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">bvr</span><span class="o">.</span><span class="n">Acquisition</span><span class="o">.</span><span class="n">StopRecording</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">_warn</span><span class="p">(</span><span class="s1">&#39;Currently Not Recording&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="VisionRecorder.set_workspace"><a class="viewcode-back" href="../../_autosummary/api/experiment.device.html#experiment.device.VisionRecorder.set_workspace">[docs]</a>    <span class="k">def</span> <span class="nf">set_workspace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">workSpaceFile</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">_os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">workSpaceFile</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;workSpaceFile not found&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">()</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Currently Recording. Will not switch&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">()</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Warning</span><span class="p">(</span><span class="s1">&#39;Currently Viewing. Will try to switch&#39;</span><span class="p">)</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">stop_viewing</span><span class="p">()</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">bvr</span><span class="o">.</span><span class="n">CurrentWorkspace</span><span class="o">.</span><span class="n">Load</span><span class="p">(</span><span class="n">workSpaceFile</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">start_viewing</span><span class="p">()</span>
+                <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Can not switch&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">bvr</span><span class="o">.</span><span class="n">CurrentWorkspace</span><span class="o">.</span><span class="n">Load</span><span class="p">(</span><span class="n">workSpaceFile</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="VisionRecorder.save_workspace"><a class="viewcode-back" href="../../_autosummary/api/experiment.device.html#experiment.device.VisionRecorder.save_workspace">[docs]</a>    <span class="k">def</span> <span class="nf">save_workspace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fname</span><span class="p">):</span>
+        <span class="n">workspace</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;chan&#39;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">chan</span><span class="p">),</span>
+                     <span class="s1">&#39;fs&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">fs</span><span class="p">}</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>
+            <span class="n">_json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">workspace</span><span class="p">,</span> <span class="n">fp</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="VisionRecorder.load_workspace"><a class="viewcode-back" href="../../_autosummary/api/experiment.device.html#experiment.device.VisionRecorder.load_workspace">[docs]</a>    <span class="k">def</span> <span class="nf">load_workspace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fname</span><span class="p">):</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>
+            <span class="n">workspace</span> <span class="o">=</span> <span class="n">_json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">fp</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">chan</span> <span class="o">=</span> <span class="n">_np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">workspace</span><span class="p">[</span><span class="s1">&#39;chan&#39;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fs</span> <span class="o">=</span> <span class="n">workspace</span><span class="p">[</span><span class="s1">&#39;fs&#39;</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="VisionRecorder.scan_workspace"><a class="viewcode-back" href="../../_autosummary/api/experiment.device.html#experiment.device.VisionRecorder.scan_workspace">[docs]</a>    <span class="k">def</span> <span class="nf">scan_workspace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">workingFilePath</span><span class="o">=</span><span class="s1">&#39;C:\Vision\Raw Files&#39;</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">            Records 200ms of data with the current workspace into</span>
+<span class="sd">            workingFilePath and reads channels and Fs from this recording</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="k">if</span> <span class="n">_os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">workingFilePath</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;workingFilePath not found&#39;</span><span class="p">)</span>
+
+        <span class="c1"># switch to view</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">()</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">bvr</span><span class="o">.</span><span class="n">Acquisition</span><span class="o">.</span><span class="n">ViewData</span><span class="p">()</span>
+            <span class="n">nanoClock</span><span class="p">()</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">nanoClock</span><span class="p">()</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="o">.</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># save 100 ms of data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bvr</span><span class="o">.</span><span class="n">Acquisition</span><span class="o">.</span><span class="n">StartRecording</span><span class="p">(</span><span class="n">_os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+            <span class="n">workingFilePath</span><span class="p">,</span> <span class="s2">&quot;tmp.eeg&quot;</span><span class="p">))</span>
+        <span class="n">nanoClock</span><span class="p">()</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="o">.</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bvr</span><span class="o">.</span><span class="n">Acquisition</span><span class="o">.</span><span class="n">StopRecording</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bvr</span><span class="o">.</span><span class="n">Acquisition</span><span class="o">.</span><span class="n">StopViewing</span><span class="p">()</span>  <span class="c1"># prevents file lock by bvr</span>
+
+        <span class="c1"># view and save 200 ms of data</span>
+        <span class="n">fname</span> <span class="o">=</span> <span class="n">_os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">workingFilePath</span><span class="p">,</span> <span class="s2">&quot;tmp.vhdr&quot;</span><span class="p">)</span>
+        <span class="n">timeOut</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">while</span> <span class="n">_os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="n">nanoClock</span><span class="p">()</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="o">.</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">timeOut</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="n">timeOut</span> <span class="o">&gt;</span> <span class="mi">30</span><span class="p">:</span>  <span class="c1"># if it takes longer than 3 seconds</span>
+                <span class="k">raise</span> <span class="ne">TimeoutError</span><span class="p">(</span><span class="s1">&#39;Could not find the tempory datafile&#39;</span><span class="p">)</span>
+                <span class="k">break</span>
+
+        <span class="c1"># retrieve chan and fs</span>
+        <span class="n">conf_recording</span> <span class="o">=</span> <span class="n">_io</span><span class="o">.</span><span class="n">load_brain_vision_data</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">chan</span> <span class="o">=</span> <span class="n">conf_recording</span><span class="o">.</span><span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fs</span> <span class="o">=</span> <span class="n">conf_recording</span><span class="o">.</span><span class="n">fs</span>
+
+        <span class="c1"># delete temporary files</span>
+        <span class="k">for</span> <span class="n">extension</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;vmrk&#39;</span><span class="p">,</span> <span class="s1">&#39;eeg&#39;</span><span class="p">,</span> <span class="s1">&#39;vhdr&#39;</span><span class="p">):</span>
+            <span class="n">_os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">_os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">workingFilePath</span><span class="p">,</span> <span class="s1">&#39;tmp.&#39;</span> <span class="o">+</span> <span class="n">extension</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bvr</span><span class="o">.</span><span class="n">Acquisition</span><span class="o">.</span><span class="n">ViewData</span><span class="p">()</span>
+        <span class="c1"># return fs and chan</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">fs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">chan</span></div>
+
+<div class="viewcode-block" id="VisionRecorder.close"><a class="viewcode-back" href="../../_autosummary/api/experiment.device.html#experiment.device.VisionRecorder.close">[docs]</a>    <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">bvr</span><span class="o">.</span><span class="n">Quit</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Can not close!&#39;</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">start_viewing</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="k">def</span> <span class="nf">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">traceback</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">()</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">bvr</span><span class="o">.</span><span class="n">Acquisition</span><span class="o">.</span><span class="n">StopRecording</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">()</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">bvr</span><span class="o">.</span><span class="n">Acquisition</span><span class="o">.</span><span class="n">StopViewing</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="BrainAmp"><a class="viewcode-back" href="../../_autosummary/api/experiment.device.html#experiment.device.BrainAmp">[docs]</a><span class="k">class</span> <span class="nc">BrainAmp</span><span class="p">(</span><span class="n">VisionRecorder</span><span class="p">):</span>
+
+    <span class="n">isConnected</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ringLen</span><span class="o">=</span><span class="mi">2000</span><span class="p">,</span> <span class="n">blockLen</span><span class="o">=</span><span class="mi">50</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rbuffer</span> <span class="o">=</span> <span class="n">_wtypes</span><span class="o">.</span><span class="n">RingBuffer</span><span class="p">(</span><span class="n">ringLen</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bbuffer</span> <span class="o">=</span> <span class="n">_wtypes</span><span class="o">.</span><span class="n">BlockBuffer</span><span class="p">(</span><span class="n">blockLen</span><span class="p">)</span>
+
+<div class="viewcode-block" id="BrainAmp.connect"><a class="viewcode-back" href="../../_autosummary/api/experiment.device.html#experiment.device.BrainAmp.connect">[docs]</a>    <span class="k">def</span> <span class="nf">connect</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;chan&#39;</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s1">&#39;No workspace. You need to scan or &#39;</span> <span class="o">+</span>
+                                 <span class="s1">&#39;load the workspace first&#39;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">start_viewing</span><span class="p">()</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Attempting to connect RDA2LSL&#39;</span><span class="p">)</span>
+        <span class="n">nanoClock</span><span class="p">()</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">amp</span> <span class="o">=</span> <span class="n">_libmushu</span><span class="o">.</span><span class="n">get_amp</span><span class="p">(</span><span class="s1">&#39;lslamp&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">amp</span><span class="o">.</span><span class="n">configure</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">amp</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">isConnected</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Connected with RDA2LSL&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="BrainAmp.receive"><a class="viewcode-back" href="../../_autosummary/api/experiment.device.html#experiment.device.BrainAmp.receive">[docs]</a>    <span class="k">def</span> <span class="nf">receive</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">isConnected</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">data</span><span class="p">,</span> <span class="n">markers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">amp</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>
+            <span class="n">new_markers</span> <span class="o">=</span> <span class="nb">list</span><span class="p">([])</span>
+            <span class="k">for</span> <span class="n">t</span><span class="p">,</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">markers</span><span class="p">:</span>
+                <span class="n">new_markers</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">s</span><span class="p">,</span> <span class="n">t</span><span class="p">))</span>  <span class="c1"># flip because necessary</span>
+
+            <span class="n">raw_sig</span> <span class="o">=</span> <span class="n">_io</span><span class="o">.</span><span class="n">convert_mushu_data</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">new_markers</span><span class="p">,</span>
+                                             <span class="bp">self</span><span class="o">.</span><span class="n">fs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">chan</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">raw_sig</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ConnectionError</span><span class="p">(</span><span class="s1">&#39;Amplifier not connected.&#39;</span> <span class="o">+</span>
+                                  <span class="s1">&#39; Did you feedforward using RDA2LSL?&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="BrainAmp.receive_blocks"><a class="viewcode-back" href="../../_autosummary/api/experiment.device.html#experiment.device.BrainAmp.receive_blocks">[docs]</a>    <span class="k">def</span> <span class="nf">receive_blocks</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">            returns blocks of size 50 ms of data</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">raw_sig</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">receive</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bbuffer</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">raw_sig</span><span class="p">)</span>
+        <span class="n">raw_blocks</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bbuffer</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">raw_blocks</span></div>
+
+<div class="viewcode-block" id="BrainAmp.receive_ring"><a class="viewcode-back" href="../../_autosummary/api/experiment.device.html#experiment.device.BrainAmp.receive_ring">[docs]</a>    <span class="k">def</span> <span class="nf">receive_ring</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">            returns the last 1000 ms of data</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">raw_sig</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">receive</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rbuffer</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">raw_sig</span><span class="p">)</span>
+        <span class="n">raw_ring</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rbuffer</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">raw_ring</span></div>
+
+<div class="viewcode-block" id="BrainAmp.channel2index"><a class="viewcode-back" href="../../_autosummary/api/experiment.device.html#experiment.device.BrainAmp.channel2index">[docs]</a>    <span class="k">def</span> <span class="nf">channel2index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chanOfInterest</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Return a logical array indexing a channel</span>
+
+<span class="sd">        args</span>
+<span class="sd">        ----</span>
+<span class="sd">        chanOfInterest: str</span>
+<span class="sd">            the name of the channel to be indexed</span>
+
+
+<span class="sd">        return</span>
+<span class="sd">        -----</span>
+<span class="sd">        array: a list of bools indexing the chanOfInterest</span>
+
+
+<span class="sd">        .. tip::</span>
+<span class="sd">            use BrainAmp.channel2index(chanOfInterest).index(1) to get \</span>
+<span class="sd">            the index</span>
+
+
+<span class="sd">        .. seealso::</span>
+<span class="sd">            - :meth:`~.experiment.device.VisionRecorder.load_workspace`</span>
+<span class="sd">            - :meth:`~.experiment.device.VisionRecorder.scan_workspace`</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">coi</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span> <span class="k">if</span> <span class="p">(</span><span class="n">chan</span> <span class="o">==</span> <span class="n">chanOfInterest</span><span class="p">)</span> <span class="k">else</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">chan</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">chan</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">sum</span><span class="p">(</span><span class="n">coi</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Channel identification ambiguous&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">coi</span></div>
+
+<div class="viewcode-block" id="BrainAmp.fullstop"><a class="viewcode-back" href="../../_autosummary/api/experiment.device.html#experiment.device.BrainAmp.fullstop">[docs]</a>    <span class="k">def</span> <span class="nf">fullstop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stop_recording</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stop_viewing</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="BrainAmp.stop"><a class="viewcode-back" href="../../_autosummary/api/experiment.device.html#experiment.device.BrainAmp.stop">[docs]</a>    <span class="k">def</span> <span class="nf">stop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">isConnected</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">amp</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">isConnected</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Was not connected. No need to stop. I ignore command&#39;</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span></div>
+<span class="c1"># %%---------------------------------------------------------------------------</span>
+
+
+<div class="viewcode-block" id="TriggerDevice"><a class="viewcode-back" href="../../_autosummary/api/experiment.device.html#experiment.device.TriggerDevice">[docs]</a><span class="k">class</span> <span class="nc">TriggerDevice</span><span class="p">():</span>
+    <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="SerialTrigger"><a class="viewcode-back" href="../../_autosummary/api/experiment.device.html#experiment.device.SerialTrigger">[docs]</a><span class="k">class</span> <span class="nc">SerialTrigger</span><span class="p">():</span>
+    <span class="n">_warn</span><span class="p">(</span><span class="ne">DeprecationWarning</span><span class="p">(</span><span class="s1">&#39;Device no longer supported&#39;</span><span class="p">))</span></div>
+    
+
+<div class="viewcode-block" id="ArduinoTrigger"><a class="viewcode-back" href="../../_autosummary/api/experiment.device.html#experiment.device.ArduinoTrigger">[docs]</a><span class="k">class</span> <span class="nc">ArduinoTrigger</span><span class="p">(</span><span class="n">TriggerDevice</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Class resembling the simple one-byte Arduino-based SerialTrigger</span>
+
+<span class="sd">    Example::</span>
+
+<span class="sd">        trigger = SerialTrigger()</span>
+<span class="sd">        trigger.connect()</span>
+
+<span class="sd">        for i in range(127):</span>
+<span class="sd">            trigger.send(i+1)</span>
+<span class="sd">            trigger.sleep(0.5)</span>
+
+<span class="sd">        trigger.close()</span>
+
+<span class="sd">    .. seealso::</span>
+<span class="sd">        - :ref:`tab-triggerbox-commands`</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> 
+                 <span class="n">BaudRate</span><span class="o">=</span><span class="mi">115200</span><span class="p">,</span> 
+                 <span class="n">ComPort</span><span class="o">=</span><span class="s2">&quot;COM1&quot;</span><span class="p">,</span>
+                 <span class="p">):</span>  
+        <span class="bp">self</span><span class="o">.</span><span class="n">sleep</span> <span class="o">=</span> <span class="n">nanoClock</span><span class="p">()</span><span class="o">.</span><span class="n">sleep</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ComPort</span> <span class="o">=</span> <span class="n">ComPort</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_BaudRate</span> <span class="o">=</span> <span class="n">BaudRate</span>
+
+<div class="viewcode-block" id="ArduinoTrigger.newline"><a class="viewcode-back" href="../../_autosummary/api/experiment.device.html#experiment.device.ArduinoTrigger.newline">[docs]</a>    <span class="k">def</span> <span class="nf">newline</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">b</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span></div>
+        
+<div class="viewcode-block" id="ArduinoTrigger.write"><a class="viewcode-back" href="../../_autosummary/api/experiment.device.html#experiment.device.ArduinoTrigger.write">[docs]</a>    <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;writes an 8-Bit Messages to the SerialTrigger</span>
+
+<span class="sd">        args</span>
+<span class="sd">        ----</span>
+<span class="sd">        triggerVal: bytes</span>
+<span class="sd">            8-Bit Messages are allowed, i.e. 0x00 - 0xff</span>
+
+
+<span class="sd">        .. admonition:: sideeffect</span>
+
+<span class="sd">            uses the hardware resource to the SerialTrigger</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_arduino</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">message</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ArduinoTrigger.pull_low"><a class="viewcode-back" href="../../_autosummary/api/experiment.device.html#experiment.device.ArduinoTrigger.pull_low">[docs]</a>    <span class="k">def</span> <span class="nf">pull_low</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="s2">&quot;immediately pull all pins low&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+
+<div class="viewcode-block" id="ArduinoTrigger.stimulus"><a class="viewcode-back" href="../../_autosummary/api/experiment.device.html#experiment.device.ArduinoTrigger.stimulus">[docs]</a>    <span class="k">def</span> <span class="nf">stimulus</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameter</span><span class="p">:</span><span class="nb">int</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">b</span><span class="s1">&#39;</span><span class="se">\x53</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">parameter</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;big&#39;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">newline</span><span class="p">()</span></div>
+        
+<div class="viewcode-block" id="ArduinoTrigger.response"><a class="viewcode-back" href="../../_autosummary/api/experiment.device.html#experiment.device.ArduinoTrigger.response">[docs]</a>    <span class="k">def</span> <span class="nf">response</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameter</span><span class="p">:</span><span class="nb">int</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+        
+<div class="viewcode-block" id="ArduinoTrigger.onehot"><a class="viewcode-back" href="../../_autosummary/api/experiment.device.html#experiment.device.ArduinoTrigger.onehot">[docs]</a>    <span class="k">def</span> <span class="nf">onehot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channel</span><span class="p">:</span><span class="nb">int</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Sends the onehot command to the arduino</span>
+<span class="sd">        </span>
+<span class="sd">        args</span>
+<span class="sd">        ----</span>
+<span class="sd">        </span>
+<span class="sd">        channel:int</span>
+<span class="sd">            The channel to be set, with 0: Off</span>
+<span class="sd">        </span>
+<span class="sd">            </span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="sa">b</span><span class="s1">&#39;</span><span class="se">\x4f</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">channel</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;big&#39;</span><span class="p">))</span></div>
+        
+<div class="viewcode-block" id="ArduinoTrigger.trigger_loud"><a class="viewcode-back" href="../../_autosummary/api/experiment.device.html#experiment.device.ArduinoTrigger.trigger_loud">[docs]</a>    <span class="k">def</span> <span class="nf">trigger_loud</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">forwardStimulus</span><span class="p">:</span><span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Sends the loud_trigger command to the arduino</span>
+<span class="sd">        </span>
+<span class="sd">        args</span>
+<span class="sd">        ----</span>
+<span class="sd">        </span>
+<span class="sd">        forwardStimulus:int            </span>
+<span class="sd">            - 0: Off</span>
+<span class="sd">            - Any other value: On, and will be forwarded to stimulus within the arduino</span>
+<span class="sd">            </span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="sa">b</span><span class="s1">&#39;</span><span class="se">\x54</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">forwardStimulus</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;big&#39;</span><span class="p">))</span></div>
+        
+<div class="viewcode-block" id="ArduinoTrigger.trigger_silent"><a class="viewcode-back" href="../../_autosummary/api/experiment.device.html#experiment.device.ArduinoTrigger.trigger_silent">[docs]</a>    <span class="k">def</span> <span class="nf">trigger_silent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Sends the silent_trigger command to the arduino</span>
+<span class="sd">        </span>
+<span class="sd">        args</span>
+<span class="sd">        ----</span>
+<span class="sd">        parameter:bool</span>
+<span class="sd">            The parameter of the command, with</span>
+<span class="sd">            - False: Off</span>
+<span class="sd">            - True or larger: On</span>
+<span class="sd">            </span>
+
+<span class="sd">        .. tip::</span>
+<span class="sd">            use trigger_silent(0) to pull *all* pins low, i.e. external trigOut as well as all D-SUB 26 and D-SUB 9 Pins</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>            
+        <span class="bp">self</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="sa">b</span><span class="s1">&#39;</span><span class="se">\x74</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">state</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;big&#39;</span><span class="p">))</span></div>
+    
+<div class="viewcode-block" id="ArduinoTrigger.wrap_marker"><a class="viewcode-back" href="../../_autosummary/api/experiment.device.html#experiment.device.ArduinoTrigger.wrap_marker">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">wrap_marker</span><span class="p">(</span><span class="n">foo</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">high_wrapper</span><span class="p">(</span><span class="n">mv</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">lowFlag</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>            
+            <span class="k">if</span> <span class="n">lowFlag</span><span class="p">:</span>
+                <span class="k">def</span> <span class="nf">base_wrapper</span><span class="p">():</span>                
+                    <span class="n">foo</span><span class="p">(</span><span class="n">mv</span><span class="p">)</span>             
+                    <span class="n">foo</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>    
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">def</span> <span class="nf">base_wrapper</span><span class="p">():</span>                
+                    <span class="n">foo</span><span class="p">(</span><span class="n">mv</span><span class="p">)</span>                                                 
+            <span class="k">return</span> <span class="n">base_wrapper</span>
+        <span class="k">return</span> <span class="n">high_wrapper</span></div>
+    
+<div class="viewcode-block" id="ArduinoTrigger.set_pulseduration"><a class="viewcode-back" href="../../_autosummary/api/experiment.device.html#experiment.device.ArduinoTrigger.set_pulseduration">[docs]</a>    <span class="k">def</span> <span class="nf">set_pulseduration</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">duration</span><span class="p">:</span><span class="nb">int</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="sa">b</span><span class="s1">&#39;</span><span class="se">\x09</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">duration</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;big&#39;</span><span class="p">));</span></div>
+        
+<div class="viewcode-block" id="ArduinoTrigger.set_forwardPin"><a class="viewcode-back" href="../../_autosummary/api/experiment.device.html#experiment.device.ArduinoTrigger.set_forwardPin">[docs]</a>    <span class="k">def</span> <span class="nf">set_forwardPin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pinNumber</span><span class="p">:</span><span class="nb">int</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="sa">b</span><span class="s1">&#39;</span><span class="se">\x1a</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">pinNumber</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;big&#39;</span><span class="p">));</span></div>
+        
+<div class="viewcode-block" id="ArduinoTrigger.set_threshold"><a class="viewcode-back" href="../../_autosummary/api/experiment.device.html#experiment.device.ArduinoTrigger.set_threshold">[docs]</a>    <span class="k">def</span> <span class="nf">set_threshold</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">threshold</span><span class="p">:</span><span class="nb">int</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;set the threshold for detecting a signal at TrigIn</span>
+<span class="sd">        </span>
+<span class="sd">        args</span>
+<span class="sd">        ----</span>
+<span class="sd">        threshold: int</span>
+<span class="sd">            threshold in 1023rds of 5V, in steps of 4ths</span>
+<span class="sd">            default is 512, i.e. 2.5V</span>
+<span class="sd">                        </span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Setting threshold to &#39;</span><span class="p">,</span> <span class="n">threshold</span> <span class="o">*</span> <span class="mi">4</span> <span class="o">/</span> <span class="mi">1023</span> <span class="o">*</span> <span class="mi">5</span> <span class="p">,</span><span class="s1">&#39;V&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="sa">b</span><span class="s1">&#39;</span><span class="se">\x0b</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">threshold</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;big&#39;</span><span class="p">));</span></div>
+        
+<div class="viewcode-block" id="ArduinoTrigger.set_forwardDelay"><a class="viewcode-back" href="../../_autosummary/api/experiment.device.html#experiment.device.ArduinoTrigger.set_forwardDelay">[docs]</a>    <span class="k">def</span> <span class="nf">set_forwardDelay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">delayDuration</span><span class="p">:</span><span class="nb">int</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;set the delay duration from TrigIn to forwardPin</span>
+<span class="sd">        </span>
+<span class="sd">        args</span>
+<span class="sd">        ----</span>
+<span class="sd">        delayDuration: int</span>
+<span class="sd">           delayDuration in microseconds in steps of 250 microseconds </span>
+<span class="sd">           default is 0 ms</span>
+<span class="sd">            </span>
+
+<span class="sd">        .. note:: </span>
+<span class="sd">           Resolution of delayDuration is in 250µs and will be rounded down!</span>
+<span class="sd">            </span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">delayDuration</span> <span class="o">=</span> <span class="n">delayDuration</span> <span class="o">//</span> <span class="mi">250</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Setting forwardDelay to &#39;</span><span class="p">,</span> <span class="n">delayDuration</span><span class="o">*</span><span class="mi">250</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="sa">b</span><span class="s1">&#39;</span><span class="se">\x16</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">delayDuration</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;big&#39;</span><span class="p">));</span></div>
+    
+<div class="viewcode-block" id="ArduinoTrigger.reset"><a class="viewcode-back" href="../../_autosummary/api/experiment.device.html#experiment.device.ArduinoTrigger.reset">[docs]</a>    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="sa">b</span><span class="s1">&#39;</span><span class="se">\x1b</span><span class="s1">&#39;</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;big&#39;</span><span class="p">));</span></div>
+        
+<div class="viewcode-block" id="ArduinoTrigger.bell"><a class="viewcode-back" href="../../_autosummary/api/experiment.device.html#experiment.device.ArduinoTrigger.bell">[docs]</a>    <span class="k">def</span> <span class="nf">bell</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">question</span><span class="p">:</span><span class="nb">int</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="sa">b</span><span class="s1">&#39;</span><span class="se">\x07</span><span class="s1">&#39;</span><span class="p">,</span> <span class="p">(</span><span class="n">question</span><span class="p">)</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;big&#39;</span><span class="p">));</span>
+        <span class="n">message</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_arduino</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+        <span class="k">assert</span><span class="p">(</span><span class="n">message</span> <span class="o">==</span> <span class="p">(</span><span class="n">question</span><span class="p">)</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;big&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">&#39;</span><span class="se">\r\n</span><span class="s1">&#39;</span><span class="p">)</span></div>
+    
+<div class="viewcode-block" id="ArduinoTrigger.enquire"><a class="viewcode-back" href="../../_autosummary/api/experiment.device.html#experiment.device.ArduinoTrigger.enquire">[docs]</a>    <span class="k">def</span> <span class="nf">enquire</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="sa">b</span><span class="s1">&#39;</span><span class="se">\x05</span><span class="s1">&#39;</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;big&#39;</span><span class="p">));</span>
+        <span class="n">message</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_arduino</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">d</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">SyntaxError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">EnvironmentError</span><span class="p">(</span><span class="s1">&#39;Arduino not found&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">settings</span> <span class="o">=</span> <span class="n">d</span></div>
+            
+<div class="viewcode-block" id="ArduinoTrigger.send"><a class="viewcode-back" href="../../_autosummary/api/experiment.device.html#experiment.device.ArduinoTrigger.send">[docs]</a>    <span class="k">def</span> <span class="nf">send</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">command</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">parameter</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">parameter</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">newline</span><span class="p">()</span></div>
+    
+<div class="viewcode-block" id="ArduinoTrigger.connect"><a class="viewcode-back" href="../../_autosummary/api/experiment.device.html#experiment.device.ArduinoTrigger.connect">[docs]</a>    <span class="k">def</span> <span class="nf">connect</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Connect</span>
+
+<span class="sd">        Connect with the SerialTrigger, automatically selects the Port with</span>
+<span class="sd">        the lowest PortNumber, or the one specified during init</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_arduino&quot;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+        <span class="k">def</span> <span class="nf">attempt_connection</span><span class="p">(</span><span class="n">BaudRate</span><span class="p">,</span> <span class="n">PortNumber</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">PortNumber</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">arduino</span> <span class="o">=</span> <span class="n">_serial</span><span class="o">.</span><span class="n">Serial</span><span class="p">(</span><span class="s1">&#39;COM&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">PortNumber</span><span class="p">),</span>
+                                             <span class="n">BaudRate</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=.</span><span class="mi">1</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="s1">&#39;COM&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">PortNumber</span><span class="p">),</span> <span class="n">arduino</span>
+                <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                    <span class="n">port</span><span class="p">,</span> <span class="n">arduino</span> <span class="o">=</span> <span class="n">attempt_connection</span><span class="p">(</span><span class="n">BaudRate</span><span class="p">,</span>
+                                                       <span class="n">PortNumber</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="n">port</span><span class="p">,</span> <span class="n">arduino</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">EnvironmentError</span><span class="p">(</span><span class="s1">&#39;No TriggerDevice found&#39;</span> <span class="o">+</span>
+                                       <span class="s1">&#39;at a ComPort below COM10&#39;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ComPort</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_arduino</span> <span class="o">=</span> \
+            <span class="n">attempt_connection</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_BaudRate</span><span class="p">,</span>
+                               <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ComPort</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;COM&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">connected</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">flush</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_arduino</span><span class="o">.</span><span class="n">flush</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Opening Connection to TriggerDevice&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sleep</span> <span class="o">=</span> <span class="n">nanoClock</span><span class="p">()</span><span class="o">.</span><span class="n">sleep</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ArduinoTrigger.close"><a class="viewcode-back" href="../../_autosummary/api/experiment.device.html#experiment.device.ArduinoTrigger.close">[docs]</a>    <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Close connection</span>
+
+<span class="sd">        Close the Connection to the SerialTrigger</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_arduino&quot;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_arduino</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Closing Connection to TriggerDevice&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">connected</span> <span class="o">=</span> <span class="kc">False</span></div>
+
+    <span class="k">def</span> <span class="nf">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_arduino&quot;</span><span class="p">):</span>
+            <span class="k">del</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_arduino</span><span class="p">)</span>
+        <span class="n">gc</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>        
+        <span class="bp">self</span><span class="o">.</span><span class="n">enquire</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="k">def</span> <span class="nf">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">traceback</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+<div class="viewcode-block" id="ArduinoTrigger.test"><a class="viewcode-back" href="../../_autosummary/api/experiment.device.html#experiment.device.ArduinoTrigger.test">[docs]</a>    <span class="k">def</span> <span class="nf">test</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">256</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>    </div></div>
+
+
+<div class="viewcode-block" id="SoftwareTrigger"><a class="viewcode-back" href="../../_autosummary/api/experiment.device.html#experiment.device.SoftwareTrigger">[docs]</a><span class="k">class</span> <span class="nc">SoftwareTrigger</span><span class="p">(</span><span class="n">VisionRecorder</span><span class="p">,</span> <span class="n">TriggerDevice</span><span class="p">):</span>
+
+<div class="viewcode-block" id="SoftwareTrigger.makeMessage"><a class="viewcode-back" href="../../_autosummary/api/experiment.device.html#experiment.device.SoftwareTrigger.makeMessage">[docs]</a>    <span class="nd">@lru_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">256</span><span class="p">,</span> <span class="n">typed</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">makeMessage</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">TriggerNumber</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s1">&#39;C </span><span class="si">{:03d}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">TriggerNumber</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="SoftwareTrigger.connect"><a class="viewcode-back" href="../../_autosummary/api/experiment.device.html#experiment.device.SoftwareTrigger.connect">[docs]</a>    <span class="k">def</span> <span class="nf">connect</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">start_viewing</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="SoftwareTrigger.send"><a class="viewcode-back" href="../../_autosummary/api/experiment.device.html#experiment.device.SoftwareTrigger.send">[docs]</a>    <span class="k">def</span> <span class="nf">send</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">TriggerNumber</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Send a Marker to BVR</span>
+
+<span class="sd">        Example::</span>
+
+<span class="sd">            trigger = SoftwareTrigger()</span>
+<span class="sd">            trigger.send(4)</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bvr</span><span class="o">.</span><span class="n">Acquisition</span><span class="o">.</span><span class="n">SetMarker</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">makeMessage</span><span class="p">(</span><span class="n">TriggerNumber</span><span class="p">))</span></div></div>
+
+
+<span class="c1"># %%</span>
+<div class="viewcode-block" id="Stimulator"><a class="viewcode-back" href="../../_autosummary/api/experiment.device.html#experiment.device.Stimulator">[docs]</a><span class="k">class</span> <span class="nc">Stimulator</span><span class="p">():</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">interface</span> <span class="o">=</span> <span class="n">ArduinoTrigger</span><span class="p">()):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">interface</span> <span class="o">=</span> <span class="n">interface</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sleep</span> <span class="o">=</span> <span class="n">nanoClock</span><span class="p">()</span><span class="o">.</span><span class="n">sleep</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">delay</span> <span class="o">=</span> <span class="n">nanoClock</span><span class="p">()</span><span class="o">.</span><span class="n">delay</span>
+        
+<div class="viewcode-block" id="Stimulator.connect"><a class="viewcode-back" href="../../_autosummary/api/experiment.device.html#experiment.device.Stimulator.connect">[docs]</a>    <span class="k">def</span> <span class="nf">connect</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">interface</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">interface</span><span class="o">.</span><span class="n">enquire</span><span class="p">()</span></div>
+        
+<div class="viewcode-block" id="Stimulator.close"><a class="viewcode-back" href="../../_autosummary/api/experiment.device.html#experiment.device.Stimulator.close">[docs]</a>    <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">interface</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div></div>
+
+
+
+<div class="viewcode-block" id="multiChannelSystems"><a class="viewcode-back" href="../../_autosummary/api/experiment.device.html#experiment.device.multiChannelSystems">[docs]</a><span class="k">class</span> <span class="nc">multiChannelSystems</span><span class="p">(</span><span class="n">Stimulator</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Class resembling the multiChannelSystems STG 4000</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    Represents the interface to the multichannelsystem STG 4008 from</span>
+<span class="sd">    `mcs &lt;http://www.multichannelsystems.com/products/stg4000-series&gt;`_.</span>
+
+
+<span class="sd">    A minimal working example::</span>
+
+<span class="sd">        with xp.device.MCS(modus = &#39;single&#39;) as mcs:</span>
+<span class="sd">            mcs.trigger(settleDuration = 1)</span>
+
+<span class="sd">    Triggers the mcs at its current stimulation setting in single mode</span>
+
+<span class="sd">    Another minimal working example::</span>
+
+<span class="sd">        with xp.device.MCS(modus=&#39;mf8&#39;) as mcs:</span>
+<span class="sd">            for stimKey in mcs.stimDict.keys():</span>
+<span class="sd">                mcs.trigger(stimKey, settleDuration = 1)</span>
+<span class="sd">                mcs.sleep(0.05)</span>
+
+<span class="sd">    Triggers the mcs at each available stimulation settings in mf8 mode</span>
+
+<span class="sd">    :arg modus: can be mf8, mf255 or single</span>
+
+<span class="sd">    .. tip::</span>
+<span class="sd">        Beware of possible conflicts between the mcs in mf255 mode and</span>
+<span class="sd">        other external devices.</span>
+
+<span class="sd">    .. admonition:: BVR Marker in single mode</span>
+
+<span class="sd">        - Trigger: &#39;S  1&#39;</span>
+
+<span class="sd">    .. admonition:: BVR Marker in mf8 mode</span>
+
+<span class="sd">        - Trigger 1 : &#39;S  1&#39;</span>
+<span class="sd">        - Trigger 2 : &#39;S  2&#39;</span>
+<span class="sd">        - Trigger 3 : &#39;S  4&#39;</span>
+<span class="sd">        - Trigger 4 : &#39;S  8&#39;</span>
+<span class="sd">        - Trigger 5 : &#39;S 16&#39;</span>
+<span class="sd">        - Trigger 6 : &#39;S 32&#39;</span>
+<span class="sd">        - Trigger 7 : &#39;S 64&#39;</span>
+<span class="sd">        - Trigger 8 : &#39;S128&#39;</span>
+
+<span class="sd">    .. admonition:: BVR Marker in mf255 mode</span>
+
+<span class="sd">        - Trigger 1 : &#39;S  1&#39;</span>
+<span class="sd">        - Trigger 2 : &#39;S  2&#39;</span>
+<span class="sd">        - Trigger 3 : &#39;S  3&#39;</span>
+<span class="sd">        - ...</span>
+<span class="sd">        - Trigger 253 : &#39;S253&#39;</span>
+<span class="sd">        - Trigger 254 : &#39;S254&#39;</span>
+<span class="sd">        - Trigger 255 : &#39;S255&#39;</span>
+
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="c1"># -------------</span>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_parse_mf8</span><span class="p">():</span>
+        <span class="sd">&#39;&#39;&#39;Parses the ini-file of MCS II</span>
+<span class="sd">        returns</span>
+<span class="sd">        -------</span>
+<span class="sd">            dictionary with stm as key and triggerchannel as value</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">homeFolder</span> <span class="o">=</span> <span class="n">_os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="s2">&quot;~&quot;</span><span class="p">)</span>
+        <span class="n">iniFolder</span> <span class="o">=</span> <span class="s1">&#39;AppData\Roaming\Multi Channel Systems\MC_Stimulus II&#39;</span>
+        <span class="n">iniFile</span> <span class="o">=</span> <span class="s1">&#39;MC_Stimulus II.ini&#39;</span>
+        <span class="n">fname</span> <span class="o">=</span> <span class="n">_os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">homeFolder</span><span class="p">,</span> <span class="n">iniFolder</span><span class="p">,</span> <span class="n">iniFile</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">_os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">fname</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="s1">&#39;Could not find MCS Stimulus II ini file&#39;</span><span class="p">)</span>
+        <span class="n">mf1</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">lineNum</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">fp</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">lineNum</span> <span class="o">&gt;</span> <span class="mi">9</span><span class="p">:</span>
+                    <span class="k">break</span>
+                <span class="k">if</span> <span class="n">lineNum</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">stm</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">_os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">line</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\\</span><span class="s1">&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="n">key</span> <span class="o">=</span> <span class="n">stm</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="c1"># sanity check</span>
+                    <span class="n">stmFile</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">_os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">stmFile</span><span class="p">):</span>
+                        <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span>
+                            <span class="sd">&#39;&#39;&#39;The supposed stm File does not exist.\n</span>
+<span class="sd">                                Solution: Check the MCS II Program&#39;&#39;&#39;</span><span class="p">)</span>
+                    <span class="c1">#val = 1 &lt;&lt; (lineNum - 2)</span>
+                    <span class="n">val</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">*</span> <span class="p">(</span><span class="n">lineNum</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+                    <span class="n">mf1</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">key</span><span class="p">:</span> <span class="n">val</span><span class="p">})</span>
+        <span class="k">return</span> <span class="n">mf1</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_parse_mf255</span><span class="p">():</span>
+        <span class="sd">&#39;&#39;&#39;Parses the ini-file of MCS II</span>
+
+<span class="sd">        returns</span>
+<span class="sd">        -------</span>
+<span class="sd">            dictionary with stm as key and DIO as value</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">homeFolder</span> <span class="o">=</span> <span class="n">_os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="s2">&quot;~&quot;</span><span class="p">)</span>
+        <span class="n">iniFolder</span> <span class="o">=</span> <span class="s1">&#39;AppData\Roaming\Multi Channel Systems\MC_Stimulus II&#39;</span>
+        <span class="n">iniFile</span> <span class="o">=</span> <span class="s1">&#39;MF2Files.ini&#39;</span>
+        <span class="n">fname</span> <span class="o">=</span> <span class="n">_os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">homeFolder</span><span class="p">,</span> <span class="n">iniFolder</span><span class="p">,</span> <span class="n">iniFile</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">_os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">fname</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="s1">&#39;Could not find MCS Stimulus II ini file&#39;</span><span class="p">)</span>
+        <span class="n">mf2</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">lineNum</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">fp</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">line</span> <span class="o">==</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">:</span>
+                    <span class="c1"># break if last line of content is reached</span>
+                    <span class="k">break</span>
+                <span class="k">if</span> <span class="n">lineNum</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="c1"># get stimulation name</span>
+                    <span class="n">stm</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">_os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">line</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\\</span><span class="s1">&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="n">key</span> <span class="o">=</span> <span class="n">stm</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+                    <span class="c1"># sanity check</span>
+                    <span class="n">stmFile</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">_os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">stmFile</span><span class="p">):</span>
+                        <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span>
+                            <span class="sd">&#39;&#39;&#39;The supposed stm File does not exist.\n</span>
+<span class="sd">                                Solution: Check the MCS II Program&#39;&#39;&#39;</span><span class="p">)</span>
+                    <span class="c1"># get trigger numbner</span>
+                    <span class="n">trig</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;File&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+                    <span class="c1"># use the lowest possible trigger ID</span>
+                    <span class="n">val</span> <span class="o">=</span> <span class="nb">min</span><span class="p">([</span><span class="n">trig</span><span class="p">,</span> <span class="n">mf2</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="mi">999</span><span class="p">)])</span>
+                    <span class="n">mf2</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">key</span><span class="p">:</span> <span class="n">val</span><span class="p">})</span>
+        <span class="k">return</span> <span class="n">mf2</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_parse_extmf</span><span class="p">(</span><span class="n">mf2File</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Parses an extended multifile</span>
+
+<span class="sd">        takes filename as argument</span>
+<span class="sd">        returns</span>
+<span class="sd">        -------</span>
+<span class="sd">            a dictionary with stm as key and DIO as value</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">mf2Folder</span><span class="p">,</span> <span class="n">mf2FileName</span> <span class="o">=</span> <span class="n">_os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">mf2File</span><span class="p">)</span>
+        <span class="n">mf2</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">mf2File</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">lineNum</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">fp</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">lineNum</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">tmp</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">tmp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+                        <span class="n">dio</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">tmp</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="o">-</span><span class="mi">3</span><span class="p">:])</span>
+                        <span class="c1"># dio = lineNum -1</span>
+                        <span class="k">if</span> <span class="ow">not</span> <span class="n">tmp</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+                            <span class="n">_</span><span class="p">,</span> <span class="n">wave</span> <span class="o">=</span> <span class="n">tmp</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">mf2Folder</span><span class="p">)</span>
+                            <span class="c1"># mf2.append([dio,wave.split(&#39;.stm&#39;)[0][1:]])</span>
+                            <span class="n">key</span> <span class="o">=</span> <span class="n">wave</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.stm&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">:]</span>
+                            <span class="n">mf2</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">key</span><span class="p">:</span> <span class="n">dio</span><span class="p">})</span>
+        <span class="k">return</span> <span class="n">mf2</span>
+    <span class="c1"># -------------</span>
+
+    <span class="k">def</span> <span class="nf">_trigger_mf255</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stimKey</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">settleDuration</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;trigger in mf255 mode</span>
+
+<span class="sd">        Send the arg:StimKey to the SerialTrigger</span>
+<span class="sd">        with default settle duration of 100 ms</span>
+
+<span class="sd">        only 7-Bit Messages are allowed,</span>
+<span class="sd">        i.e. Stimkey mapping to values of 0-127</span>
+<span class="sd">        Written on D0-D6, then D7 is flipped</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">triggerNumber</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stimDict</span><span class="p">[</span><span class="n">stimKey</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">triggerNumber</span> <span class="o">&lt;=</span> <span class="mi">127</span><span class="p">:</span>
+            <span class="n">sendHIGH</span> <span class="o">=</span> <span class="n">triggerNumber</span> <span class="o">|</span> <span class="mi">128</span>
+            <span class="n">sendLOW</span> <span class="o">=</span> <span class="n">triggerNumber</span> <span class="o">|</span> <span class="mi">0</span>
+            <span class="n">highMessage</span> <span class="o">=</span> <span class="n">sendHIGH</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;big&#39;</span><span class="p">)</span>
+            <span class="n">lowMessage</span> <span class="o">=</span> <span class="n">sendLOW</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;big&#39;</span><span class="p">)</span>
+            <span class="n">resetMessage</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;big&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ConnectionError</span><span class="p">(</span><span class="s1">&#39;Only 7-Bit Messages are allowed&#39;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">interface</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">lowMessage</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.001</span><span class="p">)</span>  <span class="c1"># at least 20 ns</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">interface</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">highMessage</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">settleDuration</span> <span class="o">/</span> <span class="mi">1000</span><span class="p">)</span>  <span class="c1"># milliseconds scaling</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">interface</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">resetMessage</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_trigger_mf8</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stimKey</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">stimDuration</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+        <span class="c1"># transfrom D0-D7 to TriggerNumber</span>
+        <span class="n">triggerNumber</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stimDict</span><span class="p">[</span><span class="n">stimKey</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_trigger_single</span><span class="p">(</span><span class="n">stimDuration</span><span class="p">,</span> <span class="n">triggerNumber</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_trigger_single</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stimDuration</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">triggerNumber</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">interface</span><span class="o">.</span><span class="n">onehot</span><span class="p">(</span><span class="n">triggerNumber</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">stimDuration</span><span class="o">/</span><span class="mi">1000</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">interface</span><span class="o">.</span><span class="n">onehot</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+<div class="viewcode-block" id="multiChannelSystems.trigger"><a class="viewcode-back" href="../../_autosummary/api/experiment.device.html#experiment.device.multiChannelSystems.trigger">[docs]</a>    <span class="k">def</span> <span class="nf">trigger</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stimKey</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">settleDuration</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+
+        <span class="c1"># stub for autodoc with sphinx, will be overwritten during __init__</span>
+        <span class="k">pass</span></div>
+
+    <span class="c1"># -------------</span>
+<div class="viewcode-block" id="multiChannelSystems.shuffle"><a class="viewcode-back" href="../../_autosummary/api/experiment.device.html#experiment.device.multiChannelSystems.shuffle">[docs]</a>    <span class="k">def</span> <span class="nf">shuffle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">counts</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Permutate keys to stimDict</span>
+
+<span class="sd">        Returns a list of keys to access the current stimDict in randomly</span>
+<span class="sd">        permutated order. It memorizes the already returned keys to maintain</span>
+<span class="sd">        permutation across repetitive stimulations.</span>
+
+<span class="sd">        Example::</span>
+
+<span class="sd">            for stim in range(0,100,1):</span>
+<span class="sd">                stimKey = mcs.shuffle(1)</span>
+<span class="sd">                mcs.trigger(stimKey)</span>
+
+<span class="sd">        args</span>
+<span class="sd">        ----</span>
+
+<span class="sd">        counts: int</span>
+<span class="sd">            Number of permutated keys to generate. Defaults to len of stimDict</span>
+
+<span class="sd">        return</span>
+<span class="sd">        ------</span>
+<span class="sd">            list</span>
+<span class="sd">                a permutated list of keys for adressing stimDict</span>
+
+<span class="sd">        .. seealso::</span>
+
+<span class="sd">            :meth:`~.experiment.device.multiChannelSystems.reset_shuffle`</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="n">counts</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">counts</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stimDict</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_shuffle</span><span class="p">()</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">counts</span><span class="p">,</span> <span class="mi">1</span><span class="p">)]</span></div>
+
+<div class="viewcode-block" id="multiChannelSystems.reset_shuffle"><a class="viewcode-back" href="../../_autosummary/api/experiment.device.html#experiment.device.multiChannelSystems.reset_shuffle">[docs]</a>    <span class="k">def</span> <span class="nf">reset_shuffle</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Reset the shuffle generator</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_shuffle</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stimkey_generator</span><span class="p">()</span></div>
+
+    <span class="k">def</span> <span class="nf">_stimkey_generator</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">pd</span><span class="p">():</span>
+            <span class="n">newPermutation</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">_np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">permutation</span><span class="p">(</span>
+                                  <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stimDict</span><span class="o">.</span><span class="n">keys</span><span class="p">())))</span>
+            <span class="n">keyReservoir</span> <span class="o">=</span> <span class="n">newPermutation</span>
+            <span class="k">for</span> <span class="n">cnt</span><span class="p">,</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">keyReservoir</span><span class="p">):</span>
+                <span class="k">yield</span> <span class="n">key</span>
+                <span class="k">if</span> <span class="n">cnt</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">keyReservoir</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">newPermutation</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">_np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">permutation</span><span class="p">(</span>
+                                          <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stimDict</span><span class="o">.</span><span class="n">keys</span><span class="p">())))</span>
+                    <span class="n">keyReservoir</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">newPermutation</span><span class="p">)</span>
+        <span class="n">permDict</span> <span class="o">=</span> <span class="n">pd</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">permDict</span><span class="o">.</span><span class="fm">__next__</span>
+
+    <span class="c1"># --------------------------------------------------------------------------</span>
+
+<div class="viewcode-block" id="multiChannelSystems.random_isi"><a class="viewcode-back" href="../../_autosummary/api/experiment.device.html#experiment.device.multiChannelSystems.random_isi">[docs]</a>    <span class="k">def</span> <span class="nf">random_isi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">minduration</span><span class="p">,</span> <span class="n">maxduration</span><span class="p">,</span> <span class="n">count</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Creates a list of random interstimulus intervals</span>
+
+<span class="sd">        Example::</span>
+
+<span class="sd">            for stim in range(0,100,1):</span>
+<span class="sd">                stimKey = mcs.shuffle(count = 1)</span>
+<span class="sd">                isi = mcs.isi(1, 2, count = 1)</span>
+<span class="sd">                mcs.trigger(stimKey)</span>
+<span class="sd">                mcs.sleep(isi)</span>
+
+<span class="sd">        :arg minduration: minimum and</span>
+<span class="sd">        :arg maxduration: maximum duration ISI duration</span>
+<span class="sd">        :arg count: number of ISIs to create. Defaults is len of stimDict</span>
+<span class="sd">        :returns: a list of uniform random ISIs</span>
+
+<span class="sd">        .. seealso::</span>
+
+<span class="sd">            :meth:`~.experiment.device.nanoClock.sleep`</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="n">count</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stimDict</span><span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">_rndisi</span><span class="p">(</span><span class="n">minduration</span><span class="p">,</span> <span class="n">maxduration</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">_np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="n">minduration</span><span class="p">,</span> <span class="n">maxduration</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">[</span><span class="n">_rndisi</span><span class="p">(</span><span class="n">minduration</span><span class="p">,</span> <span class="n">maxduration</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">count</span><span class="p">,</span> <span class="mi">1</span><span class="p">)]</span></div>
+    <span class="c1"># -------------</span>
+
+<div class="viewcode-block" id="multiChannelSystems.dump"><a class="viewcode-back" href="../../_autosummary/api/experiment.device.html#experiment.device.multiChannelSystems.dump">[docs]</a>    <span class="k">def</span> <span class="nf">dump</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">modus</span><span class="o">=</span><span class="s1">&#39;wyrm&#39;</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Saves the current setting</span>
+
+<span class="sd">        Args</span>
+<span class="sd">        ----</span>
+<span class="sd">        filename: str</span>
+<span class="sd">            saves the current stimDict to filename as a json</span>
+<span class="sd">        mod: str</span>
+<span class="sd">            - &#39;wyrm&#39; saves in easy format for loading into wyrm</span>
+<span class="sd">            - &#39;raw&#39; saves in default dict -&gt; json format</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">_os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">filename</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;.json&#39;</span><span class="p">:</span>
+            <span class="n">_warn</span><span class="p">(</span><span class="s1">&#39;&#39;&#39;Filename does not end in .json. </span><span class="se">\n</span><span class="s1"></span>
+<span class="s1">                  Solution: I change extension to .json&#39;&#39;&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">modus</span> <span class="o">==</span> <span class="s1">&#39;bvr&#39;</span> <span class="ow">or</span> <span class="n">modus</span> <span class="o">==</span> <span class="s1">&#39;wyrm&#39;</span><span class="p">:</span>
+            <span class="n">d</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stim2wyrm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stimDict</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">modus</span> <span class="o">==</span> <span class="s1">&#39;raw&#39;</span><span class="p">:</span>
+            <span class="n">d</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stimDict</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>
+            <span class="n">_json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">fp</span><span class="p">)</span></div>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_stim2wyrm</span><span class="p">(</span><span class="n">stimDict</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">stimDict</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">LookupError</span><span class="p">(</span><span class="s1">&#39;Stim Dictionary Missing.</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">+</span>
+                              <span class="s1">&#39;Solution: Specify one as argument&#39;</span><span class="p">)</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">stimDict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="s1">&#39;S</span><span class="si">{:3d}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+            <span class="n">i</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">k</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;mA&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">d</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">i</span><span class="p">:</span> <span class="n">m</span><span class="p">})</span>
+        <span class="k">return</span> <span class="n">d</span>
+
+    <span class="c1"># -------------</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">stimDict</span><span class="o">.</span><span class="fm">__str__</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">modus</span><span class="o">=</span><span class="s1">&#39;mf8&#39;</span><span class="p">,</span>
+                 <span class="n">interface</span><span class="o">=</span><span class="n">ArduinoTrigger</span><span class="p">()):</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">interface</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">modus</span> <span class="o">==</span> <span class="s1">&#39;mf8&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stimDict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parse_mf8</span><span class="p">()</span>
+            <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stimDict</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">trigger</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_trigger_mf8</span>
+        <span class="k">elif</span> <span class="n">modus</span> <span class="o">==</span> <span class="s1">&#39;mf255&#39;</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;Broken for ArduinoTrigger v0.3&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">modus</span> <span class="o">==</span> <span class="s1">&#39;single&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stimDict</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;single&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">}</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">trigger</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_trigger_single</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+                <span class="s1">&#39;The modus you picked is not implemented</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">+</span>
+                <span class="s1">&#39;Solution: Choose either mf8, mf255 or single&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reset_shuffle</span><span class="p">()</span></div>
+
+<span class="c1"># %%</span>
+<div class="viewcode-block" id="neuroConnDC"><a class="viewcode-back" href="../../_autosummary/api/experiment.device.html#experiment.device.neuroConnDC">[docs]</a><span class="k">class</span> <span class="nc">neuroConnDC</span><span class="p">(</span><span class="n">Stimulator</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Class resembling the neuroConn DC Stimulator</span>
+
+<span class="sd">    .. note::</span>
+<span class="sd">       Represents the interface to DC-Plus stimulator from</span>
+<span class="sd">       `neuroConn &lt;http://www.neurocaregroup.com/dc_stimulator_plus.html&gt;`_.</span>
+
+
+<span class="sd">    A minimal working example::</span>
+
+<span class="sd">        ncdc = neuroConnDC(stimDuration = 15)</span>
+<span class="sd">        ncdc.trigger()</span>
+
+<span class="sd">    Triggers the neuroconnDC and blocks the script for 15 seconds</span>
+
+<span class="sd">    .. tip::</span>
+<span class="sd">        Set the neuroConnDC to listen to its TrigIn. If repetitive blocks of</span>
+<span class="sd">        stimulation are planned, add ~7s pause after stimulation to allow the</span>
+<span class="sd">        neuroConnDC to return to listening state.</span>
+
+<span class="sd">    .. admonition:: BVR Marker</span>
+
+<span class="sd">        - neuroConnDC is marked at &#39;S254&#39; and/or &#39;R  1&#39;</span>
+
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stimDuration</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">interface</span><span class="o">=</span><span class="n">SerialTrigger</span><span class="p">(),</span>
+                 <span class="n">triggerValue</span> <span class="o">=</span> <span class="mi">254</span><span class="p">):</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">interface</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stimDuration</span> <span class="o">=</span> <span class="n">stimDuration</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">triggerValue</span> <span class="o">=</span> <span class="n">triggerValue</span>
+    
+<div class="viewcode-block" id="neuroConnDC.return_duration"><a class="viewcode-back" href="../../_autosummary/api/experiment.device.html#experiment.device.neuroConnDC.return_duration">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">return_duration</span><span class="p">(</span><span class="n">saveDir</span><span class="p">,</span> <span class="n">stimTarget</span><span class="o">=</span><span class="s1">&#39;EDC_L&#39;</span><span class="p">,</span>
+                        <span class="n">cycles</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">parameter</span><span class="o">=</span><span class="s1">&#39;Beta_Location&#39;</span><span class="p">):</span>
+        <span class="n">fname</span> <span class="o">=</span> <span class="n">saveDir</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\\</span><span class="s1">00_emgfb_&#39;</span> <span class="o">+</span> <span class="n">stimTarget</span> <span class="o">+</span> <span class="s1">&#39;_fit.json&#39;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>
+                <span class="n">Dict</span> <span class="o">=</span> <span class="n">_json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">fp</span><span class="p">)</span>
+                <span class="n">d</span> <span class="o">=</span> <span class="p">(</span><span class="n">cycles</span> <span class="o">/</span> <span class="n">Dict</span><span class="p">[</span><span class="s2">&quot;Beta_Location&quot;</span><span class="p">])</span>
+                <span class="n">f</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{:2.1f}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">Dict</span><span class="p">[</span><span class="s2">&quot;Beta_Location&quot;</span><span class="p">])</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Could not find file, using default!&#39;</span><span class="p">)</span>
+            <span class="n">d</span><span class="p">,</span> <span class="n">f</span> <span class="o">=</span> <span class="n">cycles</span> <span class="o">/</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">20</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">d</span><span class="p">,</span> <span class="n">f</span></div>
+
+    <span class="k">def</span> <span class="nf">_join2json</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">saveDir</span><span class="p">,</span> <span class="n">stimTarget</span><span class="p">):</span>
+        <span class="n">fname</span> <span class="o">=</span> <span class="n">saveDir</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\\</span><span class="s1">00_emgfb_&#39;</span> <span class="o">+</span> <span class="n">stimTarget</span> <span class="o">+</span> <span class="s1">&#39;_cmc_fit.json&#39;</span>
+        <span class="k">return</span> <span class="n">fname</span>
+
+    <span class="k">def</span> <span class="nf">_duration_from_json</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fname</span><span class="p">,</span> <span class="n">cycles</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+                            <span class="n">parameter</span><span class="o">=</span><span class="s1">&#39;Beta_Location&#39;</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;reads duration of tACS stimulation from a json</span>
+
+<span class="sd">        returns duration of NeurConn Stimulation</span>
+<span class="sd">        at individual CMC frequency, when</span>
+<span class="sd">        stimulations last for @arg cycleNum cycles</span>
+
+<span class="sd">        add 7s to wait until NC returns to trig-in mode</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>
+            <span class="n">Dict</span> <span class="o">=</span> <span class="n">_json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">fp</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">cycles</span> <span class="o">/</span> <span class="n">Dict</span><span class="p">[</span><span class="s2">&quot;Beta_Location&quot;</span><span class="p">])</span>
+
+<div class="viewcode-block" id="neuroConnDC.register_duration_from_file"><a class="viewcode-back" href="../../_autosummary/api/experiment.device.html#experiment.device.neuroConnDC.register_duration_from_file">[docs]</a>    <span class="k">def</span> <span class="nf">register_duration_from_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fname</span><span class="p">,</span> <span class="n">parameter</span><span class="o">=</span><span class="s1">&#39;Beta_Location&#39;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">fname</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_join2json</span><span class="p">(</span><span class="o">*</span><span class="n">fname</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Was not able to join fname &#39;</span> <span class="o">+</span>
+                                <span class="s1">&#39;tuple to a proper Filename&#39;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">stimDuration</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_duration_from_json</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="n">parameter</span><span class="p">)</span></div>
+ 
+<div class="viewcode-block" id="neuroConnDC.trigger"><a class="viewcode-back" href="../../_autosummary/api/experiment.device.html#experiment.device.neuroConnDC.trigger">[docs]</a>    <span class="k">def</span> <span class="nf">trigger</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Triggers the NeuroConnDC</span>
+
+<span class="sd">        .. seealso::</span>
+<span class="sd">           :class:`~.experiment.device.Serialtrigger`</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="c1"># starts NeuroConn tdcs at BNC set in init</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">interface</span><span class="o">.</span><span class="n">trigger_loud</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">triggerValue</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">delay</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stimDuration</span><span class="p">,</span>
+                   <span class="k">lambda</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">interface</span><span class="o">.</span><span class="n">trigger_silent</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>  <span class="c1"># sets all to 0,</span></div>
+
+<div class="viewcode-block" id="neuroConnDC.dump"><a class="viewcode-back" href="../../_autosummary/api/experiment.device.html#experiment.device.neuroConnDC.dump">[docs]</a>    <span class="k">def</span> <span class="nf">dump</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Saves the curent parameters</span>
+
+<span class="sd">        :arg filename: saves the current parameters to filename</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">_os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">filename</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;.json&#39;</span><span class="p">:</span>
+            <span class="n">_warn</span><span class="p">(</span><span class="s1">&#39;&#39;&#39;Filename does not end in .json. </span><span class="se">\n</span><span class="s1"></span>
+<span class="s1">                  Solution: I change extension to .json&#39;&#39;&#39;</span><span class="p">)</span>
+
+        <span class="n">m</span> <span class="o">=</span> <span class="s1">&#39;S</span><span class="si">{:3d}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">triggerValue</span><span class="p">)</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">stimDuration</span><span class="p">)</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="p">{</span><span class="n">i</span><span class="p">:</span> <span class="n">m</span><span class="p">}</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>
+            <span class="n">_json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">fp</span><span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Experiment Framework 0.2.1. documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, Robert Guggenberger &amp; Max Scherer.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
+    </div>
+  </body>
+</html>

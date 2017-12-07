@@ -1,0 +1,48 @@
+.. Explore Sphinx documentation master file, created by
+   sphinx-quickstart on Wed Nov 15 09:11:42 2017.
+   You can adapt this file completely to your liking, but it should at least
+   contain the root `toctree` directive.
+
+Welcome to Explore Sphinx's documentation!
+==========================================
+
+.. toctree::
+   :caption: Table of Contents
+   :maxdepth: 2
+
+   intro
+
+Task Library
+============
+Several tasks have already been created, which eases the creation of experiments.
+
+.. toctree::
+   :maxdepth: 2
+
+   _tasks
+
+Creating Tasks
+==============
+Creating tasks uses modules organised in an API.
+
+.. toctree::
+   :maxdepth: 2
+
+   _api
+
+
+Hardware
+========
+Descripion of control software for external devices
+
+.. toctree::
+   :maxdepth: 2
+
+   ext/triggerbox/triggerbox  
+
+Indices and tables
+==================
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`

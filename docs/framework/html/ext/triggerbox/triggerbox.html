@@ -1,0 +1,286 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Triggerbox &#8212; Experiment Framework 0.2.1. documentation</title>
+    <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.2.1.',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="prev" title="C++ Wrappers" href="../../cppwrapper.html" /> 
+  </head>
+  <body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../../cppwrapper.html" title="C++ Wrappers"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Experiment Framework 0.2.1. documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="triggerbox">
+<h1>Triggerbox<a class="headerlink" href="#triggerbox" title="Permalink to this headline">¶</a></h1>
+<p>This arduino triggers and reads external stimulation devices and sends markers to brainvisionrecorder.</p>
+<div class="section" id="triggering">
+<h2>Triggering<a class="headerlink" href="#triggering" title="Permalink to this headline">¶</a></h2>
+<p>Triggering of the following devices is implemented over BNC:</p>
+<ul class="simple">
+<li>NeuroConn DC Plus</li>
+<li>Bomedus Stimulator</li>
+<li>Multichannel System STG 4008 single mode</li>
+</ul>
+<p>Triggering of the following devices is implemented over DSUB-9:</p>
+<ul class="simple">
+<li>Multichannel System STG 4008 mf8 mode</li>
+</ul>
+</div>
+<div class="section" id="listening">
+<h2>Listening<a class="headerlink" href="#listening" title="Permalink to this headline">¶</a></h2>
+<p>The arduino can listen to external stimulators for e.g. synchronisation of devices using ADC thresholding.</p>
+<p>Listening to the following devices is implemented over BNC:</p>
+<ul class="simple">
+<li>NeuroConn DC Plus</li>
+<li>Bomedus Stimulator</li>
+</ul>
+</div>
+<div class="section" id="marker">
+<h2>Marker<a class="headerlink" href="#marker" title="Permalink to this headline">¶</a></h2>
+<p>Marker are subsequently send to the brainvisionrecorder. This is currently implemented for</p>
+<ul class="simple">
+<li>S001 to S255</li>
+<li>R001 to R255</li>
+</ul>
+</div>
+<div class="section" id="modal-communication">
+<h2>Modal Communication<a class="headerlink" href="#modal-communication" title="Permalink to this headline">¶</a></h2>
+<p>Because so many distinct devices have to be controlled, pins are overloaden and the arduino needs to be flexible.
+We implemented an at least 2-byte communciation protocol from measurement-PC via USB at 115200 baud.</p>
+<p>The first byte is a byte encoding a command
+The second byte is a byte eencoding the parameters of the command
+All remaining bytes are ignored until the newline terminator (0x0a, i.e. ‘n’) was sent</p>
+<p>The following commands have been implemented</p>
+<span id="tab-triggerbox-commands"></span><table border="1" class="docutils" id="id1">
+<caption><span class="caption-text">Triggerbox Commands and Parameters</span><a class="headerlink" href="#id1" title="Permalink to this table">¶</a></caption>
+<colgroup>
+<col width="5%" />
+<col width="3%" />
+<col width="4%" />
+<col width="12%" />
+<col width="36%" />
+<col width="39%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Decimal</th>
+<th class="head">Hex</th>
+<th class="head">Char</th>
+<th class="head">Command</th>
+<th class="head">Description</th>
+<th class="head">Parameters</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>5</td>
+<td>0x05</td>
+<td>ENQ</td>
+<td>enquire</td>
+<td>return current settings as json</td>
+<td>n.a.</td>
+</tr>
+<tr class="row-odd"><td>6</td>
+<td>0x06</td>
+<td>ACK</td>
+<td>acknowledge</td>
+<td>return all received bytes via serial</td>
+<td>1: True 0: False</td>
+</tr>
+<tr class="row-even"><td>7</td>
+<td>0x07</td>
+<td>BEL</td>
+<td>bell</td>
+<td>return the following parameter byte via serial</td>
+<td>return message</td>
+</tr>
+<tr class="row-odd"><td>27</td>
+<td>0x1b</td>
+<td>ESC</td>
+<td>reset</td>
+<td>reset arduino to default setting</td>
+<td>n.a.</td>
+</tr>
+<tr class="row-even"><td>22</td>
+<td>0x16</td>
+<td>SYNC</td>
+<td>synchronize</td>
+<td>set delay for trigIn forwarding to forwardPin</td>
+<td>delay duration in 250 µs (default is 0ms)</td>
+</tr>
+<tr class="row-odd"><td>26</td>
+<td>0x1a</td>
+<td>SUB</td>
+<td>substitute</td>
+<td>set forwardPin for trigIn</td>
+<td>pinNumber to forward trigIn to</td>
+</tr>
+<tr class="row-even"><td>11</td>
+<td>0x0b</td>
+<td>VT</td>
+<td>threshold</td>
+<td>set threshold for analog input at trigIn</td>
+<td>threshold in steps of 4 (0-1020)</td>
+</tr>
+<tr class="row-odd"><td>9</td>
+<td>0x09</td>
+<td>TAB</td>
+<td>pulseduration</td>
+<td>set pulse duration for triggering</td>
+<td>pulse duration in 100 µs (default is 1ms)</td>
+</tr>
+<tr class="row-even"><td>116</td>
+<td>0x74</td>
+<td>t</td>
+<td>silent_trigger</td>
+<td>flip TRIGOUT silently, i.e. without BVR message</td>
+<td>1: On 0: Off;</td>
+</tr>
+<tr class="row-odd"><td>84</td>
+<td>0x54</td>
+<td>T</td>
+<td>loud_trigger</td>
+<td>flip TRIGOUT with BVR message</td>
+<td>0: Off; parameter is on and ff to stimulus</td>
+</tr>
+<tr class="row-even"><td>79</td>
+<td>0x4f</td>
+<td>O</td>
+<td>onehot</td>
+<td>trigger with onehot encoding, i.e. bitshift</td>
+<td>channel to be triggered (1-8); 0: Off</td>
+</tr>
+<tr class="row-odd"><td>82</td>
+<td>0x52</td>
+<td>R</td>
+<td>response</td>
+<td>send a response marker (R000-R255)</td>
+<td>response marker value (not implemented yet)</td>
+</tr>
+<tr class="row-even"><td>83</td>
+<td>0x53</td>
+<td>S</td>
+<td>stimulus</td>
+<td>send a stimulus marker (S000-S255)</td>
+<td>stimulus marker value</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">All S000-S255 messages are copied on the DSUB9</p>
+</div>
+<div class="admonition tip">
+<p class="first admonition-title">Tip</p>
+<ul class="last simple">
+<li>use onehot for the mcs-stg in mf8 mode</li>
+<li>use silent_trigger or loud_trigger for NeuroConn DC or Bomedus</li>
+<li>use stimulus for brainvisionrecorder markers</li>
+</ul>
+</div>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<ul class="last simple">
+<li><a class="reference internal" href="../../_autosummary/api/experiment.device.html#experiment.device.SerialTrigger" title="experiment.device.SerialTrigger"><code class="xref py py-class docutils literal"><span class="pre">SerialTrigger</span></code></a></li>
+</ul>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Triggerbox</a><ul>
+<li><a class="reference internal" href="#triggering">Triggering</a></li>
+<li><a class="reference internal" href="#listening">Listening</a></li>
+<li><a class="reference internal" href="#marker">Marker</a></li>
+<li><a class="reference internal" href="#modal-communication">Modal Communication</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="../../cppwrapper.html"
+                        title="previous chapter">C++ Wrappers</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/ext/triggerbox/triggerbox.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../../cppwrapper.html" title="C++ Wrappers"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Experiment Framework 0.2.1. documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, Robert Guggenberger &amp; Max Scherer.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
+    </div>
+  </body>
+</html>

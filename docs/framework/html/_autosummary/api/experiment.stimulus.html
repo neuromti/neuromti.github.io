@@ -1,0 +1,440 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>experiment.stimulus &#8212; Experiment Framework 0.2.1. documentation</title>
+    <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.2.1.',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="experiment.classifier" href="experiment.classifier.html" />
+    <link rel="prev" title="experiment.device" href="experiment.device.html" /> 
+  </head>
+  <body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="experiment.classifier.html" title="experiment.classifier"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="experiment.device.html" title="experiment.device"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Experiment Framework 0.2.1. documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../_api.html" accesskey="U">Main API</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-experiment.stimulus">
+<span id="experiment-stimulus"></span><h1>experiment.stimulus<a class="headerlink" href="#module-experiment.stimulus" title="Permalink to this headline">¶</a></h1>
+<p>This module contains classes resembling acoustic and visual stimuli</p>
+<p>It contains acoustic stimuli, represented by <a class="reference internal" href="#experiment.stimulus.Sound" title="experiment.stimulus.Sound"><code class="xref py py-class docutils literal"><span class="pre">Sound</span></code></a> and visual stimuli represented by the general <a class="reference internal" href="#experiment.stimulus.Frame" title="experiment.stimulus.Frame"><code class="xref py py-class docutils literal"><span class="pre">Frame</span></code></a></p>
+<div class="section" id="visual-stimuli">
+<h2>Visual stimuli<a class="headerlink" href="#visual-stimuli" title="Permalink to this headline">¶</a></h2>
+<p>Are grouped into whether they are a</p>
+<ul class="simple">
+<li>static <a class="reference internal" href="#experiment.stimulus.Frame" title="experiment.stimulus.Frame"><code class="xref py py-class docutils literal"><span class="pre">Frame</span></code></a>, e.g. <a class="reference internal" href="#experiment.stimulus.Mural" title="experiment.stimulus.Mural"><code class="xref py py-class docutils literal"><span class="pre">Mural</span></code></a>, <a class="reference internal" href="#experiment.stimulus.Cross" title="experiment.stimulus.Cross"><code class="xref py py-class docutils literal"><span class="pre">Cross</span></code></a> or <a class="reference internal" href="#experiment.stimulus.Rectangle" title="experiment.stimulus.Rectangle"><code class="xref py py-class docutils literal"><span class="pre">Rectangle</span></code></a></li>
+<li><a class="reference internal" href="#experiment.stimulus.Dynamic" title="experiment.stimulus.Dynamic"><code class="xref py py-class docutils literal"><span class="pre">Dynamic</span></code></a> e.g. <a class="reference internal" href="#experiment.stimulus.Ball" title="experiment.stimulus.Ball"><code class="xref py py-class docutils literal"><span class="pre">Ball</span></code></a> or <a class="reference internal" href="#experiment.stimulus.Bar" title="experiment.stimulus.Bar"><code class="xref py py-class docutils literal"><span class="pre">Bar</span></code></a></li>
+</ul>
+</div>
+<div class="section" id="documentation">
+<h2>Documentation<a class="headerlink" href="#documentation" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="experiment.stimulus.Ball">
+<em class="property">class </em><code class="descclassname">experiment.stimulus.</code><code class="descname">Ball</code><span class="sig-paren">(</span><em>Screen</em>, <em>Target=30</em>, <em>State=0</em>, <em>Tolerance=10</em>, <em>ZoomFactor=3</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/stimulus.html#Ball"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.stimulus.Ball" title="Permalink to this definition">¶</a></dt>
+<dd><p>Dynamic Feedback with a ball changing height</p>
+<p>Example:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">screen</span> <span class="o">=</span> <span class="n">cues</span><span class="o">.</span><span class="n">feedback</span><span class="o">.</span><span class="n">Screen</span><span class="p">()</span>
+<span class="n">ball</span> <span class="o">=</span> <span class="n">cues</span><span class="o">.</span><span class="n">feedback</span><span class="o">.</span><span class="n">Bar</span><span class="p">(</span><span class="n">Screen</span><span class="p">)</span>
+<span class="n">ball</span><span class="o">.</span><span class="n">showNow</span><span class="p">()</span>
+
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">101</span><span class="p">,</span><span class="mi">1</span><span class="p">):</span>
+    <span class="n">ball</span><span class="o">.</span><span class="n">updateState</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+    <span class="n">ball</span><span class="o">.</span><span class="n">showNow</span><span class="p">()</span>
+
+<span class="n">ball</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="#experiment.stimulus.Dynamic" title="experiment.stimulus.Dynamic"><code class="xref py py-class docutils literal"><span class="pre">Dynamic</span></code></a></p>
+</div>
+<dl class="method">
+<dt id="experiment.stimulus.Ball.setZoom">
+<code class="descname">setZoom</code><span class="sig-paren">(</span><em>ZoomFactor=3</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/stimulus.html#Ball.setZoom"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.stimulus.Ball.setZoom" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="experiment.stimulus.Ball.updateState">
+<code class="descname">updateState</code><span class="sig-paren">(</span><em>Level</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/stimulus.html#Ball.updateState"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.stimulus.Ball.updateState" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="experiment.stimulus.Ball.updateTarget">
+<code class="descname">updateTarget</code><span class="sig-paren">(</span><em>Level=0</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/stimulus.html#Ball.updateTarget"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.stimulus.Ball.updateTarget" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="experiment.stimulus.Bar">
+<em class="property">class </em><code class="descclassname">experiment.stimulus.</code><code class="descname">Bar</code><span class="sig-paren">(</span><em>Screen</em>, <em>Target=100</em>, <em>State=0</em>, <em>Tolerance=10</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/stimulus.html#Bar"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.stimulus.Bar" title="Permalink to this definition">¶</a></dt>
+<dd><p>Dynamic Feedback with a bar changing height</p>
+<p>Example:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">screen</span>  <span class="o">=</span> <span class="n">cues</span><span class="o">.</span><span class="n">feedback</span><span class="o">.</span><span class="n">Screen</span><span class="p">()</span>
+<span class="n">bar</span>     <span class="o">=</span> <span class="n">cues</span><span class="o">.</span><span class="n">feedback</span><span class="o">.</span><span class="n">Bar</span><span class="p">(</span><span class="n">Screen</span><span class="p">)</span>
+<span class="n">bar</span><span class="o">.</span><span class="n">showNow</span><span class="p">()</span>
+
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">101</span><span class="p">,</span><span class="mi">1</span><span class="p">):</span>
+    <span class="n">bar</span><span class="o">.</span><span class="n">updateState</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+    <span class="n">bar</span><span class="o">.</span><span class="n">showNow</span><span class="p">()</span>
+
+<span class="n">bar</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="#experiment.stimulus.Dynamic" title="experiment.stimulus.Dynamic"><code class="xref py py-class docutils literal"><span class="pre">Dynamic</span></code></a></p>
+</div>
+<dl class="method">
+<dt id="experiment.stimulus.Bar.updateState">
+<code class="descname">updateState</code><span class="sig-paren">(</span><em>Level</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/stimulus.html#Bar.updateState"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.stimulus.Bar.updateState" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="experiment.stimulus.Bar.updateTarget">
+<code class="descname">updateTarget</code><span class="sig-paren">(</span><em>Level</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/stimulus.html#Bar.updateTarget"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.stimulus.Bar.updateTarget" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="experiment.stimulus.Cross">
+<em class="property">class </em><code class="descclassname">experiment.stimulus.</code><code class="descname">Cross</code><span class="sig-paren">(</span><em>Screen</em>, <em>ZoomFactor=1</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/stimulus.html#Cross"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.stimulus.Cross" title="Permalink to this definition">¶</a></dt>
+<dd><p>Represents a white cross in the center of a screen</p>
+<p>Example</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">cross</span> <span class="o">=</span> <span class="n">experiment</span><span class="o">.</span><span class="n">stimulus</span><span class="o">.</span><span class="n">Cross</span><span class="p">(</span><span class="n">Screen</span><span class="p">,</span> <span class="n">ZoomFactor</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">cross</span><span class="o">.</span><span class="n">showNow</span><span class="p">()</span>
+</pre></div>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>Screen</strong> (<a class="reference internal" href="experiment.device.html#experiment.device.Screen" title="experiment.device.Screen"><code class="xref py py-class docutils literal"><span class="pre">Screen</span></code></a>) – A display Screen is a necessary requirement</li>
+<li><strong>Zoomfactor</strong> (<em>float</em>) – The relative size of the cross, higher values indicate a larger cross</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="experiment.stimulus.Cross.setZoom">
+<code class="descname">setZoom</code><span class="sig-paren">(</span><em>ZoomFactor=1</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/stimulus.html#Cross.setZoom"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.stimulus.Cross.setZoom" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the Zoomfactor</p>
+<div class="admonition-sanity-checks admonition">
+<p class="first admonition-title">Sanity Checks</p>
+<p class="last">will use the default of 1 if a 0 is used as Zoomfactor</p>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="experiment.stimulus.Dynamic">
+<em class="property">class </em><code class="descclassname">experiment.stimulus.</code><code class="descname">Dynamic</code><span class="sig-paren">(</span><em>Screen</em>, <em>Target=100</em>, <em>State=0</em>, <em>Tolerance=10</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/stimulus.html#Dynamic"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.stimulus.Dynamic" title="Permalink to this definition">¶</a></dt>
+<dd><p>Base class resembling dynamic visual stimuli</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>Screen</strong> (<a class="reference internal" href="experiment.device.html#experiment.device.Screen" title="experiment.device.Screen"><code class="xref py py-class docutils literal"><span class="pre">Screen</span></code></a>) – A display Screen is a necessary requirement</li>
+<li><strong>Target</strong> (<em>float</em>) – value between 0 and 100 defining the target level</li>
+<li><strong>State</strong> (<em>float</em>) – value between 0 and 100 defining the current level</li>
+<li><strong>Tolerance</strong> (<em>float</em>) – value between 0 and 100 defining the range of values         accepted around target as sufficient</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition caution">
+<p class="first admonition-title">Caution</p>
+<p class="last">as this is the base class, most methods are abstract and need to be
+implemented, e.g. as in <a class="reference internal" href="#experiment.stimulus.Bar" title="experiment.stimulus.Bar"><code class="xref py py-class docutils literal"><span class="pre">Bar</span></code></a> or
+<a class="reference internal" href="#experiment.stimulus.Ball" title="experiment.stimulus.Ball"><code class="xref py py-class docutils literal"><span class="pre">Ball</span></code></a></p>
+</div>
+<div class="admonition tip">
+<p class="first admonition-title">Tip</p>
+<ul class="last simple">
+<li>you can use print(Dynamic) for debugging purposes</li>
+<li>will use the default colors of its         <a class="reference internal" href="experiment.device.html#experiment.device.Screen" title="experiment.device.Screen"><code class="xref py py-class docutils literal"><span class="pre">Screen</span></code></a> change these accordingly</li>
+</ul>
+</div>
+<dl class="method">
+<dt id="experiment.stimulus.Dynamic.setTolerance">
+<code class="descname">setTolerance</code><span class="sig-paren">(</span><em>Tolerance=10</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/stimulus.html#Dynamic.setTolerance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.stimulus.Dynamic.setTolerance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the tolerance</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="experiment.stimulus.Dynamic.updateState">
+<code class="descname">updateState</code><span class="sig-paren">(</span><em>Level=0</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/stimulus.html#Dynamic.updateState"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.stimulus.Dynamic.updateState" title="Permalink to this definition">¶</a></dt>
+<dd><p>Updates the current state</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="experiment.stimulus.Dynamic.updateTarget">
+<code class="descname">updateTarget</code><span class="sig-paren">(</span><em>Level=100</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/stimulus.html#Dynamic.updateTarget"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.stimulus.Dynamic.updateTarget" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the target level</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="experiment.stimulus.Frame">
+<em class="property">class </em><code class="descclassname">experiment.stimulus.</code><code class="descname">Frame</code><span class="sig-paren">(</span><em>Screen</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/stimulus.html#Frame"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.stimulus.Frame" title="Permalink to this definition">¶</a></dt>
+<dd><p>Base class representing any visual stimulation</p>
+<p>A minimal working example:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">NullFrame</span>       <span class="o">=</span> <span class="n">experiment</span><span class="o">.</span><span class="n">stimulus</span><span class="o">.</span><span class="n">Frame</span><span class="p">(</span><span class="n">Screen</span><span class="p">)</span>
+<span class="c1"># An existing Screen is a necessary requirement for any Frame object</span>
+<span class="c1"># will create a black frame of full Window Size for the given Screen</span>
+</pre></div>
+</div>
+<dl class="method">
+<dt id="experiment.stimulus.Frame.setZoom">
+<code class="descname">setZoom</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/stimulus.html#Frame.setZoom"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.stimulus.Frame.setZoom" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="experiment.stimulus.Frame.showDelayed">
+<code class="descname">showDelayed</code><span class="sig-paren">(</span><em>nanoTimeCfg=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/stimulus.html#Frame.showDelayed"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.stimulus.Frame.showDelayed" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="experiment.stimulus.Frame.showNow">
+<code class="descname">showNow</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/stimulus.html#Frame.showNow"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.stimulus.Frame.showNow" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="experiment.stimulus.Mural">
+<em class="property">class </em><code class="descclassname">experiment.stimulus.</code><code class="descname">Mural</code><span class="sig-paren">(</span><em>Screen</em>, <em>Mural='TxT'</em>, <em>ZoomFactor=1</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/stimulus.html#Mural"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.stimulus.Mural" title="Permalink to this definition">¶</a></dt>
+<dd><p>Represents white text in the center of a screen</p>
+<p>Example</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">mural</span> <span class="o">=</span> <span class="n">stimulus</span><span class="o">.</span><span class="n">Mural</span><span class="p">(</span><span class="n">Screen</span><span class="p">,</span> <span class="n">Mural</span><span class="o">=</span><span class="s1">&#39;Example&#39;</span><span class="p">,</span> <span class="n">ZoomFactor</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">mural</span><span class="o">.</span><span class="n">showNow</span><span class="p">()</span>
+</pre></div>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>Screen</strong> (<a class="reference internal" href="experiment.device.html#experiment.device.Screen" title="experiment.device.Screen"><code class="xref py py-class docutils literal"><span class="pre">Screen</span></code></a>) – A display Screen is a necessary requirement</li>
+<li><strong>Mural</strong> (<em>str</em>) – The string to be shown</li>
+<li><strong>Zoomfactor</strong> (<em>float</em>) – The relative size of the cross, higher values indicate a larger cross</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition tip">
+<p class="first admonition-title">Tip</p>
+<p class="last">The font used will be the default font of the         <a class="reference internal" href="experiment.device.html#experiment.device.Screen" title="experiment.device.Screen"><code class="xref py py-class docutils literal"><span class="pre">Screen</span></code></a></p>
+</div>
+<dl class="method">
+<dt id="experiment.stimulus.Mural.setText">
+<code class="descname">setText</code><span class="sig-paren">(</span><em>Mural='TxT'</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/stimulus.html#Mural.setText"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.stimulus.Mural.setText" title="Permalink to this definition">¶</a></dt>
+<dd><p>Changes the text to be shown</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>Mural</strong> (<em>str</em>) – The string to be shown</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="experiment.stimulus.Mural.setZoom">
+<code class="descname">setZoom</code><span class="sig-paren">(</span><em>ZoomFactor=1</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/stimulus.html#Mural.setZoom"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.stimulus.Mural.setZoom" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the Zoomfactor</p>
+<div class="admonition-sanity-checks admonition">
+<p class="first admonition-title">Sanity Checks</p>
+<p class="last">will use the default of 1 if a 0 is used as Zoomfactor</p>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="experiment.stimulus.Rectangle">
+<em class="property">class </em><code class="descclassname">experiment.stimulus.</code><code class="descname">Rectangle</code><span class="sig-paren">(</span><em>Screen</em>, <em>xPos=0</em>, <em>yPos=0</em>, <em>Height=100</em>, <em>Width=100</em>, <em>Color='gray'</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/stimulus.html#Rectangle"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.stimulus.Rectangle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Example</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">rectangle</span> <span class="o">=</span> <span class="n">experiment</span><span class="o">.</span><span class="n">stimulus</span><span class="o">.</span><span class="n">Rectangle</span><span class="p">(</span><span class="n">Screen</span><span class="p">,</span> <span class="n">xPos</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">yPos</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                                       <span class="n">Height</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span> <span class="n">Width</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
+                                       <span class="n">Color</span> <span class="o">=</span> <span class="s2">&quot;gray&quot;</span><span class="p">)</span>
+<span class="n">rectangle</span><span class="o">.</span><span class="n">showNow</span><span class="p">()</span>
+</pre></div>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>Screen</strong> (<a class="reference internal" href="experiment.device.html#experiment.device.Screen" title="experiment.device.Screen"><code class="xref py py-class docutils literal"><span class="pre">Screen</span></code></a>) – A display Screen is a necessary requirement</li>
+<li><strong>xPos</strong> (<em>int</em>) – x-coordinates of center of rectangle in pixes</li>
+<li><strong>yPos</strong> (<em>int</em>) – y-coordinates of center of rectangle in pixes</li>
+<li><strong>Height</strong> (<em>int</em>) – heigth of rectangle in pixels</li>
+<li><strong>Width</strong> (<em>int</em>) – width of rectangle in pixels</li>
+<li><strong>Color</strong> (<em>tuple</em><em> or </em><em>str</em>) – <dl class="docutils">
+<dt>either a string from <a class="reference internal" href="experiment.device.html#experiment.device.Screen.colors" title="experiment.device.Screen.colors"><code class="xref py py-attr docutils literal"><span class="pre">colors</span></code></a> or         a tuple with len three defining the color in RBG, scaled either between</dt>
+<dd>(0, .5, 1) or (0, 127, 255)</dd>
+</dl>
+</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="experiment.stimulus.Rectangle.setColor">
+<code class="descname">setColor</code><span class="sig-paren">(</span><em>Color='gray'</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/stimulus.html#Rectangle.setColor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.stimulus.Rectangle.setColor" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="experiment.stimulus.Sound">
+<em class="property">class </em><code class="descclassname">experiment.stimulus.</code><code class="descname">Sound</code><span class="sig-paren">(</span><em>Speaker=&lt;Mock id='140095663742816'&gt;</em>, <em>filePath=None</em>, <em>Duration='Automatic'</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/stimulus.html#Sound"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.stimulus.Sound" title="Permalink to this definition">¶</a></dt>
+<dd><p>Representing an Sound to be played with Speaker
+Example:</p>
+<p>create a “silent” Sound object</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">NullSound</span>       <span class="o">=</span> <span class="n">experiment</span><span class="o">.</span><span class="n">stimulus</span><span class="o">.</span><span class="n">Sound</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Create a Sound object based on wavfile.wav</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">WavFilePath</span>     <span class="o">=</span> <span class="s2">&quot;wavfile.wav&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Sound</span>           <span class="o">=</span> <span class="n">experiment</span><span class="o">.</span><span class="n">stimulus</span><span class="o">.</span><span class="n">Sound</span><span class="p">(</span><span class="n">Speaker</span><span class="p">,</span> <span class="n">WavFilePath</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>see also</p>
+<p>Speaker</p>
+<dl class="attribute">
+<dt id="experiment.stimulus.Sound.LoadedBefore">
+<code class="descname">LoadedBefore</code><em class="property"> = False</em><a class="headerlink" href="#experiment.stimulus.Sound.LoadedBefore" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="experiment.stimulus.Sound.close">
+<code class="descname">close</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/stimulus.html#Sound.close"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.stimulus.Sound.close" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="experiment.stimulus.Sound.readDuration">
+<code class="descname">readDuration</code><span class="sig-paren">(</span><em>filePath</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/experiment/stimulus.html#Sound.readDuration"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#experiment.stimulus.Sound.readDuration" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">experiment.stimulus</a><ul>
+<li><a class="reference internal" href="#visual-stimuli">Visual stimuli</a></li>
+<li><a class="reference internal" href="#documentation">Documentation</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="experiment.device.html"
+                        title="previous chapter">experiment.device</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="experiment.classifier.html"
+                        title="next chapter">experiment.classifier</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/_autosummary/api/experiment.stimulus.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="experiment.classifier.html" title="experiment.classifier"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="experiment.device.html" title="experiment.device"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Experiment Framework 0.2.1. documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../_api.html" >Main API</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, Robert Guggenberger &amp; Max Scherer.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
+    </div>
+  </body>
+</html>

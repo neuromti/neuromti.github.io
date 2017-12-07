@@ -1,0 +1,6 @@
+experiment.stimulus
+===================
+
+.. automodule:: experiment.stimulus
+    :members:
+    :undoc-members:

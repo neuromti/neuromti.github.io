@@ -1,0 +1,89 @@
+
+Triggerbox
+==========
+
+
+This arduino triggers and reads external stimulation devices and sends markers to brainvisionrecorder.
+
+Triggering
+----------
+
+Triggering of the following devices is implemented over BNC:
+
+- NeuroConn DC Plus
+- Bomedus Stimulator
+- Multichannel System STG 4008 single mode
+
+Triggering of the following devices is implemented over DSUB-9:
+
+- Multichannel System STG 4008 mf8 mode
+
+
+Listening
+---------
+
+The arduino can listen to external stimulators for e.g. synchronisation of devices using ADC thresholding.
+
+Listening to the following devices is implemented over BNC:
+
+- NeuroConn DC Plus
+- Bomedus Stimulator
+
+Marker
+------
+
+Marker are subsequently send to the brainvisionrecorder. This is currently implemented for
+
+- S001 to S255
+- R001 to R255
+
+
+Modal Communication
+-------------------
+
+Because so many distinct devices have to be controlled, pins are overloaden and the arduino needs to be flexible.
+We implemented an at least 2-byte communciation protocol from measurement-PC via USB at 115200 baud.
+
+The first byte is a byte encoding a command
+The second byte is a byte eencoding the parameters of the command
+All remaining bytes are ignored until the newline terminator (0x0a, i.e. '\n') was sent
+
+The following commands have been implemented
+
+.. _tab-triggerbox-commands:
+
+.. table:: Triggerbox Commands and Parameters
+
+    ======= ==== ===== ================ ===============================================  ==================================================
+    Decimal Hex  Char  Command          Description                                      Parameters
+    ======= ==== ===== ================ ===============================================  ==================================================
+    5       0x05 ENQ   enquire          return current settings as json                  n.a.
+    6       0x06 ACK   acknowledge      return all received bytes via serial             1: True 0: False
+    7       0x07 BEL   bell             return the following parameter byte via serial   return message
+    27      0x1b ESC   reset            reset arduino to default setting                 n.a.
+
+    22      0x16 SYNC  synchronize      set delay for trigIn forwarding to forwardPin    delay duration in 250 µs (default is 0ms)
+    26      0x1a SUB   substitute       set forwardPin for trigIn                        pinNumber to forward trigIn to
+    11      0x0b VT    threshold        set threshold for analog input at trigIn         threshold in steps of 4 (0-1020)
+    9       0x09 TAB   pulseduration    set pulse duration for triggering                pulse duration in 100 µs (default is 1ms)
+
+    116     0x74 t     silent_trigger   flip TRIGOUT silently, i.e. without BVR message  1: On 0: Off;
+    84      0x54 T     loud_trigger     flip TRIGOUT with BVR message                    0: Off; parameter is on and ff to stimulus
+    79      0x4f O     onehot           trigger with onehot encoding, i.e. bitshift      channel to be triggered (1-8); 0: Off
+    82      0x52 R     response         send a response marker (R000-R255)               response marker value (not implemented yet)
+    83      0x53 S     stimulus         send a stimulus marker (S000-S255)               stimulus marker value
+    ======= ==== ===== ================ ===============================================  ==================================================
+
+
+.. note::
+   All S000-S255 messages are copied on the DSUB9
+
+
+.. tip::
+   - use onehot for the mcs-stg in mf8 mode
+   - use silent_trigger or loud_trigger for NeuroConn DC or Bomedus
+   - use stimulus for brainvisionrecorder markers
+   
+.. seealso::
+   - :class:`~.experiment.device.SerialTrigger`
+

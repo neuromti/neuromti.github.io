@@ -1,0 +1,41 @@
+Main API
+========
+
+The experiment api is based on several submodules which wrap themselves the
+:doc:`cppwrapper`. The api is mainly use for creating experimental tasks.
+A library of several differnt tasks has already been created in the :doc:`_tasks`
+sumodules.
+
+
+Example
+-------
+
+The following example would create a task that presents a cross for
+five seconds on monitor 2::
+
+    import experiment.api as xp
+    Cue = xp.Cue(xp.SOUND['peep'], xp.STATIC['cross'], 5)
+    xp.Screen.open()
+    Cue.present()
+    xp.Screen.close()
+
+Submodules
+----------
+
+.. autosummary::
+   :toctree: _autosummary/api
+   :template: module.rst
+
+   experiment.protocol
+   experiment.device
+   experiment.stimulus
+   experiment.classifier
+
+.. automodule:: experiment.api
+   :members:
+
+
+.. toctree::
+   :maxdepth: 1
+
+   cppwrapper

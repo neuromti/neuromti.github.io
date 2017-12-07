@@ -1,0 +1,408 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>C++ Wrappers &#8212; Experiment Framework 0.2.1. documentation</title>
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.2.1.',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Triggerbox" href="ext/triggerbox/triggerbox.html" />
+    <link rel="prev" title="experiment.classifier" href="_autosummary/api/experiment.classifier.html" /> 
+  </head>
+  <body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="ext/triggerbox/triggerbox.html" title="Triggerbox"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="_autosummary/api/experiment.classifier.html" title="experiment.classifier"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Experiment Framework 0.2.1. documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="_api.html" accesskey="U">Main API</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-cues.acoustic">
+<span id="c-wrappers"></span><h1>C++ Wrappers<a class="headerlink" href="#module-cues.acoustic" title="Permalink to this headline">¶</a></h1>
+<p>Created on Apr 24, 2017</p>
+<p>&#64;author: Maximilian Scherer</p>
+<p>ATTENTION, the playFileNow and playFileDelayed methods need about 100ms additional time
+to return AFTER the end of the acoustic stimulus. For a fast chain of different acoustic stimuli,
+it is therefore adviced to combine them into a single audio file to play them without delay.</p>
+<dl class="class">
+<dt id="cues.acoustic.Acoustic">
+<em class="property">class </em><code class="descclassname">cues.acoustic.</code><code class="descname">Acoustic</code><span class="sig-paren">(</span><em>libPath</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cues/acoustic.html#Acoustic"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cues.acoustic.Acoustic" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="cues.acoustic.Acoustic.deInitAudio">
+<code class="descname">deInitAudio</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cues/acoustic.html#Acoustic.deInitAudio"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cues.acoustic.Acoustic.deInitAudio" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="cues.acoustic.Acoustic.initAudio">
+<code class="descname">initAudio</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cues/acoustic.html#Acoustic.initAudio"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cues.acoustic.Acoustic.initAudio" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="cues.acoustic.Acoustic.isActive">
+<code class="descname">isActive</code><em class="property"> = 0</em><a class="headerlink" href="#cues.acoustic.Acoustic.isActive" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="cues.acoustic.Acoustic.loadFile">
+<code class="descname">loadFile</code><span class="sig-paren">(</span><em>acousticConfig</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cues/acoustic.html#Acoustic.loadFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cues.acoustic.Acoustic.loadFile" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="cues.acoustic.Acoustic.playFileDelayed">
+<code class="descname">playFileDelayed</code><span class="sig-paren">(</span><em>nanoTimeConfig</em>, <em>dummy=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cues/acoustic.html#Acoustic.playFileDelayed"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cues.acoustic.Acoustic.playFileDelayed" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="cues.acoustic.Acoustic.playFileDelayedLogged">
+<code class="descname">playFileDelayedLogged</code><span class="sig-paren">(</span><em>nanoTimeConfig</em>, <em>logConfig</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cues/acoustic.html#Acoustic.playFileDelayedLogged"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cues.acoustic.Acoustic.playFileDelayedLogged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="cues.acoustic.Acoustic.playFileNow">
+<code class="descname">playFileNow</code><span class="sig-paren">(</span><em>dummy=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cues/acoustic.html#Acoustic.playFileNow"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cues.acoustic.Acoustic.playFileNow" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="cues.acoustic.Acoustic.playFileNowLogged">
+<code class="descname">playFileNowLogged</code><span class="sig-paren">(</span><em>logConfig</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cues/acoustic.html#Acoustic.playFileNowLogged"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cues.acoustic.Acoustic.playFileNowLogged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="cues.acoustic.Acoustic.preLoadFile">
+<code class="descname">preLoadFile</code><span class="sig-paren">(</span><em>filePath</em>, <em>length</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cues/acoustic.html#Acoustic.preLoadFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cues.acoustic.Acoustic.preLoadFile" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="cues.acoustic.Acoustic.setFramesPerBuffer">
+<code class="descname">setFramesPerBuffer</code><span class="sig-paren">(</span><em>acousticConfig</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cues/acoustic.html#Acoustic.setFramesPerBuffer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cues.acoustic.Acoustic.setFramesPerBuffer" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="cues.acoustic.Acoustic.setMaxDelay">
+<code class="descname">setMaxDelay</code><span class="sig-paren">(</span><em>acousticConfig</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cues/acoustic.html#Acoustic.setMaxDelay"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cues.acoustic.Acoustic.setMaxDelay" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="cues.acoustic.Acoustic.setupFile">
+<code class="descname">setupFile</code><span class="sig-paren">(</span><em>acousticConfig</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cues/acoustic.html#Acoustic.setupFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cues.acoustic.Acoustic.setupFile" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="cues.acoustic.Acoustic.setupFileDirectly">
+<code class="descname">setupFileDirectly</code><span class="sig-paren">(</span><em>fileId</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cues/acoustic.html#Acoustic.setupFileDirectly"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cues.acoustic.Acoustic.setupFileDirectly" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="cues.acoustic.AcousticConfig">
+<em class="property">class </em><code class="descclassname">cues.acoustic.</code><code class="descname">AcousticConfig</code><a class="reference internal" href="_modules/cues/acoustic.html#AcousticConfig"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cues.acoustic.AcousticConfig" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="cues.acoustic.AcousticConfig.fileId">
+<code class="descname">fileId</code><em class="property"> = 0</em><a class="headerlink" href="#cues.acoustic.AcousticConfig.fileId" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="cues.acoustic.AcousticConfig.filePath">
+<code class="descname">filePath</code><em class="property"> = ''</em><a class="headerlink" href="#cues.acoustic.AcousticConfig.filePath" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="cues.acoustic.AcousticConfig.framesPerBuffer">
+<code class="descname">framesPerBuffer</code><em class="property"> = 64</em><a class="headerlink" href="#cues.acoustic.AcousticConfig.framesPerBuffer" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="cues.acoustic.AcousticConfig.length">
+<code class="descname">length</code><em class="property"> = 0</em><a class="headerlink" href="#cues.acoustic.AcousticConfig.length" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="cues.acoustic.AcousticConfig.maxDelay">
+<code class="descname">maxDelay</code><em class="property"> = 50000000000</em><a class="headerlink" href="#cues.acoustic.AcousticConfig.maxDelay" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<span class="target" id="module-cues.visual"></span><p>Created on Apr 19, 2017</p>
+<p>&#64;author: Maximilian Scherer</p>
+<dl class="class">
+<dt id="cues.visual.Visual">
+<em class="property">class </em><code class="descclassname">cues.visual.</code><code class="descname">Visual</code><span class="sig-paren">(</span><em>libPath</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cues/visual.html#Visual"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cues.visual.Visual" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="cues.visual.Visual.createWindow">
+<code class="descname">createWindow</code><span class="sig-paren">(</span><em>windowConfig</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cues/visual.html#Visual.createWindow"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cues.visual.Visual.createWindow" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="cues.visual.Visual.deleteWindow">
+<code class="descname">deleteWindow</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cues/visual.html#Visual.deleteWindow"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cues.visual.Visual.deleteWindow" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="cues.visual.Visual.disableVSync">
+<code class="descname">disableVSync</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cues/visual.html#Visual.disableVSync"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cues.visual.Visual.disableVSync" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="cues.visual.Visual.drawCircle">
+<code class="descname">drawCircle</code><span class="sig-paren">(</span><em>visualConfig</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cues/visual.html#Visual.drawCircle"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cues.visual.Visual.drawCircle" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="cues.visual.Visual.drawFixationCross">
+<code class="descname">drawFixationCross</code><span class="sig-paren">(</span><em>visualConfig</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cues/visual.html#Visual.drawFixationCross"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cues.visual.Visual.drawFixationCross" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="cues.visual.Visual.drawRectangle">
+<code class="descname">drawRectangle</code><span class="sig-paren">(</span><em>visualConfig</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cues/visual.html#Visual.drawRectangle"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cues.visual.Visual.drawRectangle" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="cues.visual.Visual.drawText">
+<code class="descname">drawText</code><span class="sig-paren">(</span><em>visualConfig</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cues/visual.html#Visual.drawText"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cues.visual.Visual.drawText" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="cues.visual.Visual.drawTexture">
+<code class="descname">drawTexture</code><span class="sig-paren">(</span><em>visualConfig</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cues/visual.html#Visual.drawTexture"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cues.visual.Visual.drawTexture" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="cues.visual.Visual.enableVSync">
+<code class="descname">enableVSync</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cues/visual.html#Visual.enableVSync"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cues.visual.Visual.enableVSync" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="cues.visual.Visual.isActive">
+<code class="descname">isActive</code><em class="property"> = 0</em><a class="headerlink" href="#cues.visual.Visual.isActive" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="cues.visual.Visual.loadTexture">
+<code class="descname">loadTexture</code><span class="sig-paren">(</span><em>visualConfig</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cues/visual.html#Visual.loadTexture"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cues.visual.Visual.loadTexture" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="cues.visual.Visual.preLoadTexture">
+<code class="descname">preLoadTexture</code><span class="sig-paren">(</span><em>imgAddress</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cues/visual.html#Visual.preLoadTexture"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cues.visual.Visual.preLoadTexture" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="cues.visual.Visual.setFramerateAsDelay">
+<code class="descname">setFramerateAsDelay</code><span class="sig-paren">(</span><em>framerate</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cues/visual.html#Visual.setFramerateAsDelay"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cues.visual.Visual.setFramerateAsDelay" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="cues.visual.Visual.setMaxDelay">
+<code class="descname">setMaxDelay</code><span class="sig-paren">(</span><em>maxDelay</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cues/visual.html#Visual.setMaxDelay"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cues.visual.Visual.setMaxDelay" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="cues.visual.Visual.showDelayed">
+<code class="descname">showDelayed</code><span class="sig-paren">(</span><em>nanoTimeConfig</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cues/visual.html#Visual.showDelayed"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cues.visual.Visual.showDelayed" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="cues.visual.Visual.showDelayedFast">
+<code class="descname">showDelayedFast</code><span class="sig-paren">(</span><em>nanoTimeConfig</em>, <em>dummy=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cues/visual.html#Visual.showDelayedFast"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cues.visual.Visual.showDelayedFast" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="cues.visual.Visual.showDelayedFastLogged">
+<code class="descname">showDelayedFastLogged</code><span class="sig-paren">(</span><em>nanoTimeConfig</em>, <em>logConfig</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cues/visual.html#Visual.showDelayedFastLogged"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cues.visual.Visual.showDelayedFastLogged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="cues.visual.Visual.showNow">
+<code class="descname">showNow</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cues/visual.html#Visual.showNow"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cues.visual.Visual.showNow" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="cues.visual.VisualConfig">
+<em class="property">class </em><code class="descclassname">cues.visual.</code><code class="descname">VisualConfig</code><a class="reference internal" href="_modules/cues/visual.html#VisualConfig"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cues.visual.VisualConfig" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="cues.visual.VisualConfig.ColorRGB">
+<code class="descname">ColorRGB</code><em class="property"> = [1.0, 1.0, 0.0]</em><a class="headerlink" href="#cues.visual.VisualConfig.ColorRGB" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="cues.visual.VisualConfig.enableVSync">
+<code class="descname">enableVSync</code><em class="property"> = True</em><a class="headerlink" href="#cues.visual.VisualConfig.enableVSync" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="cues.visual.VisualConfig.fileId">
+<code class="descname">fileId</code><em class="property"> = 0</em><a class="headerlink" href="#cues.visual.VisualConfig.fileId" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="cues.visual.VisualConfig.fontPath">
+<code class="descname">fontPath</code><em class="property"> = ''</em><a class="headerlink" href="#cues.visual.VisualConfig.fontPath" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="cues.visual.VisualConfig.height">
+<code class="descname">height</code><em class="property"> = 100</em><a class="headerlink" href="#cues.visual.VisualConfig.height" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="cues.visual.VisualConfig.imgAddress">
+<code class="descname">imgAddress</code><em class="property"> = ''</em><a class="headerlink" href="#cues.visual.VisualConfig.imgAddress" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="cues.visual.VisualConfig.isTexture">
+<code class="descname">isTexture</code><em class="property"> = False</em><a class="headerlink" href="#cues.visual.VisualConfig.isTexture" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="cues.visual.VisualConfig.pathList">
+<code class="descname">pathList</code><em class="property"> = []</em><a class="headerlink" href="#cues.visual.VisualConfig.pathList" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="cues.visual.VisualConfig.radius">
+<code class="descname">radius</code><em class="property"> = 50</em><a class="headerlink" href="#cues.visual.VisualConfig.radius" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="cues.visual.VisualConfig.selectedMonitor">
+<code class="descname">selectedMonitor</code><em class="property"> = 0</em><a class="headerlink" href="#cues.visual.VisualConfig.selectedMonitor" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="cues.visual.VisualConfig.shaderPath">
+<code class="descname">shaderPath</code><em class="property"> = ''</em><a class="headerlink" href="#cues.visual.VisualConfig.shaderPath" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="cues.visual.VisualConfig.size">
+<code class="descname">size</code><em class="property"> = 64</em><a class="headerlink" href="#cues.visual.VisualConfig.size" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="cues.visual.VisualConfig.text">
+<code class="descname">text</code><em class="property"> = ''</em><a class="headerlink" href="#cues.visual.VisualConfig.text" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="cues.visual.VisualConfig.thickness">
+<code class="descname">thickness</code><em class="property"> = 20</em><a class="headerlink" href="#cues.visual.VisualConfig.thickness" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="cues.visual.VisualConfig.width">
+<code class="descname">width</code><em class="property"> = 100</em><a class="headerlink" href="#cues.visual.VisualConfig.width" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="cues.visual.VisualConfig.xPos">
+<code class="descname">xPos</code><em class="property"> = 0</em><a class="headerlink" href="#cues.visual.VisualConfig.xPos" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="cues.visual.VisualConfig.yPos">
+<code class="descname">yPos</code><em class="property"> = 0</em><a class="headerlink" href="#cues.visual.VisualConfig.yPos" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="_autosummary/api/experiment.classifier.html"
+                        title="previous chapter">experiment.classifier</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="ext/triggerbox/triggerbox.html"
+                        title="next chapter">Triggerbox</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/cppwrapper.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="ext/triggerbox/triggerbox.html" title="Triggerbox"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="_autosummary/api/experiment.classifier.html" title="experiment.classifier"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Experiment Framework 0.2.1. documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="_api.html" >Main API</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, Robert Guggenberger &amp; Max Scherer.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
+    </div>
+  </body>
+</html>

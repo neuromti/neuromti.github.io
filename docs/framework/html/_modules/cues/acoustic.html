@@ -1,0 +1,246 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>cues.acoustic &#8212; Experiment Framework 0.2.1. documentation</title>
+    <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.2.1.',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+  </head>
+  <body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Experiment Framework 0.2.1. documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for cues.acoustic</h1><div class="highlight"><pre>
+<span></span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">Created on Apr 24, 2017</span>
+
+<span class="sd">@author: Maximilian Scherer</span>
+
+<span class="sd">ATTENTION, the playFileNow and playFileDelayed methods need about 100ms additional time</span>
+<span class="sd">to return AFTER the end of the acoustic stimulus. For a fast chain of different acoustic stimuli,</span>
+<span class="sd">it is therefore adviced to combine them into a single audio file to play them without delay.</span>
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="kn">import</span> <span class="nn">ctypes</span>
+<span class="kn">from</span> <span class="nn">os.path</span> <span class="k">import</span> <span class="n">exists</span>
+
+<span class="c1">#import utils.time</span>
+
+<div class="viewcode-block" id="AcousticConfig"><a class="viewcode-back" href="../../cppwrapper.html#cues.acoustic.AcousticConfig">[docs]</a><span class="k">class</span> <span class="nc">AcousticConfig</span><span class="p">:</span>
+    <span class="n">framesPerBuffer</span> <span class="o">=</span> <span class="mi">64</span>
+    <span class="n">maxDelay</span> <span class="o">=</span> <span class="mi">50</span> <span class="o">*</span> <span class="mi">1000</span> <span class="o">*</span> <span class="mi">1000</span> <span class="o">*</span> <span class="mi">1000</span>
+    <span class="n">filePath</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="n">fileId</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">length</span> <span class="o">=</span> <span class="mi">0</span></div>
+
+<div class="viewcode-block" id="Acoustic"><a class="viewcode-back" href="../../cppwrapper.html#cues.acoustic.Acoustic">[docs]</a><span class="k">class</span> <span class="nc">Acoustic</span><span class="p">:</span>
+    
+    <span class="n">isActive</span> <span class="o">=</span> <span class="mi">0</span>
+    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">libPath</span><span class="p">):</span>
+        
+        <span class="n">lib</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">windll</span><span class="o">.</span><span class="n">LoadLibrary</span><span class="p">(</span><span class="n">libPath</span><span class="p">)</span>
+        
+        <span class="n">protoFunction</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">WINFUNCTYPE</span><span class="p">(</span>
+        <span class="n">ctypes</span><span class="o">.</span><span class="n">c_void_p</span><span class="p">)</span>    
+        <span class="bp">self</span><span class="o">.</span><span class="n">wrappedInitAudio</span> <span class="o">=</span> <span class="n">protoFunction</span><span class="p">((</span><span class="s2">&quot;initAudio&quot;</span><span class="p">,</span> <span class="n">lib</span><span class="p">))</span>
+        
+        
+        <span class="n">protoFunction</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">WINFUNCTYPE</span><span class="p">(</span>
+        <span class="n">ctypes</span><span class="o">.</span><span class="n">c_int</span><span class="p">,</span>
+        <span class="n">ctypes</span><span class="o">.</span><span class="n">c_void_p</span><span class="p">,</span>
+        <span class="n">ctypes</span><span class="o">.</span><span class="n">c_void_p</span><span class="p">)</span>    
+        <span class="n">protoParams</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;p1&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;p2&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>    
+        <span class="bp">self</span><span class="o">.</span><span class="n">wrappedLoadFile</span> <span class="o">=</span> <span class="n">protoFunction</span><span class="p">((</span><span class="s2">&quot;loadFile&quot;</span><span class="p">,</span> <span class="n">lib</span><span class="p">),</span> <span class="n">protoParams</span><span class="p">)</span>
+        
+        
+        <span class="n">protoFunction</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">WINFUNCTYPE</span><span class="p">(</span>
+        <span class="n">ctypes</span><span class="o">.</span><span class="n">c_void_p</span><span class="p">)</span>    
+        <span class="bp">self</span><span class="o">.</span><span class="n">wrappedPlayFile</span> <span class="o">=</span> <span class="n">protoFunction</span><span class="p">((</span><span class="s2">&quot;playFile&quot;</span><span class="p">,</span> <span class="n">lib</span><span class="p">))</span>
+        
+        <span class="n">protoFunction</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">WINFUNCTYPE</span><span class="p">(</span>
+        <span class="n">ctypes</span><span class="o">.</span><span class="n">c_void_p</span><span class="p">,</span> 
+        <span class="n">ctypes</span><span class="o">.</span><span class="n">c_void_p</span><span class="p">)</span>
+        <span class="n">protoParams</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;p1&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wrappedPlayFileLogged</span> <span class="o">=</span> <span class="n">protoFunction</span><span class="p">((</span><span class="s2">&quot;playFileLogged&quot;</span><span class="p">,</span> <span class="n">lib</span><span class="p">))</span>
+        
+        
+        <span class="n">protoFunction</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">WINFUNCTYPE</span><span class="p">(</span>
+        <span class="n">ctypes</span><span class="o">.</span><span class="n">c_void_p</span><span class="p">,</span>
+        <span class="n">ctypes</span><span class="o">.</span><span class="n">c_void_p</span><span class="p">)</span>    
+        <span class="n">protoParams</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;p1&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>    
+        <span class="bp">self</span><span class="o">.</span><span class="n">wrappedPlayFileDelayed</span> <span class="o">=</span> <span class="n">protoFunction</span><span class="p">((</span><span class="s2">&quot;playFileDelayed&quot;</span><span class="p">,</span> <span class="n">lib</span><span class="p">),</span> <span class="n">protoParams</span><span class="p">)</span>
+        
+        <span class="n">protoFunction</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">WINFUNCTYPE</span><span class="p">(</span>
+        <span class="n">ctypes</span><span class="o">.</span><span class="n">c_void_p</span><span class="p">,</span>
+        <span class="n">ctypes</span><span class="o">.</span><span class="n">c_void_p</span><span class="p">,</span>
+        <span class="n">ctypes</span><span class="o">.</span><span class="n">c_void_p</span><span class="p">)</span>    
+        <span class="n">protoParams</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;p1&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;p2&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wrappedPlayFileDelayedLogged</span> <span class="o">=</span> <span class="n">protoFunction</span><span class="p">((</span><span class="s2">&quot;playFileDelayedLogged&quot;</span><span class="p">,</span> <span class="n">lib</span><span class="p">),</span> <span class="n">protoParams</span><span class="p">)</span>
+        
+        
+        <span class="n">protoFunction</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">WINFUNCTYPE</span><span class="p">(</span>
+        <span class="n">ctypes</span><span class="o">.</span><span class="n">c_void_p</span><span class="p">,</span>
+        <span class="n">ctypes</span><span class="o">.</span><span class="n">c_void_p</span><span class="p">)</span>
+        <span class="n">protoParams</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;p1&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>    
+        <span class="bp">self</span><span class="o">.</span><span class="n">wrappedSetupFile</span> <span class="o">=</span> <span class="n">protoFunction</span><span class="p">((</span><span class="s2">&quot;setupFile&quot;</span><span class="p">,</span> <span class="n">lib</span><span class="p">),</span> <span class="n">protoParams</span><span class="p">)</span>
+        
+        
+        <span class="n">protoFunction</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">WINFUNCTYPE</span><span class="p">(</span>
+        <span class="n">ctypes</span><span class="o">.</span><span class="n">c_void_p</span><span class="p">)</span>    
+        <span class="bp">self</span><span class="o">.</span><span class="n">wrappedDeInitAudio</span> <span class="o">=</span> <span class="n">protoFunction</span><span class="p">((</span><span class="s2">&quot;deInitAudio&quot;</span><span class="p">,</span> <span class="n">lib</span><span class="p">))</span>  
+        
+        
+        <span class="n">protoFunction</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">WINFUNCTYPE</span><span class="p">(</span>
+        <span class="n">ctypes</span><span class="o">.</span><span class="n">c_void_p</span><span class="p">,</span>
+        <span class="n">ctypes</span><span class="o">.</span><span class="n">c_void_p</span><span class="p">)</span>
+        <span class="n">protoParams</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;p1&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>    
+        <span class="bp">self</span><span class="o">.</span><span class="n">wrappedSetFramesPerBuffer</span> <span class="o">=</span> <span class="n">protoFunction</span><span class="p">((</span><span class="s2">&quot;setFramesPerBuffer&quot;</span><span class="p">,</span> <span class="n">lib</span><span class="p">),</span> <span class="n">protoParams</span><span class="p">)</span>
+        
+        
+        <span class="n">protoFunction</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">WINFUNCTYPE</span><span class="p">(</span>
+        <span class="n">ctypes</span><span class="o">.</span><span class="n">c_void_p</span><span class="p">,</span>
+        <span class="n">ctypes</span><span class="o">.</span><span class="n">c_void_p</span><span class="p">)</span>
+        <span class="n">protoParams</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;p1&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>    
+        <span class="bp">self</span><span class="o">.</span><span class="n">wrappedSetMaxDelay</span> <span class="o">=</span> <span class="n">protoFunction</span><span class="p">((</span><span class="s2">&quot;setMaxDelay&quot;</span><span class="p">,</span> <span class="n">lib</span><span class="p">),</span> <span class="n">protoParams</span><span class="p">)</span>
+        
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">initAudio</span><span class="p">()</span>
+    
+    <span class="k">def</span> <span class="nf">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">isActive</span> <span class="o">==</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">deInitAudio</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">isActive</span> <span class="o">=</span> <span class="mi">0</span>
+    
+<div class="viewcode-block" id="Acoustic.initAudio"><a class="viewcode-back" href="../../cppwrapper.html#cues.acoustic.Acoustic.initAudio">[docs]</a>    <span class="k">def</span> <span class="nf">initAudio</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wrappedInitAudio</span><span class="p">()</span>        
+        <span class="bp">self</span><span class="o">.</span><span class="n">isActive</span> <span class="o">=</span> <span class="mi">1</span></div>
+    
+<div class="viewcode-block" id="Acoustic.loadFile"><a class="viewcode-back" href="../../cppwrapper.html#cues.acoustic.Acoustic.loadFile">[docs]</a>    <span class="k">def</span> <span class="nf">loadFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">acousticConfig</span><span class="p">):</span>
+        <span class="n">bFilePath</span> <span class="o">=</span> <span class="n">acousticConfig</span><span class="o">.</span><span class="n">filePath</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf_8&#39;</span><span class="p">)</span>
+        <span class="n">p1</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_char_p</span><span class="p">(</span><span class="n">bFilePath</span><span class="p">)</span>
+        <span class="n">p2</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_int64</span><span class="p">(</span><span class="n">acousticConfig</span><span class="o">.</span><span class="n">length</span> <span class="o">*</span> <span class="mi">1000</span> <span class="o">*</span> <span class="mi">1000</span> <span class="o">*</span> <span class="mi">1000</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">wrappedLoadFile</span><span class="p">(</span><span class="n">p1</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">byref</span><span class="p">(</span><span class="n">p2</span><span class="p">))</span></div>
+    
+<div class="viewcode-block" id="Acoustic.preLoadFile"><a class="viewcode-back" href="../../cppwrapper.html#cues.acoustic.Acoustic.preLoadFile">[docs]</a>    <span class="k">def</span> <span class="nf">preLoadFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filePath</span><span class="p">,</span> <span class="n">length</span><span class="p">):</span>
+        <span class="n">bFilePath</span> <span class="o">=</span> <span class="n">filePath</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf_8&#39;</span><span class="p">)</span>
+        <span class="n">p1</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_char_p</span><span class="p">(</span><span class="n">bFilePath</span><span class="p">)</span>
+        <span class="n">p2</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_int64</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">length</span> <span class="o">*</span> <span class="mi">1000</span> <span class="o">*</span> <span class="mi">1000</span> <span class="o">*</span> <span class="mi">1000</span><span class="p">))</span>
+        
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">wrappedLoadFile</span><span class="p">(</span><span class="n">p1</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">byref</span><span class="p">(</span><span class="n">p2</span><span class="p">))</span></div>
+   
+<div class="viewcode-block" id="Acoustic.setupFile"><a class="viewcode-back" href="../../cppwrapper.html#cues.acoustic.Acoustic.setupFile">[docs]</a>    <span class="k">def</span> <span class="nf">setupFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">acousticConfig</span><span class="p">):</span>
+        <span class="n">p1</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_uint</span><span class="p">(</span><span class="n">acousticConfig</span><span class="o">.</span><span class="n">fileId</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">wrappedSetupFile</span><span class="p">(</span><span class="n">ctypes</span><span class="o">.</span><span class="n">byref</span><span class="p">(</span><span class="n">p1</span><span class="p">))</span></div>
+   
+<div class="viewcode-block" id="Acoustic.setupFileDirectly"><a class="viewcode-back" href="../../cppwrapper.html#cues.acoustic.Acoustic.setupFileDirectly">[docs]</a>    <span class="k">def</span> <span class="nf">setupFileDirectly</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fileId</span><span class="p">):</span>
+        <span class="n">p1</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_uint</span><span class="p">(</span><span class="n">fileId</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">wrappedSetupFile</span><span class="p">(</span><span class="n">ctypes</span><span class="o">.</span><span class="n">byref</span><span class="p">(</span><span class="n">p1</span><span class="p">))</span></div>
+        
+<div class="viewcode-block" id="Acoustic.playFileNow"><a class="viewcode-back" href="../../cppwrapper.html#cues.acoustic.Acoustic.playFileNow">[docs]</a>    <span class="k">def</span> <span class="nf">playFileNow</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dummy</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wrappedPlayFile</span><span class="p">()</span></div>
+        
+<div class="viewcode-block" id="Acoustic.playFileNowLogged"><a class="viewcode-back" href="../../cppwrapper.html#cues.acoustic.Acoustic.playFileNowLogged">[docs]</a>    <span class="k">def</span> <span class="nf">playFileNowLogged</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">logConfig</span><span class="p">):</span>
+        <span class="n">p1</span> <span class="o">=</span> <span class="n">logConfig</span><span class="o">.</span><span class="n">ptr</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">wrappedPlayFileLogged</span><span class="p">(</span><span class="n">p1</span><span class="p">)</span></div>
+        
+<div class="viewcode-block" id="Acoustic.playFileDelayed"><a class="viewcode-back" href="../../cppwrapper.html#cues.acoustic.Acoustic.playFileDelayed">[docs]</a>    <span class="k">def</span> <span class="nf">playFileDelayed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nanoTimeConfig</span><span class="p">,</span> <span class="n">dummy</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="n">p1</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_int64</span><span class="p">(</span><span class="n">nanoTimeConfig</span><span class="o">.</span><span class="n">referenceTime</span> <span class="o">+</span> <span class="n">nanoTimeConfig</span><span class="o">.</span><span class="n">delay</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">wrappedPlayFileDelayed</span><span class="p">(</span><span class="n">ctypes</span><span class="o">.</span><span class="n">byref</span><span class="p">(</span><span class="n">p1</span><span class="p">))</span></div>
+        
+<div class="viewcode-block" id="Acoustic.playFileDelayedLogged"><a class="viewcode-back" href="../../cppwrapper.html#cues.acoustic.Acoustic.playFileDelayedLogged">[docs]</a>    <span class="k">def</span> <span class="nf">playFileDelayedLogged</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nanoTimeConfig</span><span class="p">,</span> <span class="n">logConfig</span><span class="p">):</span>
+        <span class="n">p1</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_int64</span><span class="p">(</span><span class="n">nanoTimeConfig</span><span class="o">.</span><span class="n">referenceTime</span> <span class="o">+</span> <span class="n">nanoTimeConfig</span><span class="o">.</span><span class="n">delay</span><span class="p">)</span>
+        <span class="n">p2</span> <span class="o">=</span> <span class="n">logConfig</span><span class="o">.</span><span class="n">ptr</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">wrappedPlayFileDelayedLogged</span><span class="p">(</span><span class="n">ctypes</span><span class="o">.</span><span class="n">byref</span><span class="p">(</span><span class="n">p1</span><span class="p">),</span> <span class="n">p2</span><span class="p">)</span></div>
+        
+<div class="viewcode-block" id="Acoustic.deInitAudio"><a class="viewcode-back" href="../../cppwrapper.html#cues.acoustic.Acoustic.deInitAudio">[docs]</a>    <span class="k">def</span> <span class="nf">deInitAudio</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wrappedDeInitAudio</span><span class="p">()</span></div>
+        
+<div class="viewcode-block" id="Acoustic.setFramesPerBuffer"><a class="viewcode-back" href="../../cppwrapper.html#cues.acoustic.Acoustic.setFramesPerBuffer">[docs]</a>    <span class="k">def</span> <span class="nf">setFramesPerBuffer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">acousticConfig</span><span class="p">):</span>
+        <span class="n">p1</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_uint</span><span class="p">(</span><span class="n">acousticConfig</span><span class="o">.</span><span class="n">framesPerBuffer</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">wrappedSetFramesPerBuffer</span><span class="p">(</span><span class="n">ctypes</span><span class="o">.</span><span class="n">byref</span><span class="p">(</span><span class="n">p1</span><span class="p">))</span></div>
+        
+<div class="viewcode-block" id="Acoustic.setMaxDelay"><a class="viewcode-back" href="../../cppwrapper.html#cues.acoustic.Acoustic.setMaxDelay">[docs]</a>    <span class="k">def</span> <span class="nf">setMaxDelay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">acousticConfig</span><span class="p">):</span>
+        <span class="n">p1</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_uint</span><span class="p">(</span><span class="n">acousticConfig</span><span class="o">.</span><span class="n">maxDelay</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">wrappedSetMaxDelay</span><span class="p">(</span><span class="n">ctypes</span><span class="o">.</span><span class="n">byref</span><span class="p">(</span><span class="n">p1</span><span class="p">))</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Experiment Framework 0.2.1. documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, Robert Guggenberger &amp; Max Scherer.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
+    </div>
+  </body>
+</html>
